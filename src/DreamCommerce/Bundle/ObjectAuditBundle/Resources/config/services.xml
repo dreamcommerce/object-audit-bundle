@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="dream_commerce_object_audit.resource_manager.class">DreamCommerce\Bundle\ObjectAuditBundle\ResourceAuditManager</parameter>
+        <parameter key="dream_commerce_object_audit.resource_configuration.class">DreamCommerce\Component\ObjectAudit\ResourceAuditConfiguration</parameter>
+    </parameters>
+
+    <services>
+        <service id="dream_commerce_object_audit.configuration" class="%dream_commerce_object_audit.configuration.class%" />
+
+        <service id="dream_commerce_object_audit.manager" class="%dream_commerce_object_audit.manager.class%">
+            <argument type="service" id="dream_commerce_object_audit.configuration" />
+            <argument>%dream_commerce.model.revision_class%</argument>
+            <argument type="service" id="dream_commerce.factory.revision" />
+            <argument type="service" id="%dream_commerce_object_audit.persist_manager.class%" />
+            <argument type="service" id="%dream_commerce_object_audit.persist_audit_manager.class%" />
+        </service>
+
+        <service id="dream_commerce_object_audit.resource_configuration" class="%dream_commerce_object_audit.resource_configuration.class%">
+            <argument type="service" id="dream_commerce_object_audit.configuration" />
+            <argument type="service" id="sylius.resource_registry" />
+        </service>
+
+        <service id="dream_commerce_object_audit.resource_manager" class="%dream_commerce_object_audit.resource_manager.class%">
+            <argument type="service" id="dream_commerce_object_audit.manager" />
+            <argument type="service" id="dream_commerce_object_audit.resource_configuration" />
+            <argument type="service" id="sylius.resource_registry" />
+            <argument type="service" id="service_container" />
+        </service>
+    </services>
+</container>
+

@@ -1,0 +1,40 @@
+dream_commerce_object_audit_home:
+    path: /{page}
+    defaults:
+        _controller: DreamCommerceObjectAuditBundle:Resource:index
+        page: 1
+    requirements:
+        page: \d+
+
+dream_commerce_object_audit_viewrevision:
+    path: /viewrev/{revisionId}
+    defaults:
+        _controller: DreamCommerceObjectAuditBundle:Resource:viewRevision
+    requirements:
+        revisionId: \d+
+
+dream_commerce_object_audit_viewentity_detail:
+    path: /viewent/{resourceName}/{resourceId}/{revisionId}
+    defaults:
+        _controller: DreamCommerceObjectAuditBundle:Resource:viewDetail
+    requirements:
+        resourceId: \d+
+        revisionId: \d+
+
+dream_commerce_object_audit_viewentity:
+    path: /viewent/{resourceName}/{resourceId}
+    defaults:
+        _controller: DreamCommerceObjectAuditBundle:Resource:viewEntity
+    requirements:
+        resourceId: \d+
+
+dream_commerce_object_audit_compare:
+    path: /compare/{resourceName}/{resourceId}/{oldRevisionId}/{newRevisionId}
+    defaults:
+        _controller: DreamCommerceObjectAuditBundle:Resource:compare
+        oldRevisionId: ~
+        newRevisionId: ~
+    requirements:
+        resourceId: \d+
+        oldRevisionId: \d+
+        newRevisionId: \d+

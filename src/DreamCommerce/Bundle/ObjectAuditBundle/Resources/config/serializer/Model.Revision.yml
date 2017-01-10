@@ -1,0 +1,11 @@
+DreamCommerce\Component\ObjectAudit\Model\Revision:
+    exclusion_policy: ALL
+    xml_root_name: revision
+    properties:
+        id:
+            expose: true
+            type: integer
+            xml_attribute: true
+        createdAt:
+            expose: true
+            type: DateTime

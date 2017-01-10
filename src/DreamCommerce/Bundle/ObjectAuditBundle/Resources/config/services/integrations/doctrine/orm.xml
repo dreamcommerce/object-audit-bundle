@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container xmlns="http://symfony.com/schema/dic/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <parameters>
+        <parameter key="dream_commerce.repository.revision.class">DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORM\Repository\RevisionRepository</parameter>
+        <parameter key="dream_commerce_object_audit.manager.class">DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORMAuditManager</parameter>
+        <parameter key="dream_commerce_object_audit.configuration.class">DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORMAuditConfiguration</parameter>
+        <parameter key="dream_commerce_object_audit.persist_manager.service">doctrine.orm.default_entity_manager</parameter>
+        <parameter key="dream_commerce_object_audit.persist_audit_manager.service">doctrine.orm.default_entity_manager</parameter>
+    </parameters>
+
+    <services>
+        <service id="dream_commerce.doctrine.orm.event_subscriber.create_schema.entity_audit" class="DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORM\Subscriber\CreateSchemaSubscriber">
+            <argument id="dream_commerce_object_audit.manager" type="service" />
+            <tag name="doctrine.event_subscriber" />
+        </service>
+
+        <service id="dream_commerce.doctrine.orm.event_subscriber.log_revisions.entity_audit" class="DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORM\Subscriber\LogRevisionsSubscriber">
+            <argument id="dream_commerce_object_audit.manager" type="service" />
+            <tag name="doctrine.event_subscriber" />
+        </service>
+    </services>
+</container>

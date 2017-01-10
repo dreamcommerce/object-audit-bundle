@@ -1,0 +1,36 @@
+{% extends "DreamCommerceObjectAuditBundle::layout.html.twig" %}
+
+{% block dream_commerce_object_audit_content %}
+    <h1>{{ 'Detail of %resourceName% with identifier of %resourceId% at revisions %revision%'|trans('%resourceName%': resourceName, '%resourceId%': resourceId, '%revision%': revision.id) }}</h1>
+
+    <p><a href="{{ path('dream_commerce_object_audit_viewentity', { 'resourceName': resourceName, 'resourceId': id }) }}">{{ 'Compare revisions'|trans }}</a></p>
+    <table>
+        <thead>
+            <tr>
+                <th>{{ 'Field'| trans }}</th>
+                <th>{{ 'Value'|trans }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for field, value in data %}
+                <tr>
+                    <td>{{ field }}</td>
+                    {% if value.date is defined %}
+                        <td>{{ value|date('r') }}</td>
+                    {% elseif value is iterable %}
+                        <td>
+                            <ul>
+                                {% for element in value %}
+                                    <li>{{ element }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    {% else %}
+                        <td>{{ value }}</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock dream_commerce_object_audit_content %}
+

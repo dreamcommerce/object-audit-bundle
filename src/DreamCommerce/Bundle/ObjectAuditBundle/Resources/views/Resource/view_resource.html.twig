@@ -1,0 +1,37 @@
+{% extends "DreamCommerceObjectAuditBundle::layout.html.twig" %}
+
+{% block dream_commerce_object_audit_content %}
+    <h1>Change history for {{ className }} with identifiers of {{ id }}</h1>
+
+    <p><a href="{{ path('dream_commerce_object_audit_home') }}">{{ 'Home'|trans }}</a></p>
+
+    <form action="{{ path('dream_commerce_object_audit_compare', { 'resourceName': resourceName, 'resourceId': resourceId }) }}" method="get">
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">&nbsp;</th>
+                    <th colspan="2">{{ 'Compare'|trans }}</th>
+                </tr>
+                <tr>
+                    <th>{{ 'Revision'|trans }}</th>
+                    <th>{{ 'Date'|trans }}</th>
+                    <th>{{ 'Old'|trans }}</th>
+                    <th>{{ 'New'|trans }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for revision in revisions %}
+                    <tr>
+                        <td><a href="{{ path('dream_commerce_object_audit_viewentity_detail', { 'revision': revision.id, 'resourceName': resourceName, 'resourceId': resourceId })}}">{{ revision.id }}</a></td>
+                        <td>{{ revision.date | date('r') }}</td>
+                        <td><input type="radio" name="oldRev" value="{{ revision.id }}"{% if loop.index == 2 %} checked{% endif %} /></td>
+                        <td><input type="radio" name="newRev" value="{{ revision.id }}"{% if loop.index == 1 %} checked{% endif %} /></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <input type="submit" value="{{ 'Compare Revisions'|trans }}" />
+    </form>
+
+{% endblock dream_commerce_object_audit_content %}
