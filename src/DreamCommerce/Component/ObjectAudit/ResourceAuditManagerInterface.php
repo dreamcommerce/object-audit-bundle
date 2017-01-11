@@ -3,9 +3,9 @@
 namespace DreamCommerce\Component\ObjectAudit;
 
 use Doctrine\Common\Collections\Collection;
-use DreamCommerce\Component\ObjectAudit\Exception\DeletedException;
-use DreamCommerce\Component\ObjectAudit\Exception\NoRevisionFoundException;
-use DreamCommerce\Component\ObjectAudit\Exception\NotAuditedException;
+use DreamCommerce\Component\ObjectAudit\Exception\ResourceDeletedException;
+use DreamCommerce\Component\ObjectAudit\Exception\ResourceNotAuditedException;
+use DreamCommerce\Component\ObjectAudit\Exception\ResourceNotFoundException;
 use DreamCommerce\Component\ObjectAudit\Model\ChangedResource;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use Sylius\Component\Resource\Model\ResourceInterface;
@@ -20,11 +20,11 @@ interface ResourceAuditManagerInterface
      * @param RevisionInterface $revision
      * @param array             $options
      *
-     * @return ResourceInterface
+     * @throws ResourceDeletedException
+     * @throws ResourceNotFoundException
+     * @throws ResourceNotAuditedException
      *
-     * @throws DeletedException
-     * @throws NoRevisionFoundException
-     * @throws NotAuditedException
+     * @return ResourceInterface
      */
     public function findResourceByRevision(string $resourceName, int $resourceId, RevisionInterface $revision, array $options = []);
 
@@ -32,6 +32,8 @@ interface ResourceAuditManagerInterface
      * @param string            $resourceName
      * @param RevisionInterface $revision
      * @param array             $options
+     *
+     * @throws ResourceNotAuditedException
      *
      * @return ChangedResource[]
      */
@@ -51,7 +53,7 @@ interface ResourceAuditManagerInterface
      * @param string $resourceName
      * @param int    $resourceId
      *
-     * @throws NotAuditedException
+     * @throws ResourceNotAuditedException
      *
      * @return Collection|RevisionInterface[]
      */
@@ -63,7 +65,8 @@ interface ResourceAuditManagerInterface
      * @param string $resourceName
      * @param int    $resourceId
      *
-     * @throws NotAuditedException
+     * @throws ResourceNotAuditedException
+     * @throws ResourceNotFoundException
      *
      * @return RevisionInterface|null
      */
@@ -75,25 +78,21 @@ interface ResourceAuditManagerInterface
      * @param string $resourceName
      * @param int    $resourceId
      *
-     * @throws NotAuditedException
-     * @throws NoRevisionFoundException
+     * @throws ResourceNotAuditedException
+     * @throws ResourceNotFoundException
      *
      * @return RevisionInterface|null
      */
     public function getCurrentResourceRevision(string $resourceName, int $resourceId);
 
     /**
-     * @param string            $resourceName
-     * @param int               $resourceId
-     * @param RevisionInterface $revision
-     * @param string            $revisionType
-     * @param array             $resourceData
+     * @param ChangedResource $changedResource
      *
-     * @throws NotAuditedException
+     * @throws ResourceNotAuditedException
      *
      * @return $this
      */
-    public function saveResourceRevisionData(string $resourceName, int $resourceId, RevisionInterface $revision, string $revisionType, array $resourceData = array());
+    public function saveResourceRevisionData(ChangedResource $changedResource);
 
     /**
      * Get an array with the differences of between two specific revisions of
@@ -103,6 +102,8 @@ interface ResourceAuditManagerInterface
      * @param int               $resourceId
      * @param RevisionInterface $oldRevision
      * @param RevisionInterface $newRevision
+     *
+     * @throws ResourceNotAuditedException
      *
      * @return array
      */

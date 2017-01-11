@@ -1,5 +1,4 @@
 <?php
-
 /*
  * (c) 2011 SimpleThings GmbH
  *
@@ -22,16 +21,33 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Component\ObjectAudit\Exception;
+namespace DreamCommerce\Component\ObjectAudit\Exception\Traits;
 
-class InvalidRevisionException extends AuditException
+use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
+
+trait RevisionTrait
 {
-    public function __construct($revision)
+    /**
+     * @var RevisionInterface
+     */
+    protected $revision;
+
+    /**
+     * @return RevisionInterface|null
+     */
+    public function getRevision()
     {
-        parent::__construct(null, null, $revision);
-        $this->message = sprintf(
-            "No revision '%s' exists.",
-            $revision
-        );
+        return $this->revision;
+    }
+
+    /**
+     * @param RevisionInterface $revision
+     * @return $this
+     */
+    public function setRevision(RevisionInterface $revision)
+    {
+        $this->revision = $revision;
+
+        return $this;
     }
 }

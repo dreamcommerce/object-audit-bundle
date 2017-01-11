@@ -23,16 +23,37 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Exception;
 
-class DeletedException extends AuditException
+use DreamCommerce\Component\ObjectAudit\Exception\Traits\ObjectTrait;
+use DreamCommerce\Component\ObjectAudit\Exception\Traits\RevisionTrait;
+use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
+
+class ObjectDeletedException extends AuditException
 {
-    public function __construct($className, $id, $revision)
+    const CODE_OBJECT_HAS_BEEN_REMOVED_AT_SPECIFIC_REVISION = 20;
+
+    use ObjectTrait;
+    use RevisionTrait;
+
+    /**
+     * @param string $className
+     * @param $id
+     * @param RevisionInterface $revision
+     * @return ObjectDeletedException
+     */
+    public static function forObjectAtSpecificRevision(string $className, $id, RevisionInterface $revision): ObjectDeletedException
     {
-        parent::__construct($className, $id, $revision);
-        $this->message = sprintf(
+        $message = sprintf(
             'Class "%s" entity id "%s" has been removed at revision %s',
             $className,
-            implode(', ', $id),
-            $revision
+            is_array($id) ? implode(', ', $id) : $id,
+            $revision->getId()
         );
+
+        $exception = new self($message, self::CODE_OBJECT_HAS_BEEN_REMOVED_AT_SPECIFIC_REVISION);
+        $exception->setClassName($className)
+            ->setId($id)
+            ->setRevision($revision);
+
+        return $exception;
     }
 }

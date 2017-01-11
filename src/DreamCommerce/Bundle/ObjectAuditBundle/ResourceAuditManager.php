@@ -4,6 +4,12 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Persistence\ObjectManager;
+use DreamCommerce\Component\ObjectAudit\Exception\ObjectDeletedException;
+use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
+use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotFoundException;
+use DreamCommerce\Component\ObjectAudit\Exception\ResourceDeletedException;
+use DreamCommerce\Component\ObjectAudit\Exception\ResourceNotAuditedException;
+use DreamCommerce\Component\ObjectAudit\Exception\ResourceNotFoundException;
 use DreamCommerce\Component\ObjectAudit\Model\ChangedResource;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditManagerInterface;
@@ -57,10 +63,32 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
      */
     public function findResourceByRevision(string $resourceName, int $resourceId, RevisionInterface $revision, array $options = [])
     {
+        if(!$this->configuration->isResourceAudited($resourceName)) {
+            throw ResourceNotAuditedException::forResource($resourceName);
+        }
+
         $className = $this->getResourceModelClass($resourceName);
         $objectManager = $this->getResourceObjectManager($resourceName);
 
-        return $this->objectAuditManager->findObjectByRevision($className, $resourceId, $revision, $objectManager, $options);
+        try {
+            $object = $this->objectAuditManager->findObjectByRevision($className, $resourceId, $revision, $objectManager, $options);
+        } catch(ObjectDeletedException $exception) {
+            throw ResourceDeletedException::forResourceAtSpecificRevision(
+                $resourceName,
+                $exception->getClassName(),
+                $exception->getId(),
+                $exception->getRevision()
+            );
+        } catch(ObjectNotFoundException $exception) {
+            throw ResourceNotFoundException::forResourceAtSpecificRevision(
+                $resourceName,
+                $exception->getClassName(),
+                $exception->getId(),
+                $exception->getRevision()
+            );
+        }
+
+        return $object;
     }
 
     /**
@@ -84,16 +112,30 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
      */
     public function findResourcesChangedAtRevision(string $resourceName, RevisionInterface $revision, array $options = []): array
     {
+        if(!$this->configuration->isResourceAudited($resourceName)) {
+            throw ResourceNotAuditedException::forResource($resourceName);
+        }
+
         $className = $this->getResourceModelClass($resourceName);
         $objectManager = $this->getResourceObjectManager($resourceName);
 
-        $rows = $this->objectAuditManager->findObjectsChangedAtRevision($className, $revision, $objectManager, $options);
+        try {
+            $rows = $this->objectAuditManager->findObjectsChangedAtRevision($className, $revision, $objectManager, $options);
+        } catch(ObjectNotAuditedException $exception) {
+            throw ResourceNotAuditedException::forResource($resourceName, $className);
+        }
+
         foreach ($rows as $k => $row) {
             /** @var ResourceInterface $object */
             $object = $row->getObject();
-            $revisionType = $row->getRevisionType();
 
-            $rows[$k] = new ChangedResource($object, $resourceName, $revisionType);
+            $rows[$k] = new ChangedResource(
+                $object,
+                $resourceName,
+                $row->getRevision(),
+                $row->getRevisionData(),
+                $row->getRevisionType()
+            );
         }
 
         return $rows;
@@ -104,10 +146,20 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
      */
     public function findResourceRevisions(string $resourceName, int $resourceId): Collection
     {
+        if(!$this->configuration->isResourceAudited($resourceName)) {
+            throw ResourceNotAuditedException::forResource($resourceName);
+        }
+
         $className = $this->getResourceModelClass($resourceName);
         $objectManager = $this->getResourceObjectManager($resourceName);
 
-        return $this->objectAuditManager->findObjectRevisions($className, $resourceId, $objectManager);
+        try {
+            $revisions = $this->objectAuditManager->findObjectRevisions($className, $resourceId, $objectManager);
+        } catch(ObjectNotAuditedException $exception) {
+            throw ResourceNotAuditedException::forResource($resourceName, $className);
+        }
+
+        return $revisions;
     }
 
     /**
@@ -115,10 +167,27 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
      */
     public function getInitializeResourceRevision(string $resourceName, int $resourceId)
     {
+        if(!$this->configuration->isResourceAudited($resourceName)) {
+            throw ResourceNotAuditedException::forResource($resourceName);
+        }
+
         $className = $this->getResourceModelClass($resourceName);
         $objectManager = $this->getResourceObjectManager($resourceName);
 
-        return $this->objectAuditManager->getInitializeObjectRevision($className, $resourceId, $objectManager);
+        try {
+            $revision = $this->objectAuditManager->getInitializeObjectRevision($className, $resourceId, $objectManager);
+        } catch(ObjectNotFoundException $exception) {
+            throw ResourceNotFoundException::forResourceAtSpecificRevision(
+                $resourceName,
+                $exception->getClassName(),
+                $exception->getId(),
+                $exception->getRevision()
+            );
+        } catch(ObjectNotAuditedException $exception) {
+            throw ResourceNotAuditedException::forResource($resourceName, $className);
+        }
+
+        return $revision;
     }
 
     /**
@@ -126,21 +195,38 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
      */
     public function getCurrentResourceRevision(string $resourceName, int $resourceId)
     {
+        if(!$this->configuration->isResourceAudited($resourceName)) {
+            throw ResourceNotAuditedException::forResource($resourceName);
+        }
+
         $className = $this->getResourceModelClass($resourceName);
         $objectManager = $this->getResourceObjectManager($resourceName);
 
-        return $this->objectAuditManager->getCurrentObjectRevision($className, $resourceId, $objectManager);
+        try {
+            $revision = $this->objectAuditManager->getCurrentObjectRevision($className, $resourceId, $objectManager);
+        } catch(ObjectNotFoundException $exception) {
+            throw ResourceNotFoundException::forResourceAtSpecificRevision(
+                $resourceName,
+                $exception->getClassName(),
+                $exception->getId(),
+                $exception->getRevision()
+            );
+        } catch(ObjectNotAuditedException $exception) {
+            throw ResourceNotAuditedException::forResource($resourceName, $className);
+        }
+
+        return $revision;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function saveResourceRevisionData(string $resourceName, int $resourceId, RevisionInterface $revision, string $revisionType, array $resourceData = array())
+    public function saveResourceRevisionData(ChangedResource $changedResource)
     {
-        $className = $this->getResourceModelClass($resourceName);
+        $resourceName = $changedResource->getResourceName();
         $objectManager = $this->getResourceObjectManager($resourceName);
 
-        return $this->objectAuditManager->saveObjectRevisionData($className, $resourceId, $revision, $revisionType, $resourceData, $objectManager);
+        return $this->objectAuditManager->saveObjectRevisionData($changedResource, $objectManager);
     }
 
     /**
@@ -148,6 +234,10 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
      */
     public function diffResourceRevisions(string $resourceName, int $resourceId, RevisionInterface $oldRevision, RevisionInterface $newRevision): array
     {
+        if(!$this->configuration->isResourceAudited($resourceName)) {
+            throw ResourceNotAuditedException::forResource($resourceName);
+        }
+
         $className = $this->getResourceModelClass($resourceName);
         $objectManager = $this->getResourceObjectManager($resourceName);
 

@@ -4,6 +4,7 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\ObjectManager;
+use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditConfiguration;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
@@ -101,6 +102,10 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
      */
     public function diffObjectRevisions(string $className, $objectId, RevisionInterface $oldRevision, RevisionInterface $newRevision, ObjectManager $objectManager = null): array
     {
+        if(!$this->getConfiguration()->isClassAudited($className)) {
+            throw ObjectNotAuditedException::forClass($className);
+        }
+
         $oldObject = $this->findObjectByRevision($className, $objectId, $oldRevision, $objectManager);
         $newObject = $this->findObjectByRevision($className, $objectId, $newRevision, $objectManager);
 

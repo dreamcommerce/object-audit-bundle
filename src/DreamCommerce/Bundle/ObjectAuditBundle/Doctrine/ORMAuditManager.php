@@ -5,19 +5,23 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle\Doctrine;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\ORM\ORMException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use DreamCommerce\Bundle\ObjectAuditBundle\BaseObjectAuditManager;
 use DreamCommerce\Component\ObjectAudit\Collection\AuditedCollection;
-use DreamCommerce\Component\ObjectAudit\Exception\DeletedException;
-use DreamCommerce\Component\ObjectAudit\Exception\NoRevisionFoundException;
-use DreamCommerce\Component\ObjectAudit\Exception\NotAuditedException;
+use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
+use DreamCommerce\Component\ObjectAudit\Exception\ObjectDeletedException;
+use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotFoundException;
 use DreamCommerce\Component\ObjectAudit\Model\ChangedObject;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
+use Exception;
 use RuntimeException;
 
 class ORMAuditManager extends BaseObjectAuditManager
@@ -34,6 +38,12 @@ class ORMAuditManager extends BaseObjectAuditManager
      */
     public function findObjectByRevision(string $className, $objectId, RevisionInterface $revision, ObjectManager $objectManager = null, array $options = [])
     {
+        /** @var ORMAuditConfiguration $configuration */
+        $configuration = $this->getConfiguration();
+        if(!$configuration->isClassAudited($className)) {
+            throw ObjectNotAuditedException::forClass($className);
+        }
+
         $options = array_merge(['threatDeletionsAsExceptions' => false], $options);
 
         if ($objectManager === null) {
@@ -45,21 +55,17 @@ class ORMAuditManager extends BaseObjectAuditManager
         /** @var EntityManagerInterface $auditObjectManager */
         $auditObjectManager = $this->getAuditObjectManager();
         $revisionMetadata = $auditObjectManager->getClassMetadata($this->revisionClass);
-        /** @var ORMAuditConfiguration $configuration */
-        $configuration = $this->getConfiguration();
         $quoteStrategy = $auditObjectManager->getConfiguration()->getQuoteStrategy();
         $connection = $auditObjectManager->getConnection();
         $platform = $connection->getDatabasePlatform();
-
         $tableName = $this->getAuditTableNameForClass($className, $auditObjectManager);
+
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder->from($tableName);
 
         if (!is_array($objectId)) {
             $objectId = array($entityMetadata->identifier[0] => $objectId);
         }
-
-        $bindParameters = [];
-        $columns = [];
-        $conditions = [];
 
         foreach ($revisionMetadata->identifier as $revisionIdField) {
             if (isset($revisionMetadata->fieldMappings[$revisionIdField])) {
@@ -70,13 +76,11 @@ class ORMAuditManager extends BaseObjectAuditManager
                 continue;
             }
             $columnName = $configuration->getRevisionIdFieldPrefix().$columnName.$configuration->getRevisionIdFieldSuffix();
-            $bindParameters[] = $columnName;
-            $columns[] = 'e.'.$columnName;
-            $conditions[] = 'e.'.$columnName.' <= :'.$columnName;
+
+            $queryBuilder->orderBy('e.' . $columnName);
+            $queryBuilder->andWhere('e.' . $columnName . ' <= :' . $columnName);
+            $queryBuilder->addSelect('e.' . $columnName);
         }
-        $orders = array_map(function ($order) {
-            return $order.' DESC';
-        }, $columns);
 
         foreach ($entityMetadata->identifier as $idField) {
             if (isset($entityMetadata->fieldMappings[$idField])) {
@@ -86,24 +90,24 @@ class ORMAuditManager extends BaseObjectAuditManager
             } else {
                 continue;
             }
-            $bindParameters[] = $columnName;
-            $columns[] = 'e.'.$columnName;
-            $conditions[] = 'e.'.$columnName.' = :'.$columnName;
+
+            $queryBuilder->andWhere('e.' . $columnName.' = :' . $columnName);
+            $queryBuilder->addSelect('e.' . $columnName);
         }
 
-        $columnMap = array();
+        $columnMap = [];
 
         foreach ($entityMetadata->fieldNames as $columnName => $field) {
             $tableAlias = $entityMetadata->isInheritanceTypeJoined() && $entityMetadata->isInheritedField($field) && !$entityMetadata->isIdentifier($field)
                 ? 're' // root entity
                 : 'e';
 
-            $columns[] = sprintf(
+            $queryBuilder->addSelect(sprintf(
                 '%s.%s AS %s',
                 $tableAlias,
                 $quoteStrategy->getColumnName($field, $entityMetadata, $platform),
                 $platform->quoteSingleIdentifier($field)
-            );
+            ));
             $columnMap[$field] = $platform->getSQLResultCasing($columnName);
         }
 
@@ -118,18 +122,17 @@ class ORMAuditManager extends BaseObjectAuditManager
                 !$entityMetadata->isIdentifier($assoc['fieldName'])
                     ? 're' // root entity
                     : 'e';
-                $columns[] = $tableAlias.'.'.$sourceCol;
+
+                $queryBuilder->addSelect($tableAlias . '.' . $sourceCol);
                 $columnMap[$sourceCol] = $platform->getSQLResultCasing($sourceCol);
             }
         }
 
-        $joinSql = '';
         if ($entityMetadata->isInheritanceTypeJoined() && $entityMetadata->name != $entityMetadata->rootEntityName) {
             /** @var ClassMetadata $rootClass */
             $rootClass = $objectManager->getClassMetadata($entityMetadata->rootEntityName);
             $rootTableName = $this->getAuditTableNameForClass($rootClass, $objectManager);
-            $joinSql = "INNER JOIN {$rootTableName} re ON";
-            $joinSqlConditions = [];
+            $condition = [];
 
             foreach ($revisionMetadata->identifier as $revisionIdField) {
                 if (isset($revisionMetadata->fieldMappings[$revisionIdField])) {
@@ -140,18 +143,19 @@ class ORMAuditManager extends BaseObjectAuditManager
                     continue;
                 }
                 $columnName = $configuration->getRevisionIdFieldPrefix().$columnName.$configuration->getRevisionIdFieldSuffix();
-                $joinSqlConditions[] = 're.'.$columnName.' = e.'.$columnName;
+                $condition[] = 're.'.$columnName.' = e.'.$columnName;
             }
 
             foreach ($entityMetadata->getIdentifierColumnNames() as $name) {
-                $joinSqlConditions[] = 're.'.$name.' = e.'.$name;
+                $condition[] = 're.'.$name.' = e.'.$name;
             }
 
-            $joinSql .= ' '.implode(' AND ', $joinSqlConditions);
+            $queryBuilder->innerJoin('e', $rootTableName, 're', implode(' AND ', $condition));
         }
 
         if (!$entityMetadata->isInheritanceTypeNone()) {
-            $columns[] = $entityMetadata->discriminatorColumn['name'];
+            $queryBuilder->addSelect($entityMetadata->discriminatorColumn['name']);
+
             if ($entityMetadata->isInheritanceTypeSingleTable()
                 && $entityMetadata->discriminatorValue !== null) {
 
@@ -162,7 +166,11 @@ class ORMAuditManager extends BaseObjectAuditManager
                     $queriedDiscrValues[] = $connection->quote($allDiscrValues[$subclassName]);
                 }
 
-                $conditions[] = $entityMetadata->discriminatorColumn['name'].' IN '.'('.implode(', ', $queriedDiscrValues).')';
+                $queryBuilder->andWhere(sprintf(
+                    '%s IN (%s)',
+                    $entityMetadata->discriminatorColumn['name'],
+                    implode(', ', $queriedDiscrValues)
+                ));
             }
         }
 
@@ -173,30 +181,15 @@ class ORMAuditManager extends BaseObjectAuditManager
             unset($revisionIds[$fieldName]);
         }
 
-        $bindValues = array_merge(
-            $revisionIds,
-            $objectId
-        );
+        $queryBuilder->setParameters(array_merge($revisionIds, $objectId));
+        $row = $queryBuilder->execute()->fetch(\PDO::FETCH_ASSOC);
 
-        $query = 'SELECT '.implode(', ', $columns).' '.
-                    'FROM '.$tableName.' e '.
-                    $joinSql.' '.
-                    'WHERE '.implode(' AND ', $conditions).' '.
-                    'ORDER BY '.implode(', ', $orders).' '.
-                    'LIMIT 1';
-
-        $stmt = $connection->prepare($query);
-        foreach ($bindParameters as $bindParameter) {
-            $stmt->bindValue($bindParameter, $bindValues[$bindParameter]);
-        }
-        $stmt->execute();
-        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         if (!$row) {
-            throw new NoRevisionFoundException($entityMetadata->name, $objectId, $revision);
+            throw ObjectNotFoundException::forObjectAtSpecificRevision($entityMetadata->name, $objectId, $revision);
         }
 
         if ($options['threatDeletionsAsExceptions'] && $row[$configuration->getRevisionTypeFieldName()] == RevisionInterface::ACTION_DELETE) {
-            throw new DeletedException($entityMetadata->name, $objectId, $revision);
+            throw ObjectDeletedException::forObjectAtSpecificRevision($entityMetadata->name, $objectId, $revision);
         }
 
         unset($row[$configuration->getRevisionTypeFieldName()]);
@@ -209,6 +202,12 @@ class ORMAuditManager extends BaseObjectAuditManager
      */
     public function findObjectsChangedAtRevision(string $className, RevisionInterface $revision, ObjectManager $objectManager = null, array $options = []): array
     {
+        /** @var ORMAuditConfiguration $configuration */
+        $configuration = $this->getConfiguration();
+        if(!$configuration->isClassAudited($className)) {
+            throw ObjectNotAuditedException::forClass($className);
+        }
+
         /** @var EntityManagerInterface $objectManager */
         if ($objectManager === null) {
             $objectManager = $this->getDefaultObjectManager();
@@ -225,22 +224,23 @@ class ORMAuditManager extends BaseObjectAuditManager
         $connection = $objectManager->getConnection();
         $platform = $connection->getDatabasePlatform();
         $quoteStrategy = $objectManager->getConfiguration()->getQuoteStrategy();
-        /** @var ORMAuditConfiguration $configuration */
-        $configuration = $this->getConfiguration();
         /** @var EntityManagerInterface $auditObjectManager */
         $auditObjectManager = $this->getAuditObjectManager();
         $revisionMetadata = $auditObjectManager->getClassMetadata($this->revisionClass);
 
         $tableName = $this->getAuditTableNameForClass($className);
-        $bindParameters = [];
-        $conditions = [];
         $revisionIds = $revisionMetadata->getIdentifierValues($revision);
+
         $bindValues = [];
 
         foreach ($revisionIds as $fieldName => $fieldValue) {
-            $fieldName = $configuration->getRevisionIdFieldPrefix().$fieldName.$configuration->getRevisionIdFieldSuffix();
+            $fieldName = $configuration->getRevisionIdFieldPrefix() . $fieldName . $configuration->getRevisionIdFieldSuffix();
             $bindValues[$fieldName] = $fieldValue;
         }
+
+        $queryBuilder = $connection->createQueryBuilder()
+            ->select('e.' . $configuration->getRevisionTypeFieldName())
+            ->from($tableName, 'e');
 
         foreach ($revisionMetadata->identifier as $revisionIdField) {
             if (isset($revisionMetadata->fieldMappings[$revisionIdField])) {
@@ -250,12 +250,10 @@ class ORMAuditManager extends BaseObjectAuditManager
             } else {
                 continue;
             }
-            $columnName = $configuration->getRevisionIdFieldPrefix().$columnName.$configuration->getRevisionIdFieldSuffix();
-            $bindParameters[] = $columnName;
-            $conditions[] = 'e.'.$columnName.' = :'.$columnName;
+            $columnName = $configuration->getRevisionIdFieldPrefix() . $columnName . $configuration->getRevisionIdFieldSuffix();
+            $queryBuilder->andWhere('e.' . $columnName . ' = :' . $columnName);
         }
 
-        $columnList = ['e.'.$configuration->getRevisionTypeFieldName()];
         $columnMap = [];
 
         foreach ($class->fieldNames as $columnName => $field) {
@@ -263,26 +261,29 @@ class ORMAuditManager extends BaseObjectAuditManager
                 ? 're' // root entity
                 : 'e';
 
-            $columnList[] = $tableAlias.'.'.$quoteStrategy->getColumnName($field, $class, $platform).' AS '.$platform->quoteSingleIdentifier($field);
+            $queryBuilder->addSelect(sprintf(
+                '%s.%s AS %s',
+                $tableAlias,
+                $quoteStrategy->getColumnName($field, $class, $platform),
+                $platform->quoteSingleIdentifier($field)
+            ));
             $columnMap[$field] = $platform->getSQLResultCasing($columnName);
         }
 
         foreach ($class->associationMappings as $assoc) {
             if (($assoc['type'] & ClassMetadata::TO_ONE) > 0 && $assoc['isOwningSide']) {
                 foreach ($assoc['targetToSourceKeyColumns'] as $sourceCol) {
-                    $columnList[] = $sourceCol;
+                    $queryBuilder->addSelect($sourceCol);
                     $columnMap[$sourceCol] = $platform->getSQLResultCasing($sourceCol);
                 }
             }
         }
 
-        $joinSql = '';
         if ($class->isInheritanceTypeSingleTable()) {
             $columnName = $class->discriminatorColumn['fieldName'];
-            $columnList[] = 'e.'.$class->discriminatorColumn['name'];
-            $conditions[] = 'e.'.$columnName.' = :'.$columnName;
-            $bindParameters[] = $columnName;
             $bindValues[$columnName] = $class->discriminatorValue;
+            $queryBuilder->addSelect('e.' . $class->discriminatorColumn['name']);
+            $queryBuilder->andWhere('e.' . $columnName . ' = :' . $columnName);
         } elseif ($class->isInheritanceTypeJoined() && $class->rootEntityName != $class->name) {
             $columnList[] = 're.'.$class->discriminatorColumn['name'];
 
@@ -290,9 +291,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             $rootClass = $objectManager->getClassMetadata($class->rootEntityName);
             $rootTableName = $this->getAuditTableNameForClass($rootClass, $objectManager);
 
-            $joinSql = "INNER JOIN {$rootTableName} re ON";
-            $joinSqlConditions = [];
-
+            $conditions = [];
             foreach ($revisionMetadata->identifier as $revisionIdField) {
                 if (isset($revisionMetadata->fieldMappings[$revisionIdField])) {
                     $columnName = $revisionMetadata->fieldMappings[$revisionIdField]['columnName'];
@@ -302,27 +301,19 @@ class ORMAuditManager extends BaseObjectAuditManager
                     continue;
                 }
                 $columnName = $configuration->getRevisionIdFieldPrefix().$columnName.$configuration->getRevisionIdFieldSuffix();
-                $joinSqlConditions[] = 're.'.$columnName.' = e.'.$columnName;
+                $conditions[] = 're.'.$columnName.' = e.'.$columnName;
             }
 
             foreach ($class->getIdentifierColumnNames() as $name) {
-                $joinSqlConditions[] = 're.'.$name.' = e.'.$name;
+                $conditions[] = 're.'.$name.' = e.'.$name;
             }
 
-            $joinSql .= ' '.implode(' AND ', $joinSqlConditions);
+            $queryBuilder->addSelect('re.' . $class->discriminatorColumn['name']);
+            $queryBuilder->innerJoin('e', $rootTableName, 're', implode(' AND ', $conditions));
         }
 
-        $query = 'SELECT '.implode(', ', $columnList).' '.
-                    'FROM '.$tableName.' e '.
-                    $joinSql.' '.
-                    'WHERE '.implode(' AND ', $conditions);
-
-        $stmt = $objectManager->getConnection()->prepare($query);
-        foreach ($bindParameters as $bindParameter) {
-            $stmt->bindValue($bindParameter, $bindValues[$bindParameter]);
-        }
-        $stmt->execute();
-        $revisionsData = $stmt->fetchAll();
+        $queryBuilder->setParameters($bindValues);
+        $revisionsData = $queryBuilder->execute()->fetchAll();
 
         $revisionFieldType = $configuration->getRevisionTypeFieldType();
         $revisionFieldName = $configuration->getRevisionTypeFieldName();
@@ -348,12 +339,16 @@ class ORMAuditManager extends BaseObjectAuditManager
             );
 
             $objectRevType = $row[$revisionFieldName];
+            unset($row[$revisionFieldName]);
+
             if ($revisionType !== null) {
                 $objectRevType = $revisionType->convertToPHPValue($objectRevType, $platform);
             }
 
             $changedEntities[] = new ChangedObject(
                 $entity,
+                $revision,
+                $row,
                 $objectRevType
             );
         }
@@ -366,6 +361,13 @@ class ORMAuditManager extends BaseObjectAuditManager
      */
     public function findObjectRevisions(string $className, $objectId, ObjectManager $objectManager = null): Collection
     {
+        /** @var ORMAuditConfiguration $configuration */
+        $configuration = $this->getConfiguration();
+        if(!$configuration->isClassAudited($className)) {
+            throw ObjectNotAuditedException::forClass($className);
+        }
+
+        /** @var EntityManagerInterface $objectManager */
         if ($objectManager === null) {
             $objectManager = $this->getDefaultObjectManager();
         }
@@ -374,8 +376,6 @@ class ORMAuditManager extends BaseObjectAuditManager
         $auditManager = $this->getAuditObjectManager();
         $revisionMetadata = $auditManager->getClassMetadata($this->revisionClass);
         $revisionTableName = $revisionMetadata->getTableName();
-        /** @var ORMAuditConfiguration $configuration */
-        $configuration = $this->getConfiguration();
 
         /** @var ClassMetadata $entityMetadata */
         $entityMetadata = $objectManager->getClassMetadata($className);
@@ -385,8 +385,11 @@ class ORMAuditManager extends BaseObjectAuditManager
             $objectId = array($entityMetadata->identifier[0] => $objectId);
         }
 
-        $conditions = [];
-        $columns = [];
+        $connection = $objectManager->getConnection();
+        $queryBuilder = $connection->createQueryBuilder()
+            ->select('r.*')
+            ->from($revisionTableName, 'r');
+
         foreach ($entityMetadata->identifier as $entityIdField) {
             if (isset($entityMetadata->fieldMappings[$entityIdField])) {
                 $columnName = $entityMetadata->fieldMappings[$entityIdField]['columnName'];
@@ -395,12 +398,10 @@ class ORMAuditManager extends BaseObjectAuditManager
             } else {
                 continue;
             }
-            $conditions[] = 'e.'.$columnName.' = :'.$columnName;
-            $columns[] = $columnName;
+            $queryBuilder->andWhere('e.'.$columnName.' = :'.$columnName);
         }
 
-        $orders = [];
-        $innerConditions = [];
+        $conditions = [];
         foreach ($revisionMetadata->identifier as $revisionIdField) {
             if (isset($revisionMetadata->fieldMappings[$revisionIdField])) {
                 $columnName = $revisionMetadata->fieldMappings[$revisionIdField]['columnName'];
@@ -409,22 +410,15 @@ class ORMAuditManager extends BaseObjectAuditManager
             } else {
                 continue;
             }
-            $innerConditions[] = 'r.'.$revisionIdField.' = e.'.$configuration->getRevisionIdFieldPrefix().$columnName.$configuration->getRevisionIdFieldSuffix();
-            $orders[] = 'r.'.$columnName.' DESC';
+            $conditions[] = 'r.'.$revisionIdField.' = e.'.$configuration->getRevisionIdFieldPrefix().$columnName.$configuration->getRevisionIdFieldSuffix();
+            $queryBuilder->orderBy('r.' . $columnName . ' DESC');
         }
+        $queryBuilder->innerJoin('r', $entityTableName, 'e', implode(' AND ', $conditions));
 
-        $sql = 'SELECT r.* '.
-                    'FROM '.$revisionTableName.' r '.
-                    'INNER JOIN '.$entityTableName.' e  ON '.implode(' AND ', $innerConditions).' '.
-                    'WHERE '.implode(' AND ', $conditions).' '.
-                    'ORDER BY '.implode(', ', $orders);
-
+        $queryBuilder->setParameters($objectId);
         $rsm = new ResultSetMappingBuilder($auditManager);
         $rsm->addRootEntityFromClassMetadata($this->revisionClass, 'r');
-        $query = $auditManager->createNativeQuery($sql, $rsm);
-        foreach ($columns as $column) {
-            $query->setParameter($column, $objectId[$column]);
-        }
+        $query = $auditManager->createNativeQuery($queryBuilder->getSQL(), $rsm);
 
         $result = $query->getResult();
 
@@ -490,14 +484,22 @@ class ORMAuditManager extends BaseObjectAuditManager
 
     /**
      * @param string        $className
-     * @param mixed         $objectId
+     * @param mixed         $objectIds
      * @param ObjectManager $objectManager
      * @param string        $sort
      *
+     * @throws ObjectNotAuditedException
+     *
      * @return null|object
      */
-    private function getObjectRevision(string $className, $objectId, ObjectManager $objectManager, $sort = 'ASC')
+    private function getObjectRevision(string $className, $objectIds, ObjectManager $objectManager, $sort = 'ASC')
     {
+        /** @var ORMAuditConfiguration $configuration */
+        $configuration = $this->getConfiguration();
+        if(!$configuration->isClassAudited($className)) {
+            throw ObjectNotAuditedException::forClass($className);
+        }
+
         /** @var ClassMetadataInfo $entityMetadata */
         $entityMetadata = $objectManager->getClassMetadata($className);
         $entityTableName = $this->getAuditTableNameForClass($className, $objectManager);
@@ -505,15 +507,15 @@ class ORMAuditManager extends BaseObjectAuditManager
         $auditEntityManager = $this->getAuditObjectManager();
         $revisionMetadata = $auditEntityManager->getClassMetadata($this->revisionClass);
         $connection = $auditEntityManager->getConnection();
-        /** @var ORMAuditConfiguration $configuration */
-        $configuration = $this->getConfiguration();
 
-        if (!is_array($objectId)) {
-            $objectId = [$entityMetadata->identifier[0] => $objectId];
+        if (!is_array($objectIds)) {
+            $objectIds = [$entityMetadata->identifier[0] => $objectIds];
         }
 
-        $columns = [];
-        $conditions = [];
+        $queryBuilder = $connection->createQueryBuilder()
+            ->setMaxResults(1)
+            ->from($entityTableName, 'e');
+
         foreach ($entityMetadata->identifier as $idField) {
             if (isset($entityMetadata->fieldMappings[$idField])) {
                 $columnName = $entityMetadata->fieldMappings[$idField]['columnName'];
@@ -523,33 +525,19 @@ class ORMAuditManager extends BaseObjectAuditManager
                 continue;
             }
 
-            $columns[] = $columnName;
-            $conditions[] = $columnName.' = :'.$columnName;
+            $queryBuilder->select($columnName);
+            $queryBuilder->andWhere($columnName.' = :'.$columnName);
         }
 
         $revisionIdMap = [];
-        $revisionIdNames = [];
         foreach ($revisionMetadata->identifier as $idField) {
             $revisionIdName = $configuration->getRevisionIdFieldPrefix().$idField.$configuration->getRevisionIdFieldSuffix();
-            $revisionIdNames[] = $revisionIdName;
             $revisionIdMap[$revisionIdName] = $idField;
+            $queryBuilder->orderBy($revisionIdName, $sort);
         }
-        $revisionIdOrders = array_map(function ($idField) use ($sort) {
-            return $idField.' '.$sort;
-        }, $revisionIdNames);
 
-        $query = 'SELECT '.implode(', ', $revisionIdNames).' '.
-            'FROM '.$entityTableName.' '.
-            'WHERE '.implode(' AND ', $conditions).' '.
-            'ORDER BY '.implode(', ', $revisionIdOrders).' '.
-            'LIMIT 1';
-
-        $stmt = $connection->prepare($query);
-        foreach ($columns as $column) {
-            $stmt->bindValue($column, $objectId[$column]);
-        }
-        $stmt->execute();
-        $revisionIds = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $queryBuilder->setParameters($objectIds);
+        $revisionIds = $queryBuilder->execute()->fetch(\PDO::FETCH_ASSOC);
 
         foreach ($revisionIds as $fieldName => $fieldValue) {
             $newFieldName = $revisionIdMap[$fieldName];
@@ -570,13 +558,13 @@ class ORMAuditManager extends BaseObjectAuditManager
      * @param array                       $revisionIds
      * @param EntityManagerInterface|null $objectManager
      *
-     * @throws DeletedException
-     * @throws NoRevisionFoundException
-     * @throws NotAuditedException
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Exception
+     * @throws ObjectDeletedException
+     * @throws ObjectNotFoundException
+     * @throws ObjectNotAuditedException
+     * @throws DBALException
+     * @throws MappingException
+     * @throws ORMException
+     * @throws Exception
      *
      * @return object
      */
@@ -687,9 +675,9 @@ class ORMAuditManager extends BaseObjectAuditManager
                         } else {
                             try {
                                 $value = $this->findObjectByRevision($targetClass->name, $pk, $revision, $objectManager, ['threatDeletionsAsExceptions' => true]);
-                            } catch (DeletedException $e) {
+                            } catch (ObjectDeletedException $e) {
                                 $value = null;
-                            } catch (NoRevisionFoundException $e) {
+                            } catch (ObjectNotFoundException $e) {
                                 // The entity does not have any revision yet. So let's get the actual state of it.
                                 $value = $objectManager->find($targetClass->name, $pk);
                             }

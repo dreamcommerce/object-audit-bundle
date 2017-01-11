@@ -23,16 +23,37 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Exception;
 
-class NoRevisionFoundException extends AuditException
+use DreamCommerce\Component\ObjectAudit\Exception\Traits\ObjectTrait;
+use DreamCommerce\Component\ObjectAudit\Exception\Traits\RevisionTrait;
+use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
+
+class ObjectNotFoundException extends AuditException
 {
-    public function __construct($className, $id, $revision)
+    const CODE_OBJECT_NOT_EXIST_AT_SPECIFIC_REVISION = 10;
+
+    use ObjectTrait;
+    use RevisionTrait;
+
+    /**
+     * @param string $className
+     * @param mixed $id
+     * @param RevisionInterface $revision
+     * @return ObjectNotFoundException
+     */
+    public static function forObjectAtSpecificRevision(string $className, $id, RevisionInterface $revision): ObjectNotFoundException
     {
-        parent::__construct($className, $id, $revision);
-        $this->message = sprintf(
+        $message = sprintf(
             "No revision of class '%s' (%s) was found at revision %s or before. The entity did not exist at the specified revision yet.",
             $className,
-            implode(', ', $id),
-            $revision
+            is_array($id) ? implode(', ', $id) : $id,
+            $revision->getId()
         );
+
+        $exception = new self($message, self::CODE_OBJECT_NOT_EXIST_AT_SPECIFIC_REVISION);
+        $exception->setClassName($className)
+            ->setId($id)
+            ->setRevision($revision);
+
+        return $exception;
     }
 }

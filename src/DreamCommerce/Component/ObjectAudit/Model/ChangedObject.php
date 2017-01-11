@@ -47,6 +47,12 @@ class ChangedObject
      */
     private $revisionType;
 
+    /**
+     * @param $object
+     * @param RevisionInterface $revision
+     * @param array $revisionData
+     * @param string $revisionType
+     */
     public function __construct($object, RevisionInterface $revision, array $revisionData = [], string $revisionType)
     {
         Assert::oneOf($revisionType, [RevisionInterface::ACTION_INSERT, RevisionInterface::ACTION_UPDATE, RevisionInterface::ACTION_DELETE]);

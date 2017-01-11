@@ -32,16 +32,23 @@ final class ChangedResource extends ChangedObject
      */
     private $resourceName;
 
-    public function __construct(ResourceInterface $resource, $resourceName, $revisionType)
+    /**
+     * @param ResourceInterface $resource
+     * @param string $resourceName
+     * @param RevisionInterface $revision
+     * @param array $revisionData
+     * @param string $revisionType
+     */
+    public function __construct(ResourceInterface $resource, string $resourceName, RevisionInterface $revision, array $revisionData = [], string $revisionType)
     {
         $this->resourceName = $resourceName;
-        parent::__construct($resource, $revisionType);
+        parent::__construct($resource, $revision, $revisionData, $revisionType);
     }
 
     /**
      * @return string
      */
-    public function getResourceName()
+    public function getResourceName(): string
     {
         return $this->resourceName;
     }

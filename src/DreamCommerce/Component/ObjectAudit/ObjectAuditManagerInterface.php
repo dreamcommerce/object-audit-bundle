@@ -4,9 +4,9 @@ namespace DreamCommerce\Component\ObjectAudit;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Persistence\ObjectManager;
-use DreamCommerce\Component\ObjectAudit\Exception\DeletedException;
-use DreamCommerce\Component\ObjectAudit\Exception\NoRevisionFoundException;
-use DreamCommerce\Component\ObjectAudit\Exception\NotAuditedException;
+use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
+use DreamCommerce\Component\ObjectAudit\Exception\ObjectDeletedException;
+use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotFoundException;
 use DreamCommerce\Component\ObjectAudit\Model\ChangedObject;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\Repository\RevisionRepositoryInterface;
@@ -22,11 +22,11 @@ interface ObjectAuditManagerInterface
      * @param ObjectManager|null $objectManager
      * @param array              $options
      *
-     * @return object
+     * @throws ObjectDeletedException
+     * @throws ObjectNotFoundException
+     * @throws ObjectNotAuditedException
      *
-     * @throws DeletedException
-     * @throws NoRevisionFoundException
-     * @throws NotAuditedException
+     * @return object
      */
     public function findObjectByRevision(string $className, $objectId, RevisionInterface $revision, ObjectManager $objectManager = null, array $options = []);
 
@@ -45,6 +45,8 @@ interface ObjectAuditManagerInterface
      * @param array              $options
      * @param ObjectManager|null $objectManager
      *
+     * @throws ObjectNotAuditedException
+     *
      * @return ChangedObject[]
      */
     public function findObjectsChangedAtRevision(string $className, RevisionInterface $revision, ObjectManager $objectManager = null, array $options = []): array;
@@ -56,7 +58,7 @@ interface ObjectAuditManagerInterface
      * @param mixed              $objectId
      * @param ObjectManager|null $objectManager
      *
-     * @throws NotAuditedException
+     * @throws ObjectNotAuditedException
      *
      * @return Collection|RevisionInterface[]
      */
@@ -69,7 +71,7 @@ interface ObjectAuditManagerInterface
      * @param mixed              $objectId
      * @param ObjectManager|null $objectManager
      *
-     * @throws NotAuditedException
+     * @throws ObjectNotAuditedException
      *
      * @return RevisionInterface|null
      */
@@ -82,8 +84,8 @@ interface ObjectAuditManagerInterface
      * @param mixed              $objectId
      * @param ObjectManager|null $objectManager
      *
-     * @throws NotAuditedException
-     * @throws NoRevisionFoundException
+     * @throws ObjectNotAuditedException
+     * @throws ObjectNotFoundException
      *
      * @return RevisionInterface|null
      */
@@ -93,7 +95,7 @@ interface ObjectAuditManagerInterface
      * @param ChangedObject $changedObject
      * @param ObjectManager|null $objectManager
      *
-     * @throws NotAuditedException
+     * @throws ObjectNotAuditedException
      *
      * @return $this
      */
@@ -108,6 +110,8 @@ interface ObjectAuditManagerInterface
      * @param RevisionInterface  $oldRevision
      * @param RevisionInterface  $newRevision
      * @param ObjectManager|null $objectManager
+     *
+     * @throws ObjectNotAuditedException
      *
      * @return array
      */
