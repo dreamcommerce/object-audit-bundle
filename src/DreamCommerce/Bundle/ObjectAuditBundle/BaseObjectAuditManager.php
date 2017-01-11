@@ -102,7 +102,7 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
      */
     public function diffObjectRevisions(string $className, $objectId, RevisionInterface $oldRevision, RevisionInterface $newRevision, ObjectManager $objectManager = null): array
     {
-        if(!$this->getConfiguration()->isClassAudited($className)) {
+        if (!$this->getConfiguration()->isClassAudited($className)) {
             throw ObjectNotAuditedException::forClass($className);
         }
 

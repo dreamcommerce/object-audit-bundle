@@ -13,6 +13,7 @@ class ResourceNotAuditedException extends ObjectNotAuditedException
     /**
      * @param string $resourceName
      * @param string $className
+     *
      * @return ResourceNotAuditedException
      */
     public static function forResource(string $resourceName, string $className = null): ResourceNotAuditedException

@@ -93,13 +93,12 @@ interface ObjectAuditManagerInterface
 
     /**
      * @param ChangedObject $changedObject
-     * @param ObjectManager|null $objectManager
      *
      * @throws ObjectNotAuditedException
      *
      * @return $this
      */
-    public function saveObjectRevisionData(ChangedObject $changedObject, ObjectManager $objectManager = null);
+    public function saveObjectRevisionData(ChangedObject $changedObject);
 
     /**
      * Get an array with the differences of between two specific revisions of

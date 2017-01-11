@@ -41,7 +41,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  *
  * @author Tim Nagel <tim@nagel.com.au>
  */
-final class AuditController
+final class ResourceController
 {
     /**
      * @var ContainerInterface
@@ -64,7 +64,7 @@ final class AuditController
     private $resourceRegistry;
 
     /**
-     * @param ContainerInterface                     $container
+     * @param ContainerInterface            $container
      * @param EngineInterface               $templatingEngine
      * @param ResourceAuditManagerInterface $auditManager
      * @param RegistryInterface             $resourceRegistry

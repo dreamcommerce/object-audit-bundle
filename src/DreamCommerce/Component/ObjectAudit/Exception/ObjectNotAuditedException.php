@@ -34,6 +34,7 @@ class ObjectNotAuditedException extends AuditException
 
     /**
      * @param string $className
+     *
      * @return ObjectNotAuditedException
      */
     public static function forClass(string $className): ObjectNotAuditedException

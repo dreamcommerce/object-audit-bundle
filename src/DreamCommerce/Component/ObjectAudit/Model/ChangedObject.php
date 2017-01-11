@@ -23,6 +23,7 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Model;
 
+use Doctrine\Common\Persistence\ObjectManager;
 use Webmozart\Assert\Assert;
 
 class ChangedObject
@@ -48,12 +49,18 @@ class ChangedObject
     private $revisionType;
 
     /**
+     * @var ObjectManager
+     */
+    private $objectManager;
+
+    /**
      * @param $object
      * @param RevisionInterface $revision
-     * @param array $revisionData
-     * @param string $revisionType
+     * @param array             $revisionData
+     * @param string            $revisionType
+     * @param ObjectManager     $objectManager
      */
-    public function __construct($object, RevisionInterface $revision, array $revisionData = [], string $revisionType)
+    public function __construct($object, RevisionInterface $revision, array $revisionData, string $revisionType, ObjectManager $objectManager)
     {
         Assert::oneOf($revisionType, [RevisionInterface::ACTION_INSERT, RevisionInterface::ACTION_UPDATE, RevisionInterface::ACTION_DELETE]);
 
@@ -61,6 +68,7 @@ class ChangedObject
         $this->revision = $revision;
         $this->revisionData = $revisionData;
         $this->revisionType = $revisionType;
+        $this->objectManager = $objectManager;
     }
 
     /**
@@ -93,5 +101,13 @@ class ChangedObject
     public function getRevisionType(): string
     {
         return $this->revisionType;
+    }
+
+    /**
+     * @return ObjectManager
+     */
+    public function getObjectManager(): ObjectManager
+    {
+        return $this->objectManager;
     }
 }

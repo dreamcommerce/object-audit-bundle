@@ -38,6 +38,7 @@ class ObjectDeletedException extends AuditException
      * @param string $className
      * @param $id
      * @param RevisionInterface $revision
+     *
      * @return ObjectDeletedException
      */
     public static function forObjectAtSpecificRevision(string $className, $id, RevisionInterface $revision): ObjectDeletedException

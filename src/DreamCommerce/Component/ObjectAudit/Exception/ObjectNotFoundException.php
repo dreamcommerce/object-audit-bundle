@@ -35,9 +35,10 @@ class ObjectNotFoundException extends AuditException
     use RevisionTrait;
 
     /**
-     * @param string $className
-     * @param mixed $id
+     * @param string            $className
+     * @param mixed             $id
      * @param RevisionInterface $revision
+     *
      * @return ObjectNotFoundException
      */
     public static function forObjectAtSpecificRevision(string $className, $id, RevisionInterface $revision): ObjectNotFoundException

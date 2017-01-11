@@ -12,10 +12,11 @@ class ResourceDeletedException extends ObjectDeletedException
     use ResourceTrait;
 
     /**
-     * @param string $resourceName
-     * @param string $className
-     * @param mixed $id
+     * @param string            $resourceName
+     * @param string            $className
+     * @param mixed             $id
      * @param RevisionInterface $revision
+     *
      * @return ResourceDeletedException
      */
     public static function forResourceAtSpecificRevision(string $resourceName, string $className, $id, RevisionInterface $revision): ResourceDeletedException

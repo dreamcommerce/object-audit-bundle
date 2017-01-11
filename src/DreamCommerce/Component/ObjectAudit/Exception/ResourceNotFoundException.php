@@ -12,10 +12,11 @@ class ResourceNotFoundException extends ObjectNotFoundException
     use ResourceTrait;
 
     /**
-     * @param string $resourceName
-     * @param string $className
-     * @param mixed $id
+     * @param string            $resourceName
+     * @param string            $className
+     * @param mixed             $id
      * @param RevisionInterface $revision
+     *
      * @return ResourceNotFoundException
      */
     public static function forResourceAtSpecificRevision(string $resourceName, string $className, $id, RevisionInterface $revision): ResourceNotFoundException

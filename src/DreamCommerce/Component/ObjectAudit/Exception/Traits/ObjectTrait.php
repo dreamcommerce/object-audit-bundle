@@ -32,6 +32,7 @@ trait ObjectTrait
 
     /**
      * @param string $className
+     *
      * @return $this
      */
     public function setClassName(string $className)
@@ -43,6 +44,7 @@ trait ObjectTrait
 
     /**
      * @param mixed $id
+     *
      * @return $this
      */
     public function setId($id)

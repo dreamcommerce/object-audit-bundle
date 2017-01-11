@@ -29,22 +29,35 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\UnitOfWork;
+use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORMAuditConfiguration;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORMAuditManager;
+use DreamCommerce\Bundle\ObjectAuditBundle\DreamCommerceObjectAuditEvents;
+use DreamCommerce\Bundle\ObjectAuditBundle\Event\ChangedObjectEvent;
+use DreamCommerce\Component\ObjectAudit\Model\ChangedObject;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class LogRevisionsSubscriber implements EventSubscriber
 {
     /**
-     * @var ORMAuditManager
+     * @var ContainerInterface
      */
-    private $auditManager;
+    private $container;
 
     /**
-     * @param ORMAuditManager $auditManager
+     * @var EventDispatcherInterface
      */
-    public function __construct(ORMAuditManager $auditManager)
+    private $eventDispatcher;
+
+    /**
+     * @param ContainerInterface       $container
+     * @param EventDispatcherInterface $eventDispatcher
+     */
+    public function __construct(ContainerInterface $container, EventDispatcherInterface $eventDispatcher)
     {
-        $this->auditManager = $auditManager;
+        $this->container = $container;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function getSubscribedEvents()
@@ -56,28 +69,37 @@ class LogRevisionsSubscriber implements EventSubscriber
 
     public function onFlush(OnFlushEventArgs $eventArgs)
     {
+        /** @var ORMAuditManager $auditObjectManager */
+        $auditObjectManager = $this->container->get('dream_commerce_object_audit.manager');
+
+        /** @var ORMAuditConfiguration $configuration */
+        $configuration = $auditObjectManager->getConfiguration();
+
         $entityManager = $eventArgs->getEntityManager();
         $uow = $entityManager->getUnitOfWork();
-        $configuration = $this->auditManager->getConfiguration();
         $ignoredProperties = $configuration->getGlobalIgnoreProperties();
+        $currentRevision = $auditObjectManager->getCurrentRevision();
 
         foreach ($uow->getScheduledEntityInsertions() as $entity) {
             $className = get_class($entity);
             if (!$configuration->isClassAudited($className)) {
                 continue;
             }
-
             $entityManager = $eventArgs->getEntityManager();
-            $entityMetadata = $entityManager->getClassMetadata($className);
 
-            $this->auditManager->saveObjectRevisionData(
-                $className,
-                $entityMetadata->getIdentifierValues($entity),
-                $this->auditManager->getCurrentRevision(),
-                RevisionInterface::ACTION_INSERT,
+            $changedObject = new ChangedObject(
+                $entity,
+                $currentRevision,
                 $this->getOriginalEntityData($entity, $entityManager),
+                RevisionInterface::ACTION_INSERT,
                 $entityManager
             );
+            $this->eventDispatcher->dispatch(
+                DreamCommerceObjectAuditEvents::OBJECT_CHANGED,
+                new ChangedObjectEvent($changedObject)
+            );
+
+            $auditObjectManager->saveObjectRevisionData($changedObject);
         }
 
         foreach ($uow->getScheduledEntityUpdates() as $entity) {
@@ -100,17 +122,24 @@ class LogRevisionsSubscriber implements EventSubscriber
             if (count($changeset) == 0) {
                 return;
             }
-            $entityData = array_merge($this->getOriginalEntityData($entity, $entityManager), $uow->getEntityIdentifier($entity));
-            $entityMetadata = $entityManager->getClassMetadata($className);
+            $entityData = array_merge(
+                $this->getOriginalEntityData($entity, $entityManager),
+                $uow->getEntityIdentifier($entity)
+            );
 
-            $this->auditManager->saveObjectRevisionData(
-                $className,
-                $entityMetadata->getIdentifierValues($entity),
-                $this->auditManager->getCurrentRevision(),
-                RevisionInterface::ACTION_UPDATE,
+            $changedObject = new ChangedObject(
+                $entity,
+                $currentRevision,
                 $entityData,
+                RevisionInterface::ACTION_UPDATE,
                 $entityManager
             );
+            $this->eventDispatcher->dispatch(
+                DreamCommerceObjectAuditEvents::OBJECT_CHANGED,
+                new ChangedObjectEvent($changedObject)
+            );
+
+            $auditObjectManager->saveObjectRevisionData($changedObject);
         }
 
         $processedEntities = [];
@@ -128,20 +157,27 @@ class LogRevisionsSubscriber implements EventSubscriber
             }
             $processedEntities[] = $hash;
 
-            $entityData = array_merge($this->getOriginalEntityData($entity, $entityManager), $uow->getEntityIdentifier($entity));
-            $entityMetadata = $entityManager->getClassMetadata($className);
+            $entityData = array_merge(
+                $this->getOriginalEntityData($entity, $entityManager),
+                $uow->getEntityIdentifier($entity)
+            );
 
-            $this->auditManager->saveObjectRevisionData(
-                $className,
-                $entityMetadata->getIdentifierValues($entity),
-                $this->auditManager->getCurrentRevision(),
-                RevisionInterface::ACTION_DELETE,
+            $changedObject = new ChangedObject(
+                $entity,
+                $currentRevision,
                 $entityData,
+                RevisionInterface::ACTION_DELETE,
                 $entityManager
             );
+            $this->eventDispatcher->dispatch(
+                DreamCommerceObjectAuditEvents::OBJECT_CHANGED,
+                new ChangedObjectEvent($changedObject)
+            );
+
+            $auditObjectManager->saveObjectRevisionData($changedObject);
         }
 
-        $this->auditManager->saveCurrentRevision();
+        $auditObjectManager->saveCurrentRevision();
     }
 
     /**

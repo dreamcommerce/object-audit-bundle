@@ -34,20 +34,21 @@ use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORMAuditConfiguration;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORMAuditManager;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use RuntimeException;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class CreateSchemaSubscriber implements EventSubscriber
 {
     /**
-     * @var ORMAuditManager
+     * @var ContainerInterface
      */
-    private $auditObjectManager;
+    private $container;
 
     /**
-     * @param ORMAuditManager $auditObjectManager
+     * @param ContainerInterface $container
      */
-    public function __construct(ORMAuditManager $auditObjectManager)
+    public function __construct(ContainerInterface $container)
     {
-        $this->auditObjectManager = $auditObjectManager;
+        $this->container = $container;
     }
 
     public function getSubscribedEvents()
@@ -59,8 +60,14 @@ class CreateSchemaSubscriber implements EventSubscriber
 
     public function postGenerateSchemaTable(GenerateSchemaTableEventArgs $eventArgs)
     {
+        /** @var ORMAuditManager $auditObjectManager */
+        $auditObjectManager = $this->container->get('dream_commerce_object_audit.manager');
+
+        /** @var ORMAuditConfiguration $configuration */
+        $configuration = $auditObjectManager->getConfiguration();
+
         $classMetadata = $eventArgs->getClassMetadata();
-        if (!$this->isAudited($classMetadata)) {
+        if (!$this->isAudited($configuration, $classMetadata)) {
             return;
         }
 
@@ -68,14 +75,11 @@ class CreateSchemaSubscriber implements EventSubscriber
             throw new RuntimeException(sprintf('Inheritance type "%s" is not yet supported', $classMetadata->inheritanceType));
         }
 
-        /** @var EntityManagerInterface $auditObjectManager */
-        $auditObjectManager = $this->auditObjectManager->getAuditObjectManager();
-        $auditTableName = $this->auditObjectManager->getAuditTableNameForClass($classMetadata->name);
-        $revisionClass = $this->auditObjectManager->getRevisionClass();
-        $revisionClassMetadata = $auditObjectManager->getClassMetadata($revisionClass);
-
-        /** @var ORMAuditConfiguration $configuration */
-        $configuration = $this->auditObjectManager->getConfiguration();
+        /** @var EntityManagerInterface $objectManager */
+        $objectManager = $auditObjectManager->getAuditObjectManager();
+        $auditTableName = $auditObjectManager->getAuditTableNameForClass($classMetadata->name);
+        $revisionClass = $auditObjectManager->getRevisionClass();
+        $revisionClassMetadata = $objectManager->getClassMetadata($revisionClass);
 
         $schema = $eventArgs->getSchema();
         $entityTable = $eventArgs->getClassTable();
@@ -113,15 +117,19 @@ class CreateSchemaSubscriber implements EventSubscriber
         $auditTable->addIndex($revPkColumns, $revIndexName);
     }
 
-    private function isAudited(ClassMetadata $classMetadata): bool
+    /**
+     * @param ORMAuditConfiguration $configuration
+     * @param ClassMetadata         $classMetadata
+     *
+     * @return bool
+     */
+    private function isAudited(ORMAuditConfiguration $configuration, ClassMetadata $classMetadata): bool
     {
         $className = $classMetadata->name;
 
         if (in_array(RevisionInterface::class, class_implements($className))) {
             return false;
         }
-
-        $configuration = $this->auditObjectManager->getConfiguration();
 
         if (!$configuration->isClassAudited($className)) {
             $audited = false;

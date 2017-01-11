@@ -21,7 +21,7 @@ class UTCDateTimeType extends DateTimeType
             return null;
         }
 
-        /** @var DateTime $value */
+        /* @var DateTime $value */
         Assert::isInstanceOf($value, DateTime::class);
 
         if (is_null(self::$utc)) {

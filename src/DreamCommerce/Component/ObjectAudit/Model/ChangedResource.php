@@ -23,6 +23,7 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Model;
 
+use Doctrine\Common\Persistence\ObjectManager;
 use Sylius\Component\Resource\Model\ResourceInterface;
 
 final class ChangedResource extends ChangedObject
@@ -34,15 +35,17 @@ final class ChangedResource extends ChangedObject
 
     /**
      * @param ResourceInterface $resource
-     * @param string $resourceName
+     * @param string            $resourceName
      * @param RevisionInterface $revision
-     * @param array $revisionData
-     * @param string $revisionType
+     * @param array             $revisionData
+     * @param string            $revisionType
+     * @param ObjectManager     $objectManager
      */
-    public function __construct(ResourceInterface $resource, string $resourceName, RevisionInterface $revision, array $revisionData = [], string $revisionType)
+    public function __construct(ResourceInterface $resource, string $resourceName, RevisionInterface $revision,
+                                array $revisionData, string $revisionType, ObjectManager $objectManager)
     {
         $this->resourceName = $resourceName;
-        parent::__construct($resource, $revision, $revisionData, $revisionType);
+        parent::__construct($resource, $revision, $revisionData, $revisionType, $objectManager);
     }
 
     /**

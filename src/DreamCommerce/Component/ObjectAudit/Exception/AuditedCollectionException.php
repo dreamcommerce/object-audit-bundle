@@ -26,5 +26,4 @@ namespace DreamCommerce\Component\ObjectAudit\Exception;
 
 class AuditedCollectionException extends AuditException
 {
-
 }

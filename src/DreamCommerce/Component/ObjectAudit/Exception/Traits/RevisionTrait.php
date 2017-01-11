@@ -42,6 +42,7 @@ trait RevisionTrait
 
     /**
      * @param RevisionInterface $revision
+     *
      * @return $this
      */
     public function setRevision(RevisionInterface $revision)
