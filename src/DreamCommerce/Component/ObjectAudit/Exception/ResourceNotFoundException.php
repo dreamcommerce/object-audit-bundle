@@ -15,7 +15,7 @@ class ResourceNotFoundException extends ObjectNotFoundException
     /**
      * @param string            $resourceName
      * @param string            $className
-     * @param int             $id
+     * @param int               $id
      * @param RevisionInterface $revision
      *
      * @return ResourceNotFoundException
@@ -39,9 +39,10 @@ class ResourceNotFoundException extends ObjectNotFoundException
     }
 
     /**
-     * @param string            $resourceName
+     * @param string $resourceName
      * @param string $className
-     * @param int $id
+     * @param int    $id
+     *
      * @return ResourceNotFoundException
      */
     public static function forResourceIdentifier(string $resourceName, string $className, int $id): ResourceNotFoundException
@@ -63,24 +64,25 @@ class ResourceNotFoundException extends ObjectNotFoundException
 
     /**
      * @param ObjectNotFoundException $exception
-     * @param string $resourceName
+     * @param string                  $resourceName
+     *
      * @return ResourceNotFoundException
      */
     public static function forObjectNotFoundException(ObjectNotFoundException $exception, string $resourceName): ResourceNotFoundException
     {
         $id = $exception->getId();
-        if(is_array($id)) {
-            $id = (int)current($id);
+        if (is_array($id)) {
+            $id = (int) current($id);
         }
 
-        if($exception->getCode() == static::CODE_OBJECT_NOT_EXIST_AT_SPECIFIC_REVISION) {
+        if ($exception->getCode() == static::CODE_OBJECT_NOT_EXIST_AT_SPECIFIC_REVISION) {
             return self::forResourceAtSpecificRevision(
                 $resourceName,
                 $exception->getClassName(),
                 $id,
                 $exception->getRevision()
             );
-        } elseif($exception->getCode() == static::CODE_OBJECT_NOT_EXIST_FOR_IDENTIFIERS) {
+        } elseif ($exception->getCode() == static::CODE_OBJECT_NOT_EXIST_FOR_IDENTIFIERS) {
             return self::forResourceIdentifier(
                 $resourceName,
                 $exception->getClassName(),

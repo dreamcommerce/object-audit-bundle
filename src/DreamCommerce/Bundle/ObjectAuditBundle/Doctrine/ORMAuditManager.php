@@ -537,7 +537,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         $queryBuilder->setParameters($objectIds);
         $revisionIds = $queryBuilder->execute()->fetch(\PDO::FETCH_ASSOC);
 
-        if($revisionIds === false) {
+        if ($revisionIds === false) {
             throw ObjectNotFoundException::forObjectIdentifiers($className, $objectIds);
         }
 

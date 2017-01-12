@@ -61,7 +61,8 @@ class ObjectNotFoundException extends AuditException
 
     /**
      * @param string $className
-     * @param mixed $id
+     * @param mixed  $id
+     *
      * @return ObjectNotFoundException
      */
     public static function forObjectIdentifiers(string $className, $id): ObjectNotFoundException
