@@ -122,4 +122,9 @@ interface ResourceAuditManagerInterface
      * @return ObjectAuditManagerInterface
      */
     public function getObjectAuditManager(): ObjectAuditManagerInterface;
+
+    /**
+     * @return ResourceAuditConfiguration
+     */
+    public function getConfiguration(): ResourceAuditConfiguration;
 }

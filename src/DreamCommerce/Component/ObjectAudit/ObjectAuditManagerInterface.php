@@ -17,7 +17,7 @@ interface ObjectAuditManagerInterface
      * Find an object at the specific revision.
      *
      * @param string             $className
-     * @param mixed              $objectId
+     * @param mixed              $objectIds
      * @param RevisionInterface  $revision
      * @param ObjectManager|null $objectManager
      * @param array              $options
@@ -28,7 +28,7 @@ interface ObjectAuditManagerInterface
      *
      * @return object
      */
-    public function findObjectByRevision(string $className, $objectId, RevisionInterface $revision, ObjectManager $objectManager = null, array $options = []);
+    public function findObjectByRevision(string $className, $objectIds, RevisionInterface $revision, ObjectManager $objectManager = null, array $options = []);
 
     /**
      * @param RevisionInterface  $revision

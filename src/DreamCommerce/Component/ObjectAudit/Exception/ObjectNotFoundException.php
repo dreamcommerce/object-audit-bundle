@@ -30,6 +30,7 @@ use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 class ObjectNotFoundException extends AuditException
 {
     const CODE_OBJECT_NOT_EXIST_AT_SPECIFIC_REVISION = 10;
+    const CODE_OBJECT_NOT_EXIST_FOR_IDENTIFIERS = 11;
 
     use ObjectTrait;
     use RevisionTrait;
@@ -44,7 +45,7 @@ class ObjectNotFoundException extends AuditException
     public static function forObjectAtSpecificRevision(string $className, $id, RevisionInterface $revision): ObjectNotFoundException
     {
         $message = sprintf(
-            "No revision of class '%s' (%s) was found at revision %s or before. The entity did not exist at the specified revision yet.",
+            "No revision of class '%s' (%s) was found at revision %s or before. The object did not exist at the specified revision yet.",
             $className,
             is_array($id) ? implode(', ', $id) : $id,
             $revision->getId()
@@ -54,6 +55,26 @@ class ObjectNotFoundException extends AuditException
         $exception->setClassName($className)
             ->setId($id)
             ->setRevision($revision);
+
+        return $exception;
+    }
+
+    /**
+     * @param string $className
+     * @param mixed $id
+     * @return ObjectNotFoundException
+     */
+    public static function forObjectIdentifiers(string $className, $id): ObjectNotFoundException
+    {
+        $message = sprintf(
+            "Class '%s' does not exist for identifiers (%s)",
+            $className,
+            is_array($id) ? implode(', ', $id) : $id
+        );
+
+        $exception = new self($message, self::CODE_OBJECT_NOT_EXIST_FOR_IDENTIFIERS);
+        $exception->setClassName($className)
+            ->setId($id);
 
         return $exception;
     }

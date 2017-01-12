@@ -18,6 +18,8 @@ abstract class BaseCommand extends ContainerAwareCommand
         $messages = ['', $message, ''];
 
         $formattedBlock = $formatter->formatBlock($messages, $type);
+        $output->writeln('');
         $output->writeln($formattedBlock);
+        $output->writeln('');
     }
 }

@@ -29,6 +29,7 @@ use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\RevisionUInt8Type
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\UTCDateTimeType;
 use Sylius\Bundle\ResourceBundle\AbstractResourceBundle;
 use Sylius\Bundle\ResourceBundle\SyliusResourceBundle;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class DreamCommerceObjectAuditBundle extends AbstractResourceBundle
 {

@@ -36,4 +36,26 @@ class ResourceDeletedException extends ObjectDeletedException
 
         return $exception;
     }
+
+    /**
+     * @param ObjectDeletedException $exception
+     * @param string $resourceName
+     * @throws ResourceDeletedException
+     *
+     * @return ResourceDeletedException
+     */
+    public static function forObjectDeletedException(ObjectDeletedException $exception, string $resourceName): ResourceDeletedException
+    {
+        $id = $exception->getId();
+        if(is_array($id)) {
+            $id = (int)current($id);
+        }
+
+        return self::forResourceAtSpecificRevision(
+            $resourceName,
+            $exception->getClassName(),
+            $id,
+            $exception->getRevision()
+        );
+    }
 }

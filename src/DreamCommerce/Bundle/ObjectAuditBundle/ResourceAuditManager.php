@@ -73,19 +73,9 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
         try {
             $object = $this->objectAuditManager->findObjectByRevision($className, $resourceId, $revision, $objectManager, $options);
         } catch (ObjectDeletedException $exception) {
-            throw ResourceDeletedException::forResourceAtSpecificRevision(
-                $resourceName,
-                $exception->getClassName(),
-                $exception->getId(),
-                $exception->getRevision()
-            );
+            throw ResourceDeletedException::forObjectDeletedException($exception, $resourceName);
         } catch (ObjectNotFoundException $exception) {
-            throw ResourceNotFoundException::forResourceAtSpecificRevision(
-                $resourceName,
-                $exception->getClassName(),
-                $exception->getId(),
-                $exception->getRevision()
-            );
+            throw ResourceNotFoundException::forObjectNotFoundException($exception, $resourceName);
         }
 
         return $object;
@@ -178,12 +168,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
         try {
             $revision = $this->objectAuditManager->getInitializeObjectRevision($className, $resourceId, $objectManager);
         } catch (ObjectNotFoundException $exception) {
-            throw ResourceNotFoundException::forResourceAtSpecificRevision(
-                $resourceName,
-                $exception->getClassName(),
-                $exception->getId(),
-                $exception->getRevision()
-            );
+            throw ResourceNotFoundException::forObjectNotFoundException($exception, $resourceName);
         } catch (ObjectNotAuditedException $exception) {
             throw ResourceNotAuditedException::forResource($resourceName, $className);
         }
@@ -206,12 +191,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
         try {
             $revision = $this->objectAuditManager->getCurrentObjectRevision($className, $resourceId, $objectManager);
         } catch (ObjectNotFoundException $exception) {
-            throw ResourceNotFoundException::forResourceAtSpecificRevision(
-                $resourceName,
-                $exception->getClassName(),
-                $exception->getId(),
-                $exception->getRevision()
-            );
+            throw ResourceNotFoundException::forObjectNotFoundException($exception, $resourceName);
         } catch (ObjectNotAuditedException $exception) {
             throw ResourceNotAuditedException::forResource($resourceName, $className);
         }
@@ -259,6 +239,14 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     public function getObjectAuditManager(): ObjectAuditManagerInterface
     {
         return $this->objectAuditManager;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getConfiguration(): ResourceAuditConfiguration
+    {
+        return $this->configuration;
     }
 
     /**

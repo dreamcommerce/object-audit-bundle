@@ -56,20 +56,23 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
 
     /**
      * @param ObjectAuditConfiguration $configuration
-     * @param FactoryInterface         $revisionFactory
-     * @param string                   $revisionClass
-     * @param ObjectManager            $defaultObjectManager
-     * @param ObjectManager|null       $auditObjectManager
+     * @param string $revisionClass
+     * @param FactoryInterface $revisionFactory
+     * @param RevisionRepositoryInterface $revisionRepository
+     * @param ObjectManager $defaultObjectManager
+     * @param ObjectManager|null $auditObjectManager
      */
     public function __construct(ObjectAuditConfiguration $configuration,
                                 string $revisionClass,
                                 FactoryInterface $revisionFactory,
+                                RevisionRepositoryInterface $revisionRepository,
                                 ObjectManager $defaultObjectManager,
                                 ObjectManager $auditObjectManager = null
     ) {
         $this->configuration = $configuration;
         $this->revisionClass = $revisionClass;
         $this->revisionFactory = $revisionFactory;
+        $this->revisionRepository = $revisionRepository;
         $this->defaultObjectManager = $defaultObjectManager;
         $this->auditObjectManager = $auditObjectManager;
     }
@@ -181,11 +184,6 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
      */
     public function getRevisionRepository(): RevisionRepositoryInterface
     {
-        if ($this->revisionRepository === null) {
-            $auditObjectManager = $this->getAuditObjectManager();
-            $this->revisionRepository = $auditObjectManager->getRepository($this->revisionClass);
-        }
-
         return $this->revisionRepository;
     }
 

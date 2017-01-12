@@ -10,15 +10,14 @@
 
     <services>
         <service id="dream_commerce.doctrine.orm.event_subscriber.create_schema.entity_audit" class="DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORM\Subscriber\CreateSchemaSubscriber">
-            <argument id="dream_commerce_object_audit.manager" type="service" />
+            <argument id="service_container" type="service" />
             <tag name="doctrine.event_subscriber" />
         </service>
 
         <service id="dream_commerce.doctrine.orm.event_subscriber.log_revisions.entity_audit" class="DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORM\Subscriber\LogRevisionsSubscriber">
-            <argument id="dream_commerce_object_audit.manager" type="service" />
+            <argument id="service_container" type="service" />
+            <argument id="event_dispatcher" type="service" />
             <tag name="doctrine.event_subscriber" />
         </service>
-
-
     </services>
 </container>
