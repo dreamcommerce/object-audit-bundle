@@ -1,5 +1,5 @@
-composer.lock
-vendor
-bin
-tests/docker/docker-compose.yml
-.php_cs.cache
+/composer.lock
+/vendor
+/bin
+/tests/docker/docker-compose.yml
+/.php_cs.cache
