@@ -73,14 +73,14 @@ class AuditedCollection implements Collection
      *
      * @var array
      */
-    protected $objects = array();
+    protected $objects = [];
 
     /**
      * Definition of current association.
      *
      * @var array
      */
-    protected $associationDefinition = array();
+    protected $associationDefinition = [];
 
     /**
      * @var bool
@@ -95,7 +95,7 @@ class AuditedCollection implements Collection
      * @param array                       $associationDefinition
      * @param array                       $foreignKeys
      */
-    public function __construct(ObjectAuditManagerInterface $auditManager, $className, ClassMetadataInfo $classMeta,
+    public function __construct(ObjectAuditManagerInterface $auditManager, string $className, ClassMetadataInfo $classMeta,
                                 RevisionInterface $revision, array $associationDefinition, array $foreignKeys)
     {
         $this->auditManager = $auditManager;
@@ -111,7 +111,7 @@ class AuditedCollection implements Collection
      */
     public function add($element)
     {
-        throw new AuditedCollectionException('The AuditedCollection is read-only');
+        throw AuditedCollectionException::readOnly(__CLASS__);
     }
 
     /**
@@ -148,7 +148,7 @@ class AuditedCollection implements Collection
      */
     public function remove($key)
     {
-        throw new AuditedCollectionException('Audited collections does not support removal');
+        throw AuditedCollectionException::readOnly(__CLASS__);
     }
 
     /**
@@ -156,7 +156,7 @@ class AuditedCollection implements Collection
      */
     public function removeElement($element)
     {
-        throw new AuditedCollectionException('Audited collections does not support removal');
+        throw AuditedCollectionException::readOnly(__CLASS__);
     }
 
     /**
@@ -202,7 +202,7 @@ class AuditedCollection implements Collection
      */
     public function set($key, $value)
     {
-        throw new AuditedCollectionException('AuditedCollection is read-only');
+        throw AuditedCollectionException::readOnly(__CLASS__);
     }
 
     /**
@@ -385,7 +385,7 @@ class AuditedCollection implements Collection
         $this->initialize();
 
         if (!isset($this->objects[$offset])) {
-            throw new AuditedCollectionException(sprintf('Offset "%s" is not defined', $offset));
+            throw AuditedCollectionException::forNotDefinedOffset(__CLASS__, $offset);
         }
 
         $entity = $this->objects[$offset];
@@ -402,7 +402,7 @@ class AuditedCollection implements Collection
      */
     public function offsetSet($offset, $value)
     {
-        throw new AuditedCollectionException('AuditedCollection is read-only');
+        throw AuditedCollectionException::readOnly(__CLASS__);
     }
 
     /**
@@ -410,7 +410,7 @@ class AuditedCollection implements Collection
      */
     public function offsetUnset($offset)
     {
-        throw new AuditedCollectionException('Audited collections does not support removal');
+        throw AuditedCollectionException::readOnly(__CLASS__);
     }
 
     /**
@@ -423,7 +423,7 @@ class AuditedCollection implements Collection
         return count($this->objects);
     }
 
-    protected function resolve($entity)
+    protected function resolve(array $entity)
     {
         return $this->auditManager
             ->findObjectByRevision(

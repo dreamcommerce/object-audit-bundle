@@ -487,6 +487,7 @@ class ORMAuditManager extends BaseObjectAuditManager
      * @param string        $sort
      *
      * @throws ObjectNotAuditedException
+     * @throws ObjectNotFoundException
      *
      * @return null|object
      */
@@ -718,13 +719,13 @@ class ORMAuditManager extends BaseObjectAuditManager
             } elseif ($assoc['type'] & ClassMetadata::ONE_TO_MANY) {
                 if ($configuration->isClassAudited($assoc['targetEntity'])) {
                     if ($configuration->isLoadAuditedCollections()) {
-                        $foreignKeys = array();
+                        $foreignKeys = [];
                         foreach ($targetClass->associationMappings[$assoc['mappedBy']]['sourceToTargetKeyColumns'] as $local => $foreign) {
                             $field = $class->getFieldForColumn($foreign);
                             $foreignKeys[$local] = $class->reflFields[$field]->getValue($entity);
                         }
 
-                        $collection = new AuditedCollection($this, $targetClass->name, $targetClass, $assoc, $foreignKeys, $revision);
+                        $collection = new AuditedCollection($this, $targetClass->name, $targetClass, $revision, $assoc, $foreignKeys);
 
                         $class->reflFields[$assoc['fieldName']]->setValue($entity, $collection);
                     } else {
