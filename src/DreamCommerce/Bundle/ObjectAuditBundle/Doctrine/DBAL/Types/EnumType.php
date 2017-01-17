@@ -1,6 +1,12 @@
 <?php
 
 /*
+ * (c) 2017 DreamCommerce
+ *
+ * @package DreamCommerce\Component\ObjectAudit
+ * @author Michał Korus <michal.korus@dreamcommerce.com>
+ * @link https://www.dreamcommerce.com
+ *
  * (c) 2011 SimpleThings GmbH
  *
  * @package SimpleThings\EntityAudit
