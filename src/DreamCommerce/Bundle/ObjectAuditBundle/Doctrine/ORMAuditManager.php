@@ -1,24 +1,48 @@
 <?php
 
+/*
+ * (c) 2011 SimpleThings GmbH
+ *
+ * @package SimpleThings\EntityAudit
+ * @author Benjamin Eberlei <eberlei@simplethings.de>
+ * @link http://www.simplethings.de
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ */
+
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Doctrine;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Mapping\MappingException;
+use Doctrine\ORM\ORMException;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use DreamCommerce\Bundle\ObjectAuditBundle\BaseObjectAuditManager;
-use DreamCommerce\Component\ObjectAudit\Collection\AuditedCollection;
-use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectDeletedException;
+use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotFoundException;
+use DreamCommerce\Component\ObjectAudit\Model\AuditedCollection;
 use DreamCommerce\Component\ObjectAudit\Model\ChangedObject;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use Exception;
@@ -31,12 +55,12 @@ class ORMAuditManager extends BaseObjectAuditManager
      *
      * @var array
      */
-    protected $entityCache = [];
+    protected $entityCache = array();
 
     /**
      * {@inheritdoc}
      */
-    public function findObjectByRevision(string $className, $objectId, RevisionInterface $revision, ObjectManager $objectManager = null, array $options = [])
+    public function findObjectByRevision(string $className, $objectId, RevisionInterface $revision, ObjectManager $objectManager = null, array $options = array())
     {
         /** @var ORMAuditConfiguration $configuration */
         $configuration = $this->getConfiguration();
@@ -44,7 +68,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             throw ObjectNotAuditedException::forClass($className);
         }
 
-        $options = array_merge(['threatDeletionsAsExceptions' => false], $options);
+        $options = array_merge(array('threatDeletionsAsExceptions' => false), $options);
 
         if ($objectManager === null) {
             $objectManager = $this->getDefaultObjectManager();
@@ -96,7 +120,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             $queryBuilder->addSelect('e.'.$columnName);
         }
 
-        $columnMap = [];
+        $columnMap = array();
 
         foreach ($entityMetadata->fieldNames as $columnName => $field) {
             $tableAlias = $entityMetadata->isInheritanceTypeJoined() && $entityMetadata->isInheritedField($field) && !$entityMetadata->isIdentifier($field)
@@ -133,7 +157,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             /** @var ClassMetadata $rootClass */
             $rootClass = $objectManager->getClassMetadata($entityMetadata->rootEntityName);
             $rootTableName = $this->getAuditTableNameForClass($rootClass, $objectManager);
-            $condition = [];
+            $condition = array();
 
             foreach ($revisionMetadata->identifier as $revisionIdField) {
                 if (isset($revisionMetadata->fieldMappings[$revisionIdField])) {
@@ -162,7 +186,7 @@ class ORMAuditManager extends BaseObjectAuditManager
 
                 // Support for single table inheritance sub-classes
                 $allDiscrValues = array_flip($entityMetadata->discriminatorMap);
-                $queriedDiscrValues = [$connection->quote($entityMetadata->discriminatorValue)];
+                $queriedDiscrValues = array($connection->quote($entityMetadata->discriminatorValue));
                 foreach ($entityMetadata->subClasses as $subclassName) {
                     $queriedDiscrValues[] = $connection->quote($allDiscrValues[$subclassName]);
                 }
@@ -201,7 +225,103 @@ class ORMAuditManager extends BaseObjectAuditManager
     /**
      * {@inheritdoc}
      */
-    public function findObjectsChangedAtRevision(string $className, RevisionInterface $revision, ObjectManager $objectManager = null, array $options = []): array
+    public function findObjectsByFieldsAndRevision(string $className, array $fields, string $indexBy = null, RevisionInterface $revision, ObjectManager $objectManager = null, array $options = array()): array
+    {
+        if ($objectManager === null) {
+            /** @var EntityManagerInterface $objectManager */
+            $objectManager = $this->getDefaultObjectManager();
+        }
+
+        /** @var ORMAuditConfiguration $configuration */
+        $configuration = $this->getConfiguration();
+        $auditClassMetadata = $objectManager->getClassMetadata($className);
+        /** @var EntityManagerInterface $auditObjectManager */
+        $auditObjectManager = $this->getAuditObjectManager();
+        $revisionMetadata = $auditObjectManager->getClassMetadata($this->revisionClass);
+        $identifierColumnNames = $auditClassMetadata->getIdentifierColumnNames();
+        $connection = $objectManager->getConnection();
+
+        /** @var EntityManagerInterface $auditManager */
+        $auditObjectManager = $this->getAuditObjectManager();
+        $tableName = $this->getAuditTableNameForClass($className, $auditObjectManager);
+
+        $queryBuilder = $connection->createQueryBuilder()
+            ->select($identifierColumnNames)
+            ->from($tableName, 't');
+
+        $revisionIdentifiers = $revisionMetadata->getIdentifierValues($revision);
+        foreach ($revisionIdentifiers as $columnName => $columnValue) {
+            $auditColumnName = $this->getRevisionColumnName($configuration, $columnName);
+
+            $queryBuilder->select(sprintf('MAX(%1$s) as %1$s', $auditColumnName));
+            $queryBuilder->where(sprintf(
+                '%s <= %s',
+                $auditColumnName,
+                $queryBuilder->createPositionalParameter($columnValue)
+            ));
+
+            $revisionIdentifiers[$auditColumnName] = $columnValue;
+            unset($revisionIdentifiers[$columnName]);
+        }
+
+        if ($indexBy !== null) {
+            $queryBuilder->addSelect($indexBy);
+        }
+
+        foreach ($fields as $column => $value) {
+            $queryBuilder->andWhere($column . ' = ' . $queryBuilder->createPositionalParameter($value));
+        }
+
+        //we check for revisions greater than current belonging to other entities
+        $belongingToEntitiesQB = $this->createBelongingToOtherEntitiesQueryBuilder(
+            $tableName, $fields, $revisionIdentifiers, $identifierColumnNames, $connection, $queryBuilder
+        );
+        $queryBuilder->andWhere(sprintf('NOT EXISTS(%s)', $belongingToEntitiesQB->getSQL()));
+
+        //check for deleted revisions older than requested
+        $deletedRevisionQB = $this->createDeletedRevisionsQueryBuilder(
+            $tableName, $revisionIdentifiers, $identifierColumnNames, $connection, $queryBuilder
+        );
+        $queryBuilder->andWhere(sprintf('NOT EXISTS(%s)', $deletedRevisionQB->getSQL()));
+
+        $queryBuilder->andWhere(sprintf(
+            '%s <> %s',
+            $configuration->getRevisionTypeFieldName(),
+            $queryBuilder->createPositionalParameter(RevisionInterface::ACTION_DELETE)
+        ));
+
+        $groupBy = $identifierColumnNames;
+        if ($indexBy != null) {
+            $groupBy[] = $indexBy;
+        }
+
+        $queryBuilder->groupBy($groupBy);
+
+        foreach ($identifierColumnNames as $identifierColumnName) {
+            $queryBuilder->addOrderBy($identifierColumnName, 'ASC');
+        }
+
+        $result = $queryBuilder->execute()->fetchAll();
+
+        $entities = array();
+        foreach ($result as $identifiers) {
+            $entity = $this->findObjectByRevision($className, $identifiers, $revision, $objectManager, $options);
+
+            if ($indexBy !== null) {
+                $key = $result[$indexBy];
+                $entities[$key] = $entity;
+            } else {
+                $entities[] = $entity;
+            }
+        }
+
+        return $entities;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function findObjectsChangedAtRevision(string $className, RevisionInterface $revision, ObjectManager $objectManager = null, array $options = array()): array
     {
         /** @var ORMAuditConfiguration $configuration */
         $configuration = $this->getConfiguration();
@@ -219,7 +339,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         $class = $objectManager->getClassMetadata($className);
 
         if ($class->isInheritanceTypeSingleTable() && count($class->subClasses) > 0) {
-            return [];
+            return array();
         }
 
         $connection = $objectManager->getConnection();
@@ -232,7 +352,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         $tableName = $this->getAuditTableNameForClass($className);
         $revisionIds = $revisionMetadata->getIdentifierValues($revision);
 
-        $bindValues = [];
+        $bindValues = array();
 
         foreach ($revisionIds as $fieldName => $fieldValue) {
             $fieldName = $this->getRevisionColumnName($configuration, $fieldName);
@@ -255,7 +375,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             $queryBuilder->andWhere('e.'.$columnName.' = :'.$columnName);
         }
 
-        $columnMap = [];
+        $columnMap = array();
 
         foreach ($class->fieldNames as $columnName => $field) {
             $tableAlias = $class->isInheritanceTypeJoined() && $class->isInheritedField($field) && !$class->isIdentifier($field)
@@ -292,7 +412,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             $rootClass = $objectManager->getClassMetadata($class->rootEntityName);
             $rootTableName = $this->getAuditTableNameForClass($rootClass, $objectManager);
 
-            $conditions = [];
+            $conditions = array();
             foreach ($revisionMetadata->identifier as $revisionIdField) {
                 if (isset($revisionMetadata->fieldMappings[$revisionIdField])) {
                     $columnName = $revisionMetadata->fieldMappings[$revisionIdField]['columnName'];
@@ -324,7 +444,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         }
 
         foreach ($revisionsData as $row) {
-            $id = [];
+            $id = array();
 
             foreach ($class->identifier as $idField) {
                 $id[$idField] = $row[$idField];
@@ -349,9 +469,9 @@ class ORMAuditManager extends BaseObjectAuditManager
             $changedEntities[] = new ChangedObject(
                 $entity,
                 $revision,
+                $objectManager,
                 $row,
-                $objectRevType,
-                $objectManager
+                $objectRevType
             );
         }
 
@@ -403,7 +523,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             $queryBuilder->andWhere('e.'.$columnName.' = :'.$columnName);
         }
 
-        $conditions = [];
+        $conditions = array();
         foreach ($revisionMetadata->identifier as $revisionIdField) {
             if (isset($revisionMetadata->fieldMappings[$revisionIdField])) {
                 $columnName = $revisionMetadata->fieldMappings[$revisionIdField]['columnName'];
@@ -487,6 +607,7 @@ class ORMAuditManager extends BaseObjectAuditManager
      * @param string        $sort
      *
      * @throws ObjectNotAuditedException
+     * @throws ObjectNotFoundException
      *
      * @return null|object
      */
@@ -507,7 +628,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         $connection = $auditEntityManager->getConnection();
 
         if (!is_array($objectIds)) {
-            $objectIds = [$entityMetadata->identifier[0] => $objectIds];
+            $objectIds = array($entityMetadata->identifier[0] => $objectIds);
         }
 
         $queryBuilder = $connection->createQueryBuilder()
@@ -526,7 +647,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             $queryBuilder->andWhere($columnName.' = :'.$columnName);
         }
 
-        $revisionIdMap = [];
+        $revisionIdMap = array();
         foreach ($revisionMetadata->identifier as $idField) {
             $revisionIdName = $this->getRevisionColumnName($configuration, $idField);
             $revisionIdMap[$revisionIdName] = $idField;
@@ -621,10 +742,10 @@ class ORMAuditManager extends BaseObjectAuditManager
         }
 
         if (!isset($this->entityCache[$className])) {
-            $this->entityCache[$className] = [];
+            $this->entityCache[$className] = array();
 
             if (!isset($this->entityCache[$className][$key])) {
-                $this->entityCache[$className][$key] = [];
+                $this->entityCache[$className][$key] = array();
             }
         }
 
@@ -653,18 +774,21 @@ class ORMAuditManager extends BaseObjectAuditManager
             if ($assoc['type'] & ClassMetadata::TO_ONE) {
                 if ($configuration->isClassAudited($assoc['targetEntity'])) {
                     if ($configuration->isLoadAuditedEntities()) {
+                        // Primary Key. Used for audit tables queries.
                         $pk = array();
+                        // Primary Field. Used when fallback to Doctrine finder.
+                        $pf = array();
 
                         if ($assoc['isOwningSide']) {
                             foreach ($assoc['targetToSourceKeyColumns'] as $foreign => $local) {
-                                $pk[$foreign] = $data[$columnMap[$local]];
+                                $pk[$foreign] = $pf[$foreign] = $data[$columnMap[$local]];
                             }
                         } else {
                             /** @var ClassMetadata $otherEntityMeta */
-                            $otherEntityMeta = $objectManager->getClassMetadata($assoc['targetEntity']);
+                            $otherEntityAssoc = $objectManager->getClassMetadata($assoc['targetEntity'])->associationMappings[$assoc['mappedBy']];
 
-                            foreach ($otherEntityMeta->associationMappings[$assoc['mappedBy']]['targetToSourceKeyColumns'] as $local => $foreign) {
-                                $pk[$foreign] = $data[$class->getFieldName($local)];
+                            foreach ($otherEntityAssoc['targetToSourceKeyColumns'] as $local => $foreign) {
+                                $pk[$foreign] = $pf[$otherEntityAssoc['fieldName']] = $data[$class->getFieldName($local)];
                             }
                         }
 
@@ -676,12 +800,12 @@ class ORMAuditManager extends BaseObjectAuditManager
                             $class->reflFields[$field]->setValue($entity, null);
                         } else {
                             try {
-                                $value = $this->findObjectByRevision($targetClass->name, $pk, $revision, $objectManager, ['threatDeletionsAsExceptions' => true]);
+                                $value = $this->findObjectByRevision($targetClass->name, $pk, $revision, $objectManager, array('threatDeletionsAsExceptions' => true));
                             } catch (ObjectDeletedException $e) {
                                 $value = null;
                             } catch (ObjectNotFoundException $e) {
                                 // The entity does not have any revision yet. So let's get the actual state of it.
-                                $value = $objectManager->find($targetClass->name, $pk);
+                                $value = $objectManager->getRepository($targetClass->name)->findOneBy($pf);
                             }
 
                             $class->reflFields[$field]->setValue($entity, $value);
@@ -724,7 +848,12 @@ class ORMAuditManager extends BaseObjectAuditManager
                             $foreignKeys[$local] = $class->reflFields[$field]->getValue($entity);
                         }
 
-                        $collection = new AuditedCollection($this, $targetClass->name, $targetClass, $assoc, $foreignKeys, $revision);
+                        $indexBy = null;
+                        if (isset($assoc['indexBy'])) {
+                            $indexBy = $assoc['indexBy'];
+                        }
+
+                        $collection = new AuditedCollection($targetClass->name, $foreignKeys, $indexBy, $revision, $objectManager, $this);
 
                         $class->reflFields[$assoc['fieldName']]->setValue($entity, $collection);
                     } else {
@@ -761,5 +890,99 @@ class ORMAuditManager extends BaseObjectAuditManager
     private function getRevisionColumnName(ORMAuditConfiguration $configuration, string $columnName): string
     {
         return $configuration->getRevisionIdFieldPrefix().$columnName.$configuration->getRevisionIdFieldSuffix();
+    }
+
+    /**
+     * @param string $tableName
+     * @param array $foreignKeys
+     * @param array $revisionIdentifiers
+     * @param array $identifierColumnNames
+     * @param Connection $connection
+     * @param QueryBuilder $parentQueryBuilder
+     * @return QueryBuilder
+     */
+    private function createBelongingToOtherEntitiesQueryBuilder(
+        string $tableName, array $foreignKeys, array $revisionIdentifiers,
+        array $identifierColumnNames, Connection $connection,
+        QueryBuilder $parentQueryBuilder): QueryBuilder
+    {
+        $queryBuilder = $connection->createQueryBuilder()
+            ->select('1')
+            ->from($tableName, 'st');
+
+        foreach ($revisionIdentifiers as $columnName => $columnValue) {
+            $queryBuilder->andWhere(sprintf('st.%1$s > t.%1$s', $columnName));
+
+            $queryBuilder->andWhere(sprintf(
+                'st.%s <= %s',
+                $columnName,
+                $parentQueryBuilder->createPositionalParameter($columnValue)
+            ));
+        }
+
+        //ids
+        foreach ($identifierColumnNames as $name) {
+            $queryBuilder->andWhere(sprintf('st.%1$s = t.%1$s', $name));
+        }
+
+        //master entity query, not equals
+        $notEqualParts = $nullParts = array();
+        foreach ($foreignKeys as $column => $value) {
+            $notEqualParts[] = $column . ' <> ' . $parentQueryBuilder->createPositionalParameter($value);
+            $nullParts[] = $column . ' IS NULL';
+        }
+
+        $expr = $queryBuilder->expr();
+        $queryBuilder->andWhere(
+            $expr->orX(
+                $expr->andX(...$notEqualParts),
+                $expr->andX(...$nullParts)
+            )
+        );
+
+        return $queryBuilder;
+    }
+
+    /**
+     * @param string $tableName
+     * @param array $revisionIdentifiers
+     * @param array $identifierColumnNames
+     * @param Connection $connection
+     * @param QueryBuilder $parentQueryBuilder
+     * @return QueryBuilder
+     */
+    private function createDeletedRevisionsQueryBuilder(
+        string $tableName, array $revisionIdentifiers,
+        array $identifierColumnNames, Connection $connection,
+        QueryBuilder $parentQueryBuilder): QueryBuilder
+    {
+        /** @var ORMAuditConfiguration $configuration */
+        $configuration = $this->getConfiguration();
+
+        $queryBuilder = $connection->createQueryBuilder()
+            ->select('1')
+            ->from($tableName, 'sd');
+
+        foreach ($revisionIdentifiers as $columnName => $columnValue) {
+            $queryBuilder->andWhere(sprintf('sd.%1$s > t.%1$s', $columnName));
+            $queryBuilder->andWhere(sprintf(
+                'sd.%s <= %s',
+                $columnName,
+                $parentQueryBuilder->createPositionalParameter($columnValue)
+            ));
+        }
+
+        $queryBuilder->andWhere(sprintf(
+            'sd.%s = %s',
+            $configuration->getRevisionTypeFieldName(),
+            $parentQueryBuilder->createPositionalParameter(RevisionInterface::ACTION_DELETE)
+        ));
+
+        //ids
+        foreach ($identifierColumnNames as $name) {
+            $queryBuilder->andWhere(sprintf('sd.%1$s = t.%1$s', $name));
+        }
+
+        return $queryBuilder;
     }
 }

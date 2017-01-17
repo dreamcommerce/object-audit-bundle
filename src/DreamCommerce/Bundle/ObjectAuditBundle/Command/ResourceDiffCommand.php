@@ -1,5 +1,27 @@
 <?php
 
+/*
+ * (c) 2011 SimpleThings GmbH
+ *
+ * @package SimpleThings\EntityAudit
+ * @author Benjamin Eberlei <eberlei@simplethings.de>
+ * @link http://www.simplethings.de
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ */
+
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Command;
 
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
@@ -104,9 +126,9 @@ class ResourceDiffCommand extends BaseCommand
             return $this->printMessageBox($output, 'Nothing to compare, same resource data');
         }
 
-        $rows = [];
+        $rows = array();
         foreach ($diffRows as $fieldName => $diffRow) {
-            foreach (['old', 'same', 'new'] as $type) {
+            foreach (array('old', 'same', 'new') as $type) {
                 if ($diffRow[$type] instanceof \DateTime) {
                     $diffRow[$type] = $diffRow[$type]->format(\DateTime::ISO8601);
                 } elseif ($diffRow[$type] === null) {
@@ -114,12 +136,12 @@ class ResourceDiffCommand extends BaseCommand
                 }
             }
 
-            $rows[] = [
+            $rows[] = array(
                 $fieldName,
                 $diffRow['old'],
                 $diffRow['same'],
                 $diffRow['new'],
-            ];
+            );
         }
 
         $table = new Table($output);

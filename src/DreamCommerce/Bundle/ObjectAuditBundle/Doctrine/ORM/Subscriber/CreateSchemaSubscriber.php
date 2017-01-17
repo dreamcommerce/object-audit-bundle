@@ -1,8 +1,9 @@
 <?php
+
 /*
  * (c) 2011 SimpleThings GmbH
  *
- * @package DreamCommerce\Component\ObjectAudit
+ * @package SimpleThings\EntityAudit
  * @author Benjamin Eberlei <eberlei@simplethings.de>
  * @link http://www.simplethings.de
  *
@@ -23,13 +24,13 @@
 
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORM\Subscriber;
 
+use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
-use Doctrine\ORM\Tools\ToolEvents;
 use Doctrine\ORM\Tools\Event\GenerateSchemaTableEventArgs;
-use Doctrine\Common\EventSubscriber;
+use Doctrine\ORM\Tools\ToolEvents;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORMAuditConfiguration;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORMAuditManager;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
@@ -53,9 +54,9 @@ class CreateSchemaSubscriber implements EventSubscriber
 
     public function getSubscribedEvents()
     {
-        return [
+        return array(
             ToolEvents::postGenerateSchemaTable,
-        ];
+        );
     }
 
     public function postGenerateSchemaTable(GenerateSchemaTableEventArgs $eventArgs)
@@ -92,15 +93,15 @@ class CreateSchemaSubscriber implements EventSubscriber
             /* @var Column $column */
             $auditTable->addColumn($column->getName(), $column->getType()->getName(), array_merge(
                 $column->toArray(),
-                [
+                array(
                     'notnull' => false,
                     'autoincrement' => false,
-                ]
+                )
             ));
         }
 
         $pkColumns = $entityTable->getPrimaryKey()->getColumns();
-        $revPkColumns = [];
+        $revPkColumns = array();
 
         foreach ($revisionClassMetadata->identifier as $revisionIdentifier) {
             $columnName = $revisionClassMetadata->fieldMappings[$revisionIdentifier]['columnName'];

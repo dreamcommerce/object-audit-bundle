@@ -3,7 +3,7 @@
 /*
  * (c) 2011 SimpleThings GmbH
  *
- * @package DreamCommerce\Component\ObjectAudit
+ * @package SimpleThings\EntityAudit
  * @author Benjamin Eberlei <eberlei@simplethings.de>
  * @link http://www.simplethings.de
  *

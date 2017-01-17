@@ -1,5 +1,27 @@
 <?php
 
+/*
+ * (c) 2011 SimpleThings GmbH
+ *
+ * @package SimpleThings\EntityAudit
+ * @author Benjamin Eberlei <eberlei@simplethings.de>
+ * @link http://www.simplethings.de
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ */
+
 namespace DreamCommerce\Bundle\ObjectAuditBundle;
 
 use Doctrine\Common\Collections\Collection;
@@ -61,7 +83,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function findResourceByRevision(string $resourceName, int $resourceId, RevisionInterface $revision, array $options = [])
+    public function findResourceByRevision(string $resourceName, int $resourceId, RevisionInterface $revision, array $options = array())
     {
         if (!$this->configuration->isResourceAudited($resourceName)) {
             throw ResourceNotAuditedException::forResource($resourceName);
@@ -84,9 +106,24 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function findAllResourcesChangedAtRevision(RevisionInterface $revision, array $options = []): array
+    public function findResourcesByFieldsAndRevision(string $resourceName, array $fields, RevisionInterface $revision, array $options = array()): array
     {
-        $result = [];
+        if (!$this->configuration->isResourceAudited($resourceName)) {
+            throw ResourceNotAuditedException::forResource($resourceName);
+        }
+
+        $className = $this->getResourceModelClass($resourceName);
+        $objectManager = $this->getResourceObjectManager($resourceName);
+
+        return $this->objectAuditManager->findObjectsByFieldsAndRevision($className, $fields, $revision, $objectManager, $options);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function findAllResourcesChangedAtRevision(RevisionInterface $revision, array $options = array()): array
+    {
+        $result = array();
         foreach ($this->configuration->getAuditedResources() as $auditedResource) {
             $result = array_merge(
                 $result,
@@ -100,7 +137,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function findResourcesChangedAtRevision(string $resourceName, RevisionInterface $revision, array $options = []): array
+    public function findResourcesChangedAtRevision(string $resourceName, RevisionInterface $revision, array $options = array()): array
     {
         if (!$this->configuration->isResourceAudited($resourceName)) {
             throw ResourceNotAuditedException::forResource($resourceName);
@@ -123,9 +160,9 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
                 $object,
                 $resourceName,
                 $row->getRevision(),
+                $objectManager,
                 $row->getRevisionData(),
-                $row->getRevisionType(),
-                $objectManager
+                $row->getRevisionType()
             );
         }
 

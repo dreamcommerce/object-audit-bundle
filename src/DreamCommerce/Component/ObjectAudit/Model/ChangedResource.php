@@ -1,8 +1,9 @@
 <?php
+
 /*
  * (c) 2011 SimpleThings GmbH
  *
- * @package DreamCommerce\Component\ObjectAudit
+ * @package SimpleThings\EntityAudit
  * @author Benjamin Eberlei <eberlei@simplethings.de>
  * @link http://www.simplethings.de
  *
@@ -37,15 +38,16 @@ final class ChangedResource extends ChangedObject
      * @param ResourceInterface $resource
      * @param string            $resourceName
      * @param RevisionInterface $revision
+     * @param ObjectManager     $objectManager
      * @param array             $revisionData
      * @param string            $revisionType
-     * @param ObjectManager     $objectManager
      */
-    public function __construct(ResourceInterface $resource, string $resourceName, RevisionInterface $revision,
-                                array $revisionData, string $revisionType, ObjectManager $objectManager)
+    public function __construct(ResourceInterface $resource, string $resourceName,
+                                RevisionInterface $revision, ObjectManager $objectManager,
+                                array $revisionData, string $revisionType)
     {
         $this->resourceName = $resourceName;
-        parent::__construct($resource, $revision, $revisionData, $revisionType, $objectManager);
+        parent::__construct($resource, $revision, $objectManager, $revisionData, $revisionType);
     }
 
     /**

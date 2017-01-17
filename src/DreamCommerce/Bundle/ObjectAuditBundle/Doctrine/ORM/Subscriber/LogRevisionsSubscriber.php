@@ -1,8 +1,9 @@
 <?php
+
 /*
  * (c) 2011 SimpleThings GmbH
  *
- * @package DreamCommerce\Component\ObjectAudit
+ * @package SimpleThings\EntityAudit
  * @author Benjamin Eberlei <eberlei@simplethings.de>
  * @link http://www.simplethings.de
  *
@@ -62,9 +63,9 @@ class LogRevisionsSubscriber implements EventSubscriber
 
     public function getSubscribedEvents()
     {
-        return [
+        return array(
             Events::onFlush,
-        ];
+        );
     }
 
     public function onFlush(OnFlushEventArgs $eventArgs)
@@ -90,9 +91,9 @@ class LogRevisionsSubscriber implements EventSubscriber
             $changedObject = new ChangedObject(
                 $entity,
                 $currentRevision,
+                $entityManager,
                 $this->getOriginalEntityData($entity, $entityManager),
-                RevisionInterface::ACTION_INSERT,
-                $entityManager
+                RevisionInterface::ACTION_INSERT
             );
             $this->eventDispatcher->dispatch(
                 DreamCommerceObjectAuditEvents::OBJECT_CHANGED,
@@ -130,9 +131,9 @@ class LogRevisionsSubscriber implements EventSubscriber
             $changedObject = new ChangedObject(
                 $entity,
                 $currentRevision,
+                $entityManager,
                 $entityData,
-                RevisionInterface::ACTION_UPDATE,
-                $entityManager
+                RevisionInterface::ACTION_UPDATE
             );
             $this->eventDispatcher->dispatch(
                 DreamCommerceObjectAuditEvents::OBJECT_CHANGED,
@@ -142,7 +143,7 @@ class LogRevisionsSubscriber implements EventSubscriber
             $auditObjectManager->saveObjectRevisionData($changedObject);
         }
 
-        $processedEntities = [];
+        $processedEntities = array();
 
         foreach ($uow->getScheduledEntityDeletions() as $entity) {
             $className = get_class($entity);
@@ -165,9 +166,9 @@ class LogRevisionsSubscriber implements EventSubscriber
             $changedObject = new ChangedObject(
                 $entity,
                 $currentRevision,
+                $entityManager,
                 $entityData,
-                RevisionInterface::ACTION_DELETE,
-                $entityManager
+                RevisionInterface::ACTION_DELETE
             );
             $this->eventDispatcher->dispatch(
                 DreamCommerceObjectAuditEvents::OBJECT_CHANGED,

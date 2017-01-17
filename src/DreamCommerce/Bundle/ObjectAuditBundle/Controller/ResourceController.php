@@ -1,8 +1,9 @@
 <?php
+
 /*
  * (c) 2011 SimpleThings GmbH
  *
- * @package DreamCommerce\Component\ObjectAudit
+ * @package SimpleThings\EntityAudit
  * @author Benjamin Eberlei <eberlei@simplethings.de>
  * @link http://www.simplethings.de
  *
@@ -93,9 +94,9 @@ final class ResourceController
         $paginator = $this->auditManager->getObjectAuditManager()->getRevisionRepository()->createPaginator();
         $paginator->setCurrentPage($page);
 
-        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:index.html.twig', [
+        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:index.html.twig', array(
             'revisions' => $paginator,
-        ]);
+        ));
     }
 
     /**
@@ -109,10 +110,10 @@ final class ResourceController
     {
         $revision = $this->getRevision($revisionId);
 
-        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:view_revision.html.twig', [
+        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:view_revision.html.twig', array(
             'revision' => $revision,
             'changedResources' => $this->auditManager->findAllResourcesChangedAtRevision($revision),
-        ]);
+        ));
     }
 
     /**
@@ -153,13 +154,13 @@ final class ResourceController
         $data = $this->auditManager->getResourceValues($resource);
         krsort($data);
 
-        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:view_detail.html.twig', [
+        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:view_detail.html.twig', array(
             'resourceId' => $resourceId,
             'revision' => $revision,
             'resourceName' => $resourceName,
             'resource' => $resource,
             'data' => $data,
-        ]);
+        ));
     }
 
     /**
@@ -221,13 +222,13 @@ final class ResourceController
 
         $diff = $this->auditManager->diffResourceRevisions($resourceName, $resourceId, $oldRevision, $newRevision);
 
-        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:compare.html.twig', [
+        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:compare.html.twig', array(
             'resourceName' => $resourceName,
             'resourceId' => $resourceId,
             'oldRevision' => $oldRevision,
             'newRevision' => $newRevision,
             'diff' => $diff,
-        ]);
+        ));
     }
 
     /**

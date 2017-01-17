@@ -25,50 +25,57 @@
 namespace DreamCommerce\Component\ObjectAudit\Model;
 
 use Doctrine\Common\Persistence\ObjectManager;
-use Webmozart\Assert\Assert;
 
-class ChangedObject extends AuditedObject
+class AuditedObject
 {
     /**
-     * @var array
+     * @var object
      */
-    private $revisionData = array();
+    private $object;
 
     /**
-     * @var string
+     * @var RevisionInterface
      */
-    private $revisionType;
+    private $revision;
 
     /**
-     * @param $object
+     * @var ObjectManager
+     */
+    private $objectManager;
+
+    /**
+     * @param object $object
      * @param RevisionInterface $revision
-     * @param ObjectManager     $objectManager
-     * @param array             $revisionData
-     * @param string            $revisionType
+     * @param ObjectManager $objectManager
      */
-    public function __construct($object, RevisionInterface $revision,  ObjectManager $objectManager, array $revisionData, string $revisionType)
+    public function __construct($object, RevisionInterface $revision, ObjectManager $objectManager)
     {
-        Assert::oneOf($revisionType, array(RevisionInterface::ACTION_INSERT, RevisionInterface::ACTION_UPDATE, RevisionInterface::ACTION_DELETE));
-
-        $this->revisionData = $revisionData;
-        $this->revisionType = $revisionType;
-
-        parent::__construct($object, $revision, $objectManager);
+        $this->object = $object;
+        $this->revision = $revision;
+        $this->objectManager = $objectManager;
     }
 
     /**
-     * @return array
+     * @return object
      */
-    public function getRevisionData(): array
+    public function getObject()
     {
-        return $this->revisionData;
+        return $this->object;
     }
 
     /**
-     * @return string
+     * @return RevisionInterface
      */
-    public function getRevisionType(): string
+    public function getRevision(): RevisionInterface
     {
-        return $this->revisionType;
+        return $this->revision;
+    }
+
+    /**
+     * @return ObjectManager
+     */
+    public function getObjectManager(): ObjectManager
+    {
+        return $this->objectManager;
     }
 }

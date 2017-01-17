@@ -1,8 +1,9 @@
 <?php
+
 /*
  * (c) 2011 SimpleThings GmbH
  *
- * @package DreamCommerce\Component\ObjectAudit
+ * @package SimpleThings\EntityAudit
  * @author Benjamin Eberlei <eberlei@simplethings.de>
  * @link http://www.simplethings.de
  *
@@ -28,12 +29,12 @@ class ObjectAuditConfiguration
     /**
      * @var array
      */
-    protected $auditedClasses = [];
+    protected $auditedClasses = array();
 
     /**
      * @var array
      */
-    protected $globalIgnoreProperties = [];
+    protected $globalIgnoreProperties = array();
 
     /**
      * Decides if audited ToMany collections are loaded.
