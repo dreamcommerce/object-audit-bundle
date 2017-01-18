@@ -539,7 +539,7 @@ class ORMAuditManager extends BaseObjectAuditManager
                 continue;
             }
             $conditions[] = 'r.'.$revisionIdField.' = e.'.$this->getRevisionColumnName($configuration, $columnName);
-            $queryBuilder->orderBy('r.'.$columnName);
+            $queryBuilder->orderBy('r.'.$columnName, 'DESC');
         }
         $queryBuilder->innerJoin('r', $entityTableName, 'e', implode(' AND ', $conditions));
 
@@ -551,6 +551,14 @@ class ORMAuditManager extends BaseObjectAuditManager
         $result = $query->getResult();
 
         return new ArrayCollection($result);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getObjectHistory(string $className, $objectId, ObjectManager $objectManager = null, array $options = array()): array
+    {
+        // TODO
     }
 
     /**
@@ -604,6 +612,14 @@ class ORMAuditManager extends BaseObjectAuditManager
         $configuration = $this->getConfiguration();
 
         return $configuration->getTablePrefix().$tableName.$configuration->getTableSuffix();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function clearObjectCache()
+    {
+        $this->entityCache = array();
     }
 
     /**

@@ -33,6 +33,8 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\ObjectManager;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
+use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotFoundException;
+use DreamCommerce\Component\ObjectAudit\Model\ChangedObject;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditConfiguration;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditManagerInterface;

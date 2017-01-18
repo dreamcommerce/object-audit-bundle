@@ -97,6 +97,18 @@ interface ResourceAuditManagerInterface
     public function findResourceRevisions(string $resourceName, int $resourceId): Collection;
 
     /**
+     * @param string $resourceName
+     * @param int $resourceId
+     * @param array $options
+     *
+     * @throws ResourceNotFoundException
+     * @throws ResourceNotAuditedException
+     *
+     * @return ChangedResource[]
+     */
+    public function getResourceHistory(string $resourceName, int $resourceId, array $options = array()): array;
+
+    /**
      * Gets the initialize revision of the resource with given ID.
      *
      * @param string $resourceName

@@ -65,14 +65,17 @@ interface ObjectAuditManagerInterface
      * @param RevisionInterface $revision
      * @param ObjectManager|null $objectManager
      * @param array $options
+     *
+     * @throws ObjectNotAuditedException
+     *
      * @return array
      */
     public function findObjectsByFieldsAndRevision(string $className, array $fields, string $indexBy = null, RevisionInterface $revision, ObjectManager $objectManager = null, array $options = array()): array;
 
     /**
      * @param RevisionInterface  $revision
-     * @param array              $options
      * @param ObjectManager|null $objectManager
+     * @param array              $options
      *
      * @return ChangedObject[]
      */
@@ -81,8 +84,8 @@ interface ObjectAuditManagerInterface
     /**
      * @param string             $className
      * @param RevisionInterface  $revision
-     * @param array              $options
      * @param ObjectManager|null $objectManager
+     * @param array              $options
      *
      * @throws ObjectNotAuditedException
      *
@@ -102,6 +105,19 @@ interface ObjectAuditManagerInterface
      * @return Collection|RevisionInterface[]
      */
     public function findObjectRevisions(string $className, $objectId, ObjectManager $objectManager = null): Collection;
+
+    /**
+     * @param string $className
+     * @param mixed  $objectId
+     * @param ObjectManager|null $objectManager
+     * @param array              $options
+     *
+     * @return ChangedObject[]
+     *
+     * @throws ObjectNotFoundException
+     * @throws ObjectNotAuditedException
+     */
+    public function getObjectHistory(string $className, $objectId, ObjectManager $objectManager = null, array $options = array()): array;
 
     /**
      * Gets the initialize revision of the object with given ID.
@@ -201,4 +217,9 @@ interface ObjectAuditManagerInterface
      * @return mixed
      */
     public function saveCurrentRevision();
+
+    /**
+     * @return $this
+     */
+    public function clearObjectCache();
 }

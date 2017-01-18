@@ -199,6 +199,29 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     /**
      * {@inheritdoc}
      */
+    public function getResourceHistory(string $resourceName, int $resourceId, array $options = array()): array
+    {
+        if (!$this->configuration->isResourceAudited($resourceName)) {
+            throw ResourceNotAuditedException::forResource($resourceName);
+        }
+
+        $className = $this->getResourceModelClass($resourceName);
+        $objectManager = $this->getResourceObjectManager($resourceName);
+
+        try {
+            $revisions = $this->objectAuditManager->getObjectHistory($className, $resourceId, $objectManager);
+        } catch (ObjectNotAuditedException $exception) {
+            throw ResourceNotAuditedException::forResource($resourceName, $className);
+        } catch (ObjectNotFoundException $exception) {
+            throw ResourceNotFoundException::forObjectNotFoundException($exception, $resourceName);
+        }
+
+        return $revisions;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getInitializeResourceRevision(string $resourceName, int $resourceId)
     {
         if (!$this->configuration->isResourceAudited($resourceName)) {
