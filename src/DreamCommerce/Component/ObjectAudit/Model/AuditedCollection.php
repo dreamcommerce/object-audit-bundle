@@ -66,6 +66,11 @@ class AuditedCollection implements Collection
     protected $foreignKeys;
 
     /**
+     * @var string|null
+     */
+    protected $indexBy;
+
+    /**
      * @var RevisionInterface
      */
     protected $revision;
@@ -98,6 +103,7 @@ class AuditedCollection implements Collection
     {
         $this->className = $className;
         $this->foreignKeys = $foreignKeys;
+        $this->indexBy = $indexBy;
         $this->revision = $revision;
         $this->objectAuditManager = $objectAuditManager;
     }
@@ -422,6 +428,7 @@ class AuditedCollection implements Collection
         $this->objects = $this->objectAuditManager->findObjectsByFieldsAndRevision(
             $this->className,
             $this->foreignKeys,
+            $this->indexBy,
             $this->revision,
             $this->objectManager
         );

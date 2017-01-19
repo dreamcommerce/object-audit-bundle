@@ -35,6 +35,8 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\VarDumper\Cloner\VarCloner;
+use Symfony\Component\VarDumper\Dumper\CliDumper;
 
 class ResourceHistoryCommand extends BaseCommand
 {
@@ -71,9 +73,25 @@ class ResourceHistoryCommand extends BaseCommand
 
         $output->writeln('');
 
-        $rows = $resourceAuditManager->getResourceHistory($resourceName, $resourceId);
+        $cloner = new VarCloner();
+        $dumper = new CliDumper();
 
-        // TODO
+        $changedResources = $resourceAuditManager->getResourceHistory($resourceName, $resourceId);
+        foreach($changedResources as $changedResource) {
+            $dumper->dump($cloner->cloneVar($changedResource->getRevision()));
+            $rows = array();
+
+            foreach ($changedResource->getRevisionData() as $fieldName => $fieldValue) {
+                $rows[] = array($fieldName, $fieldValue);
+            }
+
+            $table = new Table($output);
+            $table
+                ->setHeaders(array('Field name', 'Field value'))
+                ->setRows($rows)
+            ;
+            $table->render();
+        }
 
         $output->writeln('');
     }

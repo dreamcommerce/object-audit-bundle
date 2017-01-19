@@ -43,12 +43,14 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\PersistentCollection;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use DreamCommerce\Bundle\ObjectAuditBundle\BaseObjectAuditManager;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectDeletedException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotFoundException;
 use DreamCommerce\Component\ObjectAudit\Model\AuditedCollection;
+use DreamCommerce\Component\ObjectAudit\Model\AuditedObject;
 use DreamCommerce\Component\ObjectAudit\Model\ChangedObject;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use Exception;
@@ -558,7 +560,112 @@ class ORMAuditManager extends BaseObjectAuditManager
      */
     public function getObjectHistory(string $className, $objectId, ObjectManager $objectManager = null, array $options = array()): array
     {
-        // TODO
+        /** @var ORMAuditConfiguration $configuration */
+        $configuration = $this->getConfiguration();
+        if (!$configuration->isClassAudited($className)) {
+            throw ObjectNotAuditedException::forClass($className);
+        }
+
+        /** @var EntityManagerInterface $objectManager */
+        if ($objectManager === null) {
+            $objectManager = $this->getDefaultObjectManager();
+        }
+
+        /** @var EntityManagerInterface $auditObjectManager */
+        $auditObjectManager = $this->getAuditObjectManager();
+        $tableName = $this->getAuditTableNameForClass($className, $auditObjectManager);
+        $connection = $auditObjectManager->getConnection();
+        /** @var ClassMetadata $entityMetadata */
+        $entityMetadata = $objectManager->getClassMetadata($className);
+        $revisionMetadata = $auditObjectManager->getClassMetadata(RevisionInterface::class);
+        $revisionIdentifierNames = $revisionMetadata->getIdentifierColumnNames();
+        $quoteStrategy = $auditObjectManager->getConfiguration()->getQuoteStrategy();
+        $platform = $connection->getDatabasePlatform();
+        $revisionRepository = $this->getRevisionRepository();
+
+        $revisionFieldType = $configuration->getRevisionTypeFieldType();
+        $revisionFieldName = $configuration->getRevisionTypeFieldName();
+        $revisionType = null;
+        if (Type::hasType($revisionFieldType)) {
+            $revisionType = Type::getType($revisionFieldType);
+        }
+
+        $queryBuilder = $connection->createQueryBuilder()
+            ->select($revisionFieldType)
+            ->from($tableName, 'e');
+
+        foreach($revisionIdentifierNames as $revisionIdentifierName) {
+            $revisionIdentifierName = $this->getRevisionColumnName($configuration, $revisionIdentifierName);
+            $queryBuilder->addSelect($revisionIdentifierName);
+            $queryBuilder->orderBy($revisionIdentifierName, 'DESC');
+
+        }
+
+        if (!is_array($objectId)) {
+            $objectId = array($entityMetadata->identifier[0] => $objectId);
+        }
+
+        $queryBuilder->setParameters($objectId);
+        foreach ($entityMetadata->identifier as $idField) {
+            if (isset($entityMetadata->fieldMappings[$idField])) {
+                $columnName = $entityMetadata->fieldMappings[$idField]['columnName'];
+            } elseif (isset($entityMetadata->associationMappings[$idField])) {
+                $columnName = $entityMetadata->associationMappings[$idField]['joinColumns'][0]['name'];
+            } else {
+                continue;
+            }
+
+            $queryBuilder->andWhere($columnName . ' = :' . $columnName);
+        }
+        $columnMap = array();
+        foreach ($entityMetadata->fieldNames as $columnName => $field) {
+            $queryBuilder->addSelect(sprintf(
+                '%s AS %s',
+                $quoteStrategy->getColumnName($field, $entityMetadata, $platform),
+                $platform->quoteSingleIdentifier($field)
+            ));
+            $columnMap[$field] = $platform->getSQLResultCasing($columnName);
+        }
+        foreach ($entityMetadata->associationMappings AS $assoc) {
+            if (($assoc['type'] & ClassMetadata::TO_ONE) == 0 || ! $assoc['isOwningSide']) {
+                continue;
+            }
+            foreach ($assoc['targetToSourceKeyColumns'] as $sourceCol) {
+                $queryBuilder->addSelect($sourceCol);
+                $columnMap[$sourceCol] = $platform->getSQLResultCasing($sourceCol);
+            }
+        }
+        $stmt = $queryBuilder->execute();
+        $result = array();
+
+        while ($row = $stmt->fetch(Query::HYDRATE_ARRAY)) {
+            $revisionIdentifiers = array();
+            foreach($revisionIdentifierNames as $revisionIdentifierName) {
+                if(isset($row[$revisionIdentifierName])) {
+                    $revisionIdentifiers[$revisionIdentifierName] = $row[$revisionIdentifierName];
+                    unset($row[$revisionIdentifierName]);
+                }
+            }
+
+            $objectRevType = $row[$revisionFieldName];
+            unset($row[$revisionFieldName]);
+
+            if ($revisionType !== null) {
+                $objectRevType = $revisionType->convertToPHPValue($objectRevType, $platform);
+            }
+
+            /** @var RevisionInterface $revision */
+            $revision = $revisionRepository->find($revisionIdentifiers);
+            $entity = $this->createEntity($entityMetadata->name, $columnMap, $row, $revision, $revisionIdentifiers, $objectManager);
+            $result[] = new ChangedObject(
+                $entity,
+                $revision,
+                $objectManager,
+                $row,
+                $objectRevType
+            );
+        }
+        return $result;
     }
 
     /**
