@@ -2,13 +2,14 @@ version: '2'
 services:
     php7.0:
         build: build/php7.0
-        working_dir: /root/object_audit
+        working_dir: /docker/app
         volumes:
-            - ../../:/root/object_audit
-            - /vendor
-            - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
-            - ~/.composer:/root/.composer
-            - /tmp/:/tmp/
+            - ../../:/docker/app
+            - ~/.ssh/id_rsa:/docker/.ssh/id_rsa:ro
+            - ~/.composer:/docker/.composer
+            - /tmp:/tmp
+            - ./build/php.ini:/usr/local/etc/php/php.ini:ro
+            - ./build/entry.sh:/docker/entry.sh:ro
         depends_on:
             - mysql
         links:
@@ -17,13 +18,14 @@ services:
 
     php7.1:
         build: build/php7.1
-        working_dir: /root/object_audit
+        working_dir: /docker/app
         volumes:
-            - ../../:/root/object_audit
-            - /vendor
-            - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
-            - ~/.composer:/root/.composer
-            - /tmp/:/tmp/
+            - ../../:/docker/app
+            - ~/.ssh/id_rsa:/docker/.ssh/id_rsa:ro
+            - ~/.composer:/docker/.composer
+            - /tmp:/tmp
+            - ./build/php.ini:/usr/local/etc/php/php.ini:ro
+            - ./build/entry.sh:/docker/entry.sh:ro
         depends_on:
             - mysql
         links:
@@ -34,6 +36,6 @@ services:
         image: mariadb
         environment:
             MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: object_audit
-            MYSQL_USER: object_audit
-            MYSQL_PASSWORD: object_audit
+            MYSQL_DATABASE: docker
+            MYSQL_USER: docker
+            MYSQL_PASSWORD: docker
