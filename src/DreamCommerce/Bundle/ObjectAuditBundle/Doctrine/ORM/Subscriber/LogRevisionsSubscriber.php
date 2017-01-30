@@ -34,6 +34,7 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
+use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\UnitOfWork;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORMAuditConfiguration;
@@ -58,6 +59,11 @@ class LogRevisionsSubscriber implements EventSubscriber
     private $eventDispatcher;
 
     /**
+     * @var ChangedObject[]
+     */
+    private $changedObjects = [];
+
+    /**
      * @param ContainerInterface       $container
      * @param EventDispatcherInterface $eventDispatcher
      */
@@ -71,9 +77,37 @@ class LogRevisionsSubscriber implements EventSubscriber
     {
         return array(
             Events::onFlush,
+            Events::postFlush
         );
     }
 
+    /**
+     * @param PostFlushEventArgs $eventArgs
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Exception
+     */
+    public function postFlush(PostFlushEventArgs $eventArgs)
+    {
+        if(count($this->changedObjects) > 0) {
+            /** @var ORMAuditManager $auditObjectManager */
+            $auditObjectManager = $this->container->get('dream_commerce_object_audit.manager');
+
+            foreach ($this->changedObjects as $changedObject) {
+                $this->eventDispatcher->dispatch(
+                    DreamCommerceObjectAuditEvents::OBJECT_CHANGED,
+                    new ChangedObjectEvent($changedObject)
+                );
+
+                $auditObjectManager->saveObjectRevisionData($changedObject);
+            }
+
+            $this->changedObjects = [];
+        }
+    }
+
+    /**
+     * @param OnFlushEventArgs $eventArgs
+     */
     public function onFlush(OnFlushEventArgs $eventArgs)
     {
         /** @var ORMAuditManager $auditObjectManager */
@@ -94,19 +128,13 @@ class LogRevisionsSubscriber implements EventSubscriber
             }
             $entityManager = $eventArgs->getEntityManager();
 
-            $changedObject = new ChangedObject(
+            $this->changedObjects[spl_object_hash($entity)] = new ChangedObject(
                 $entity,
                 $currentRevision,
                 $entityManager,
                 $this->getOriginalEntityData($entity, $entityManager),
                 RevisionInterface::ACTION_INSERT
             );
-            $this->eventDispatcher->dispatch(
-                DreamCommerceObjectAuditEvents::OBJECT_CHANGED,
-                new ChangedObjectEvent($changedObject)
-            );
-
-            $auditObjectManager->saveObjectRevisionData($changedObject);
         }
 
         foreach ($uow->getScheduledEntityUpdates() as $entity) {
@@ -134,19 +162,13 @@ class LogRevisionsSubscriber implements EventSubscriber
                 $uow->getEntityIdentifier($entity)
             );
 
-            $changedObject = new ChangedObject(
+            $this->changedObjects[spl_object_hash($entity)] = new ChangedObject(
                 $entity,
                 $currentRevision,
                 $entityManager,
                 $entityData,
                 RevisionInterface::ACTION_UPDATE
             );
-            $this->eventDispatcher->dispatch(
-                DreamCommerceObjectAuditEvents::OBJECT_CHANGED,
-                new ChangedObjectEvent($changedObject)
-            );
-
-            $auditObjectManager->saveObjectRevisionData($changedObject);
         }
 
         $processedEntities = array();
@@ -169,22 +191,18 @@ class LogRevisionsSubscriber implements EventSubscriber
                 $uow->getEntityIdentifier($entity)
             );
 
-            $changedObject = new ChangedObject(
+            $this->changedObjects[spl_object_hash($entity)] = new ChangedObject(
                 $entity,
                 $currentRevision,
                 $entityManager,
                 $entityData,
                 RevisionInterface::ACTION_DELETE
             );
-            $this->eventDispatcher->dispatch(
-                DreamCommerceObjectAuditEvents::OBJECT_CHANGED,
-                new ChangedObjectEvent($changedObject)
-            );
-
-            $auditObjectManager->saveObjectRevisionData($changedObject);
         }
 
-        $auditObjectManager->saveCurrentRevision();
+        if(count($this->changedObjects) > 0) {
+            $auditObjectManager->saveCurrentRevision();
+        }
     }
 
     /**

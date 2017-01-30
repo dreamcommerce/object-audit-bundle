@@ -32,6 +32,7 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotFoundException;
 use DreamCommerce\Component\ObjectAudit\Model\ChangedObject;
@@ -125,7 +126,13 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
     public function saveCurrentRevision()
     {
         if ($this->currentRevision !== null) {
-            $this->auditObjectManager->persist($this->currentRevision);
+            /** @var EntityManagerInterface $auditObjectManager */
+            $auditObjectManager = $this->auditObjectManager;
+            $uow = $auditObjectManager->getUnitOfWork();
+            $revisionName = get_class($this->currentRevision);
+            $revisionMetadata = $auditObjectManager->getClassMetadata($revisionName);
+            $uow->persist($this->currentRevision);
+            $uow->computeChangeSet($revisionMetadata, $this->currentRevision);
             $this->currentRevision = null;
         }
     }

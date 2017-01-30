@@ -2,8 +2,8 @@
 
 <phpunit bootstrap="./tests/bootstrap.php" colors="true">
     <testsuites>
-        <testsuite name="DreamCommerce EntityAudit">
-            <directory>./tests/DreamCommerce/Tests/EntityAudit</directory>
+        <testsuite name="DreamCommerce ObjectAudit">
+            <directory>./tests/DreamCommerce/Tests/ObjectAudit</directory>
         </testsuite>
     </testsuites>
 </phpunit>

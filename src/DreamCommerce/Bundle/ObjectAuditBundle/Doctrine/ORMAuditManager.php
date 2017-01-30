@@ -50,7 +50,6 @@ use DreamCommerce\Component\ObjectAudit\Exception\ObjectDeletedException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotFoundException;
 use DreamCommerce\Component\ObjectAudit\Model\AuditedCollection;
-use DreamCommerce\Component\ObjectAudit\Model\AuditedObject;
 use DreamCommerce\Component\ObjectAudit\Model\ChangedObject;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use Exception;
@@ -697,7 +696,69 @@ class ORMAuditManager extends BaseObjectAuditManager
      */
     public function saveObjectRevisionData(ChangedObject $changedObject)
     {
-        // TODO
+        $params = array($changedObject->getRevisionType());
+        $types = array(\PDO::PARAM_STR);
+        $fields = array();
+
+        $revisionMetadata = $this->auditObjectManager->getClassMetadata(RevisionInterface::class)->getIdentifier();
+
+        foreach ($class->associationMappings as $field => $assoc) {
+            if ($class->isInheritanceTypeJoined() && $class->isInheritedAssociation($field)) {
+                continue;
+            }
+            if (! (($assoc['type'] & ClassMetadata::TO_ONE) > 0 && $assoc['isOwningSide'])) {
+                continue;
+            }
+            $data = isset($entityData[$field]) ? $entityData[$field] : null;
+            $relatedId = false;
+            if ($data !== null && $this->uow->isInIdentityMap($data)) {
+                $relatedId = $this->uow->getEntityIdentifier($data);
+            }
+            $targetClass = $this->em->getClassMetadata($assoc['targetEntity']);
+            foreach ($assoc['sourceToTargetKeyColumns'] as $sourceColumn => $targetColumn) {
+                $fields[$sourceColumn] = true;
+                if ($data === null) {
+                    $params[] = null;
+                    $types[] = \PDO::PARAM_STR;
+                } else {
+                    $params[] = $relatedId ? $relatedId[$targetClass->fieldNames[$targetColumn]] : null;
+                    $types[] = $targetClass->getTypeOfColumn($targetColumn);
+                }
+            }
+        }
+        foreach ($class->fieldNames AS $field) {
+            $columnName = $class->fieldMappings[$field]['columnName'];
+            if (array_key_exists($columnName, $fields)) {
+                continue;
+            }
+            if ($class->isInheritanceTypeJoined()
+                && $class->isInheritedField($field)
+                && ! $class->isIdentifier($field)
+            ) {
+                continue;
+            }
+            $params[] = isset($entityData[$field]) ? $entityData[$field] : null;
+            $types[] = $class->fieldMappings[$field]['type'];
+        }
+        if ($class->isInheritanceTypeSingleTable()) {
+            $params[] = $class->discriminatorValue;
+            $types[] = $class->discriminatorColumn['type'];
+        } elseif ($class->isInheritanceTypeJoined()
+            && $class->name == $class->rootEntityName
+        ) {
+            $params[] = $entityData[$class->discriminatorColumn['name']];
+            $types[] = $class->discriminatorColumn['type'];
+        }
+        if ($class->isInheritanceTypeJoined() && $class->name != $class->rootEntityName) {
+            $entityData[$class->discriminatorColumn['name']] = $class->discriminatorValue;
+            $this->saveRevisionEntityData(
+                $this->em->getClassMetadata($class->rootEntityName),
+                $entityData,
+                $revType
+            );
+        }
+
+        $this->conn->executeUpdate($this->getInsertRevisionSQL($class), $params, $types);
     }
 
     /**

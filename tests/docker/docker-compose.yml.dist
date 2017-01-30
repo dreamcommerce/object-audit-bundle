@@ -1,7 +1,7 @@
 version: '2'
 services:
     php7.0:
-        build: build/php7.0
+        build: build/php-7.0
         working_dir: /docker/app
         volumes:
             - ../../:/docker/app
@@ -17,7 +17,7 @@ services:
         mem_limit: 2000000000
 
     php7.1:
-        build: build/php7.1
+        build: build/php-7.1
         working_dir: /docker/app
         volumes:
             - ../../:/docker/app

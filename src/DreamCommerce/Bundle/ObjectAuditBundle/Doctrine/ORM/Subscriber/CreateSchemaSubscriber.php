@@ -119,9 +119,7 @@ class CreateSchemaSubscriber implements EventSubscriber
 
         $pkColumns = array_merge($pkColumns, $revPkColumns);
         $auditTable->setPrimaryKey($pkColumns);
-
-        $revIndexName = 'rev_pk_'.md5($auditTable->getName()).'_idx';
-        $auditTable->addIndex($revPkColumns, $revIndexName);
+        $auditTable->addIndex($revPkColumns);
     }
 
     /**
