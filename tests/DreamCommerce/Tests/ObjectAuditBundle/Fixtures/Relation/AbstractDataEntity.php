@@ -28,40 +28,57 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Component\ObjectAudit\Model;
+namespace DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Relation;
 
-use Doctrine\Common\Persistence\ObjectManager;
-use Sylius\Component\Resource\Model\ResourceInterface;
+use Doctrine\ORM\Mapping as ORM;
 
-final class ChangedResource extends ChangedObject
+/**
+ * Abstract data entity
+ *
+ * @ORM\Entity
+ * @ORM\InheritanceType("SINGLE_TABLE")
+ * @ORM\DiscriminatorColumn(name="type", type="string")
+ * @ORM\DiscriminatorMap({"private" = "DataPrivateEntity", "legal" = "DataLegalEntity"})
+ */
+abstract class AbstractDataEntity
 {
     /**
-     * @var string
+     * @var int
+     *
+     * @ORM\Column(type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $resourceName;
+    private $id;
 
     /**
-     * @param ResourceInterface $resource
-     * @param string            $className
-     * @param string            $resourceName
-     * @param RevisionInterface $revision
-     * @param ObjectManager     $objectManager
-     * @param array             $revisionData
-     * @param string            $revisionType
+     * @var DataContainerEntity
+     *
+     * @ORM\OneToOne(targetEntity="DataContainerEntity", mappedBy="data")
      */
-    public function __construct(ResourceInterface $resource, string $className, string $resourceName,
-                                RevisionInterface $revision, ObjectManager $objectManager, array $revisionData,
-                                string $revisionType)
+    private $dataContainer;
+
+    /**
+     * @return int
+     */
+    public function getId()
     {
-        $this->resourceName = $resourceName;
-        parent::__construct($resource, $className, $revision, $objectManager, $revisionData, $revisionType);
+        return $this->id;
     }
 
     /**
-     * @return string
+     * @return DataContainerEntity
      */
-    public function getResourceName(): string
+    public function getDataContainer()
     {
-        return $this->resourceName;
+        return $this->dataContainer;
+    }
+
+    /**
+     * @param DataContainerEntity $dataContainer
+     */
+    public function setDataContainer($dataContainer)
+    {
+        $this->dataContainer = $dataContainer;
     }
 }

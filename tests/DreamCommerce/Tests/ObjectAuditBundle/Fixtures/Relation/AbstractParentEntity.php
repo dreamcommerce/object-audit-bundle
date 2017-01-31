@@ -28,40 +28,39 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Component\ObjectAudit\Model;
+namespace DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Relation;
 
-use Doctrine\Common\Persistence\ObjectManager;
-use Sylius\Component\Resource\Model\ResourceInterface;
+use Doctrine\ORM\Mapping as ORM;
 
-final class ChangedResource extends ChangedObject
+/**
+ * @ORM\MappedSuperclass()
+ */
+abstract class AbstractParentEntity
 {
-    /**
-     * @var string
-     */
-    private $resourceName;
+    /** @ORM\Id @ORM\Column(type="integer") @ORM\GeneratedValue */
+    private $id;
 
-    /**
-     * @param ResourceInterface $resource
-     * @param string            $className
-     * @param string            $resourceName
-     * @param RevisionInterface $revision
-     * @param ObjectManager     $objectManager
-     * @param array             $revisionData
-     * @param string            $revisionType
-     */
-    public function __construct(ResourceInterface $resource, string $className, string $resourceName,
-                                RevisionInterface $revision, ObjectManager $objectManager, array $revisionData,
-                                string $revisionType)
+    /** @ORM\Column(name="relation_id", type="integer", nullable=true) */
+    private $relationId;
+
+    public function getId()
     {
-        $this->resourceName = $resourceName;
-        parent::__construct($resource, $className, $revision, $objectManager, $revisionData, $revisionType);
+        return $this->id;
     }
 
     /**
-     * @return string
+     * @return mixed
      */
-    public function getResourceName(): string
+    public function getRelationId()
     {
-        return $this->resourceName;
+        return $this->relationId;
+    }
+
+    /**
+     * @param mixed $relationId
+     */
+    public function setRelationId($relationId)
+    {
+        $this->relationId = $relationId;
     }
 }

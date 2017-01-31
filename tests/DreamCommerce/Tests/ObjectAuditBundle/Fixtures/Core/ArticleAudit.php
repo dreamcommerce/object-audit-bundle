@@ -28,40 +28,58 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Component\ObjectAudit\Model;
+namespace DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Core;
 
-use Doctrine\Common\Persistence\ObjectManager;
-use Sylius\Component\Resource\Model\ResourceInterface;
+use Doctrine\ORM\Mapping as ORM;
 
-final class ChangedResource extends ChangedObject
+/**
+ * @ORM\Entity
+ */
+class ArticleAudit
 {
-    /**
-     * @var string
-     */
-    private $resourceName;
+    /** @ORM\Id @ORM\Column(type="integer") @ORM\GeneratedValue */
+    private $id;
 
-    /**
-     * @param ResourceInterface $resource
-     * @param string            $className
-     * @param string            $resourceName
-     * @param RevisionInterface $revision
-     * @param ObjectManager     $objectManager
-     * @param array             $revisionData
-     * @param string            $revisionType
-     */
-    public function __construct(ResourceInterface $resource, string $className, string $resourceName,
-                                RevisionInterface $revision, ObjectManager $objectManager, array $revisionData,
-                                string $revisionType)
+    /** @ORM\Column(type="string", name="my_title_column") */
+    private $title;
+
+    /** @ORM\Column(type="text") */
+    private $text;
+
+    /** @ORM\Column(type="text") */
+    private $ignoreMe;
+
+    /** @ORM\ManyToOne(targetEntity="UserAudit") */
+    private $author;
+
+    public function __construct($title, $text, $author, $ignoreMe)
     {
-        $this->resourceName = $resourceName;
-        parent::__construct($resource, $className, $revision, $objectManager, $revisionData, $revisionType);
+        $this->title    = $title;
+        $this->text     = $text;
+        $this->author   = $author;
+        $this->ignoreMe = $ignoreMe;
+    }
+
+    public function getId()
+    {
+        return $this->id;
     }
 
     /**
-     * @return string
+     * @return UserAudit
      */
-    public function getResourceName(): string
+    public function getAuthor()
     {
-        return $this->resourceName;
+        return $this->author;
+    }
+
+    public function setText($text)
+    {
+        $this->text = $text;
+    }
+
+    public function setIgnoreMe($ignoreMe)
+    {
+        $this->ignoreMe = $ignoreMe;
     }
 }

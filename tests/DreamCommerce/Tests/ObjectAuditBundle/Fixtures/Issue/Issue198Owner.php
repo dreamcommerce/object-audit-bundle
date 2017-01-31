@@ -28,40 +28,54 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Component\ObjectAudit\Model;
+namespace DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Issue;
 
-use Doctrine\Common\Persistence\ObjectManager;
-use Sylius\Component\Resource\Model\ResourceInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
 
-final class ChangedResource extends ChangedObject
+/**
+ * @ORM\Entity()
+ */
+class Issue198Owner
 {
+    /** @ORM\Id @ORM\Column(type="integer") @ORM\GeneratedValue(strategy="AUTO") */
+    protected $id;
+    
     /**
-     * @var string
+     * @ORM\OneToMany(targetEntity="Issue198Car", mappedBy="owner")
      */
-    private $resourceName;
-
-    /**
-     * @param ResourceInterface $resource
-     * @param string            $className
-     * @param string            $resourceName
-     * @param RevisionInterface $revision
-     * @param ObjectManager     $objectManager
-     * @param array             $revisionData
-     * @param string            $revisionType
-     */
-    public function __construct(ResourceInterface $resource, string $className, string $resourceName,
-                                RevisionInterface $revision, ObjectManager $objectManager, array $revisionData,
-                                string $revisionType)
+    protected $cars;
+    
+    public function __construct()
     {
-        $this->resourceName = $resourceName;
-        parent::__construct($resource, $className, $revision, $objectManager, $revisionData, $revisionType);
+        $this->cars = new ArrayCollection();
     }
-
-    /**
-     * @return string
-     */
-    public function getResourceName(): string
+    
+    public function setId($id)
     {
-        return $this->resourceName;
+        $this->id = $id;
+    }
+    
+    public function getId()
+    {
+        return $this->id;
+    }
+    
+    public function addCar(Issue198Car $car)
+    {
+        if (!$this->cars->contains($car)) {
+            $car->setOwner($this);
+            $this->cars[] = $car;
+        }
+    }
+    
+    public function removeCar(Issue198Car $car)
+    {
+        $this->cars->removeElement($car);
+    }
+    
+    public function getCars()
+    {
+        return $this->cars;
     }
 }

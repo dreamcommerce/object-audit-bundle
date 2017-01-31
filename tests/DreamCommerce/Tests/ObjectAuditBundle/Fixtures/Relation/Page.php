@@ -28,40 +28,58 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Component\ObjectAudit\Model;
+namespace DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Relation;
 
-use Doctrine\Common\Persistence\ObjectManager;
-use Sylius\Component\Resource\Model\ResourceInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
 
-final class ChangedResource extends ChangedObject
+/**
+ * @ORM\Entity
+ */
+class Page
 {
-    /**
-     * @var string
-     */
-    private $resourceName;
+    /** @ORM\Id @ORM\Column(type="integer") @ORM\GeneratedValue(strategy="AUTO") */
+    private $id;
+
+    /** @ORM\OneToMany(targetEntity="PageLocalization", mappedBy="page", indexBy="locale") */
+    private $localizations;
+
 
     /**
-     * @param ResourceInterface $resource
-     * @param string            $className
-     * @param string            $resourceName
-     * @param RevisionInterface $revision
-     * @param ObjectManager     $objectManager
-     * @param array             $revisionData
-     * @param string            $revisionType
+     * A page can have many aliases
+     *
+     * @var PageAlias[]
+     * @ORM\OneToMany(targetEntity="PageAlias", mappedBy="page", cascade={"persist"})
      */
-    public function __construct(ResourceInterface $resource, string $className, string $resourceName,
-                                RevisionInterface $revision, ObjectManager $objectManager, array $revisionData,
-                                string $revisionType)
+    protected $pageAliases;
+
+
+    public function __construct()
     {
-        $this->resourceName = $resourceName;
-        parent::__construct($resource, $className, $revision, $objectManager, $revisionData, $revisionType);
+        $this->localizations = new ArrayCollection();
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function getLocalizations()
+    {
+        return $this->localizations;
+    }
+
+    public function addLocalization(PageLocalization $localization)
+    {
+        $localization->setPage($this);
+        $this->localizations->set($localization->getLocale(), $localization);
     }
 
     /**
      * @return string
      */
-    public function getResourceName(): string
+    public function __toString()
     {
-        return $this->resourceName;
+        return (string) $this->id;
     }
 }

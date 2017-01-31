@@ -28,40 +28,25 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Component\ObjectAudit\Model;
+namespace DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Issue;
 
-use Doctrine\Common\Persistence\ObjectManager;
-use Sylius\Component\Resource\Model\ResourceInterface;
+use Doctrine\ORM\Mapping as ORM;
 
-final class ChangedResource extends ChangedObject
+/** @ORM\Entity @ORM\Table(name="project_project") */
+class Issue87Project extends Issue87AbstractProject
 {
     /**
-     * @var string
+     * @ORM\Column(type="string")
      */
-    private $resourceName;
+    protected $someProperty;
 
-    /**
-     * @param ResourceInterface $resource
-     * @param string            $className
-     * @param string            $resourceName
-     * @param RevisionInterface $revision
-     * @param ObjectManager     $objectManager
-     * @param array             $revisionData
-     * @param string            $revisionType
-     */
-    public function __construct(ResourceInterface $resource, string $className, string $resourceName,
-                                RevisionInterface $revision, ObjectManager $objectManager, array $revisionData,
-                                string $revisionType)
+    public function getSomeProperty()
     {
-        $this->resourceName = $resourceName;
-        parent::__construct($resource, $className, $revision, $objectManager, $revisionData, $revisionType);
+        return $this->someProperty;
     }
 
-    /**
-     * @return string
-     */
-    public function getResourceName(): string
+    public function setSomeProperty($someProperty)
     {
-        return $this->resourceName;
+        $this->someProperty = $someProperty;
     }
 }

@@ -15,6 +15,10 @@ services:
         links:
             - mysql
         mem_limit: 2000000000
+#        ports:
+#            - 19000:9000
+#        environment:
+#            XDEBUG_CONFIG: idekey=PHPSTORM remote_host=xx.yy.zz.vv
 
     php7.1:
         build: build/php-7.1
@@ -31,6 +35,10 @@ services:
         links:
             - mysql
         mem_limit: 2000000000
+#        ports:
+#            - 18000:9000
+#        environment:
+#            XDEBUG_CONFIG: idekey=PHPSTORM remote_host=xx.yy.zz.vv
 
     mysql:
         image: mariadb

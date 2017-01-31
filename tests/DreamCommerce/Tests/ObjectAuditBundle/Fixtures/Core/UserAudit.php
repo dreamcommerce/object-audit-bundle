@@ -28,40 +28,64 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Component\ObjectAudit\Model;
+namespace DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Core;
 
-use Doctrine\Common\Persistence\ObjectManager;
-use Sylius\Component\Resource\Model\ResourceInterface;
+use Doctrine\ORM\Mapping as ORM;
 
-final class ChangedResource extends ChangedObject
+/**
+ * @ORM\Entity
+ */
+class UserAudit
 {
     /**
-     * @var string
+     * @ORM\Id()
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $resourceName;
+    private $id;
 
     /**
-     * @param ResourceInterface $resource
-     * @param string            $className
-     * @param string            $resourceName
-     * @param RevisionInterface $revision
-     * @param ObjectManager     $objectManager
-     * @param array             $revisionData
-     * @param string            $revisionType
+     * @ORM\Column(type="string")
      */
-    public function __construct(ResourceInterface $resource, string $className, string $resourceName,
-                                RevisionInterface $revision, ObjectManager $objectManager, array $revisionData,
-                                string $revisionType)
+    private $name;
+
+    /** @ORM\OneToOne(targetEntity="ProfileAudit", mappedBy="user") */
+    private $profile;
+
+    public function __construct($name)
     {
-        $this->resourceName = $resourceName;
-        parent::__construct($resource, $className, $revision, $objectManager, $revisionData, $revisionType);
+        $this->name = $name;
+    }
+
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
-     * @return string
+     * @return ProfileAudit
      */
-    public function getResourceName(): string
+    public function getProfile()
     {
-        return $this->resourceName;
+        return $this->profile;
+    }
+
+    /**
+     * @param ProfileAudit $profile
+     */
+    public function setProfile(ProfileAudit $profile = null)
+    {
+        $this->profile = $profile;
+        $profile->setUser($this);
     }
 }

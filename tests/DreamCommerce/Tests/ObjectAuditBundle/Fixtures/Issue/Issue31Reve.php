@@ -28,40 +28,46 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Component\ObjectAudit\Model;
+namespace DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Issue;
 
-use Doctrine\Common\Persistence\ObjectManager;
-use Sylius\Component\Resource\Model\ResourceInterface;
+use Doctrine\ORM\Mapping as ORM;
 
-final class ChangedResource extends ChangedObject
+/** @ORM\Entity */
+class Issue31Reve
 {
-    /**
-     * @var string
-     */
-    private $resourceName;
+    /** @ORM\Id @ORM\Column(type="integer") @ORM\GeneratedValue(strategy="AUTO") */
+    protected $id;
 
     /**
-     * @param ResourceInterface $resource
-     * @param string            $className
-     * @param string            $resourceName
-     * @param RevisionInterface $revision
-     * @param ObjectManager     $objectManager
-     * @param array             $revisionData
-     * @param string            $revisionType
+     * @ORM\OneToOne(targetEntity="Issue31User")
      */
-    public function __construct(ResourceInterface $resource, string $className, string $resourceName,
-                                RevisionInterface $revision, ObjectManager $objectManager, array $revisionData,
-                                string $revisionType)
+    protected $user;
+
+    /** @ORM\Column(type="string") */
+    protected $titre;
+
+    public function getId()
     {
-        $this->resourceName = $resourceName;
-        parent::__construct($resource, $className, $revision, $objectManager, $revisionData, $revisionType);
+        return $this->id;
     }
 
-    /**
-     * @return string
-     */
-    public function getResourceName(): string
+    public function getUser()
     {
-        return $this->resourceName;
+        return $this->user;
+    }
+
+    public function setUser($user)
+    {
+        $this->user = $user;
+    }
+
+    public function getTitre()
+    {
+        return $this->titre;
+    }
+
+    public function setTitre($titre)
+    {
+        $this->titre = $titre;
     }
 }

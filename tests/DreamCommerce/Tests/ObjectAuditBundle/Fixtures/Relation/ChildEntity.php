@@ -28,40 +28,35 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Component\ObjectAudit\Model;
+namespace DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Relation;
 
-use Doctrine\Common\Persistence\ObjectManager;
-use Sylius\Component\Resource\Model\ResourceInterface;
+use Doctrine\ORM\Mapping as ORM;
 
-final class ChangedResource extends ChangedObject
+/**
+ * @ORM\Entity
+ */
+class ChildEntity extends AbstractParentEntity
 {
     /**
-     * @var string
+     * @var RelatedEntity
+     * @ORM\OneToOne(targetEntity="RelatedEntity")
+     * @ORM\JoinColumn(name="relation_id", referencedColumnName="id", nullable=true)
      */
-    private $resourceName;
+    private $relation;
 
     /**
-     * @param ResourceInterface $resource
-     * @param string            $className
-     * @param string            $resourceName
-     * @param RevisionInterface $revision
-     * @param ObjectManager     $objectManager
-     * @param array             $revisionData
-     * @param string            $revisionType
+     * @return RelatedEntity
      */
-    public function __construct(ResourceInterface $resource, string $className, string $resourceName,
-                                RevisionInterface $revision, ObjectManager $objectManager, array $revisionData,
-                                string $revisionType)
+    public function getRelation()
     {
-        $this->resourceName = $resourceName;
-        parent::__construct($resource, $className, $revision, $objectManager, $revisionData, $revisionType);
+        return $this->relation;
     }
 
     /**
-     * @return string
+     * @param RelatedEntity $relation
      */
-    public function getResourceName(): string
+    public function setRelation($relation)
     {
-        return $this->resourceName;
+        $this->relation = $relation;
     }
 }

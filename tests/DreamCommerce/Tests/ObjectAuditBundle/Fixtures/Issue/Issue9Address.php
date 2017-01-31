@@ -28,40 +28,50 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Component\ObjectAudit\Model;
+namespace DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Issue;
 
-use Doctrine\Common\Persistence\ObjectManager;
-use Sylius\Component\Resource\Model\ResourceInterface;
+use Doctrine\ORM\Mapping as ORM;
 
-final class ChangedResource extends ChangedObject
+/**
+ * @ORM\Entity
+ */
+class Issue9Address
 {
-    /**
-     * @var string
-     */
-    private $resourceName;
+    /** @ORM\Id @ORM\Column(type="integer") @ORM\GeneratedValue(strategy="AUTO") */
+    protected $id;
 
     /**
-     * @param ResourceInterface $resource
-     * @param string            $className
-     * @param string            $resourceName
-     * @param RevisionInterface $revision
-     * @param ObjectManager     $objectManager
-     * @param array             $revisionData
-     * @param string            $revisionType
+     * @ORM\Column
      */
-    public function __construct(ResourceInterface $resource, string $className, string $resourceName,
-                                RevisionInterface $revision, ObjectManager $objectManager, array $revisionData,
-                                string $revisionType)
+    protected $address_text;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Issue9Customer", inversedBy="addresses")
+     */
+    protected $customer;
+
+    public function getId()
     {
-        $this->resourceName = $resourceName;
-        parent::__construct($resource, $className, $revision, $objectManager, $revisionData, $revisionType);
+        return $this->id;
     }
 
-    /**
-     * @return string
-     */
-    public function getResourceName(): string
+    public function getAddressText()
     {
-        return $this->resourceName;
+        return $this->address_text;
+    }
+
+    public function setAddressText($address_text)
+    {
+        $this->address_text = $address_text;
+    }
+
+    public function getCustomer()
+    {
+        return $this->customer;
+    }
+
+    public function setCustomer($customer)
+    {
+        $this->customer = $customer;
     }
 }

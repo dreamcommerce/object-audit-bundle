@@ -28,40 +28,45 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Component\ObjectAudit\Model;
+/**
+ * Created by PhpStorm.
+ * User: david
+ * Date: 23/02/2016
+ * Time: 15:57
+ */
 
-use Doctrine\Common\Persistence\ObjectManager;
-use Sylius\Component\Resource\Model\ResourceInterface;
+namespace DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Issue;
 
-final class ChangedResource extends ChangedObject
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Class Issue156Client
+ * @package DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Issue
+ * @ORM\Entity()
+ */
+class Issue156Client extends Issue156Contact
 {
     /**
-     * @var string
+     * @ORM\Column(type="string", length=255)
      */
-    private $resourceName;
+    protected $clientSpecificField;
 
     /**
-     * @param ResourceInterface $resource
-     * @param string            $className
-     * @param string            $resourceName
-     * @param RevisionInterface $revision
-     * @param ObjectManager     $objectManager
-     * @param array             $revisionData
-     * @param string            $revisionType
+     * @param string $clientSpecificField
+     * @return $this
      */
-    public function __construct(ResourceInterface $resource, string $className, string $resourceName,
-                                RevisionInterface $revision, ObjectManager $objectManager, array $revisionData,
-                                string $revisionType)
+    public function setClientSpecificField($clientSpecificField)
     {
-        $this->resourceName = $resourceName;
-        parent::__construct($resource, $className, $revision, $objectManager, $revisionData, $revisionType);
+        $this->clientSpecificField = $clientSpecificField;
+
+        return $this;
     }
 
     /**
      * @return string
      */
-    public function getResourceName(): string
+    public function getClientSpecificField()
     {
-        return $this->resourceName;
+        return $this->clientSpecificField;
     }
 }

@@ -93,6 +93,15 @@ class LogRevisionsSubscriber implements EventSubscriber
             $auditObjectManager = $this->container->get('dream_commerce_object_audit.manager');
 
             foreach ($this->changedObjects as $changedObject) {
+                /** @var EntityManagerInterface $entityManager */
+                $entityManager = $changedObject->getObjectManager();
+                $uow = $entityManager->getUnitOfWork();
+
+                $changedObject->setRevisionData(array_merge(
+                    $changedObject->getRevisionData(),
+                    $uow->getEntityIdentifier($changedObject->getObject())
+                ));
+
                 $this->eventDispatcher->dispatch(
                     DreamCommerceObjectAuditEvents::OBJECT_CHANGED,
                     new ChangedObjectEvent($changedObject)
@@ -130,6 +139,7 @@ class LogRevisionsSubscriber implements EventSubscriber
 
             $this->changedObjects[spl_object_hash($entity)] = new ChangedObject(
                 $entity,
+                $className,
                 $currentRevision,
                 $entityManager,
                 $this->getOriginalEntityData($entity, $entityManager),
@@ -157,16 +167,13 @@ class LogRevisionsSubscriber implements EventSubscriber
             if (count($changeset) == 0) {
                 return;
             }
-            $entityData = array_merge(
-                $this->getOriginalEntityData($entity, $entityManager),
-                $uow->getEntityIdentifier($entity)
-            );
 
             $this->changedObjects[spl_object_hash($entity)] = new ChangedObject(
                 $entity,
+                $className,
                 $currentRevision,
                 $entityManager,
-                $entityData,
+                $this->getOriginalEntityData($entity, $entityManager),
                 RevisionInterface::ACTION_UPDATE
             );
         }
@@ -186,16 +193,12 @@ class LogRevisionsSubscriber implements EventSubscriber
             }
             $processedEntities[] = $hash;
 
-            $entityData = array_merge(
-                $this->getOriginalEntityData($entity, $entityManager),
-                $uow->getEntityIdentifier($entity)
-            );
-
             $this->changedObjects[spl_object_hash($entity)] = new ChangedObject(
                 $entity,
+                $className,
                 $currentRevision,
                 $entityManager,
-                $entityData,
+                $this->getOriginalEntityData($entity, $entityManager),
                 RevisionInterface::ACTION_DELETE
             );
         }

@@ -28,40 +28,59 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Component\ObjectAudit\Model;
+/**
+ * Created by PhpStorm.
+ * User: doconnell
+ * Date: 12/10/16
+ * Time: 08:49
+ */
 
-use Doctrine\Common\Persistence\ObjectManager;
-use Sylius\Component\Resource\Model\ResourceInterface;
+namespace DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Relation;
 
-final class ChangedResource extends ChangedObject
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * A slightly contrived entity which has an entity (Page) as an ID.
+ * @ORM\Entity
+ */
+class PageAlias
 {
     /**
-     * @var string
+     * @ORM\ManyToOne(targetEntity="Page", inversedBy="associatedEmails", cascade={"persist"})
+     * @ORM\JoinColumn(name="page_id", referencedColumnName="id", nullable=false)
+     * @ORM\Id
+     * @var Page
      */
-    private $resourceName;
+    protected $page;
 
     /**
-     * @param ResourceInterface $resource
-     * @param string            $className
-     * @param string            $resourceName
-     * @param RevisionInterface $revision
-     * @param ObjectManager     $objectManager
-     * @param array             $revisionData
-     * @param string            $revisionType
+     * @var string
+     * @ORM\Column( type="string", nullable=false, length=255, unique=true)
+     * )
      */
-    public function __construct(ResourceInterface $resource, string $className, string $resourceName,
-                                RevisionInterface $revision, ObjectManager $objectManager, array $revisionData,
-                                string $revisionType)
+    protected $alias;
+
+    public function __construct(Page $page, $alias = null)
     {
-        $this->resourceName = $resourceName;
-        parent::__construct($resource, $className, $revision, $objectManager, $revisionData, $revisionType);
+        $this->page = $page;
+        $this->alias = $alias;
     }
 
     /**
      * @return string
      */
-    public function getResourceName(): string
+    public function getAlias()
     {
-        return $this->resourceName;
+        return $this->alias;
+    }
+
+    /**
+     * @param string $alias
+     * @return self
+     */
+    public function setAlias($alias)
+    {
+        $this->alias = $alias;
+        return $this;
     }
 }

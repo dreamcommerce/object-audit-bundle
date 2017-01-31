@@ -28,40 +28,30 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Component\ObjectAudit\Model;
+namespace DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Issue;
 
-use Doctrine\Common\Persistence\ObjectManager;
-use Sylius\Component\Resource\Model\ResourceInterface;
+use Doctrine\ORM\Mapping as ORM;
 
-final class ChangedResource extends ChangedObject
+/** @ORM\Entity */
+class DuplicateRevisionFailureTestOwnedElement extends DuplicateRevisionFailureTestEntity
 {
     /**
-     * @var string
+     * @ORM\ManyToOne(targetEntity="DuplicateRevisionFailureTestPrimaryOwner", inversedBy="elements")
      */
-    private $resourceName;
+    protected $primaryOwner;
 
     /**
-     * @param ResourceInterface $resource
-     * @param string            $className
-     * @param string            $resourceName
-     * @param RevisionInterface $revision
-     * @param ObjectManager     $objectManager
-     * @param array             $revisionData
-     * @param string            $revisionType
+     * @ORM\ManyToOne(targetEntity="DuplicateRevisionFailureTestSecondaryOwner", inversedBy="elements")
      */
-    public function __construct(ResourceInterface $resource, string $className, string $resourceName,
-                                RevisionInterface $revision, ObjectManager $objectManager, array $revisionData,
-                                string $revisionType)
+    protected $secondaryOwner;
+
+    public function setPrimaryOwner(DuplicateRevisionFailureTestPrimaryOwner $owner)
     {
-        $this->resourceName = $resourceName;
-        parent::__construct($resource, $className, $revision, $objectManager, $revisionData, $revisionType);
+        $this->primaryOwner = $owner;
     }
 
-    /**
-     * @return string
-     */
-    public function getResourceName(): string
+    public function setSecondaryOwner(DuplicateRevisionFailureTestSecondaryOwner $owner)
     {
-        return $this->resourceName;
+        $this->secondaryOwner = $owner;
     }
 }

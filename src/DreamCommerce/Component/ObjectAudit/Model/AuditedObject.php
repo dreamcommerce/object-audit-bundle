@@ -31,9 +31,16 @@
 namespace DreamCommerce\Component\ObjectAudit\Model;
 
 use Doctrine\Common\Persistence\ObjectManager;
+use InvalidArgumentException;
+use Webmozart\Assert\Assert;
 
 class AuditedObject
 {
+    /**
+     * @var string
+     */
+    private $className;
+
     /**
      * @var object
      */
@@ -51,12 +58,22 @@ class AuditedObject
 
     /**
      * @param object $object
+     * @param string $className
      * @param RevisionInterface $revision
      * @param ObjectManager $objectManager
      */
-    public function __construct($object, RevisionInterface $revision, ObjectManager $objectManager)
+    public function __construct($object, string $className = null, RevisionInterface $revision, ObjectManager $objectManager)
     {
+        Assert::object($object);
+
+        if($className === null) {
+            $className = get_class($object);
+        } elseif(!($object instanceof $className)) {
+            throw new InvalidArgumentException();
+        }
+
         $this->object = $object;
+        $this->className = $className;
         $this->revision = $revision;
         $this->objectManager = $objectManager;
     }
@@ -67,6 +84,14 @@ class AuditedObject
     public function getObject()
     {
         return $this->object;
+    }
+
+    /**
+     * @return string
+     */
+    public function getClassName(): string
+    {
+        return $this->className;
     }
 
     /**
