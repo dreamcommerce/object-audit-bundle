@@ -91,11 +91,11 @@ class AuditedCollection implements Collection
     protected $initialized = false;
 
     /**
-     * @param string $className
-     * @param array $foreignKeys
-     * @param string|null $indexBy
-     * @param RevisionInterface $revision
-     * @param ObjectManager $objectManager
+     * @param string                      $className
+     * @param array                       $foreignKeys
+     * @param string|null                 $indexBy
+     * @param RevisionInterface           $revision
+     * @param ObjectManager               $objectManager
      * @param ObjectAuditManagerInterface $objectAuditManager
      */
     public function __construct(

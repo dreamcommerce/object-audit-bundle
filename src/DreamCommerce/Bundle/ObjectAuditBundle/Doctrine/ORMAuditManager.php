@@ -34,17 +34,13 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
-use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\Mapping\QuoteStrategy;
-use Doctrine\ORM\ORMException;
-use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use DreamCommerce\Bundle\ObjectAuditBundle\BaseObjectAuditManager;
@@ -52,13 +48,10 @@ use DreamCommerce\Component\ObjectAudit\Exception\ObjectDeletedException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotFoundException;
 use DreamCommerce\Component\ObjectAudit\Factory\ObjectAuditFactoryInterface;
-use DreamCommerce\Component\ObjectAudit\Model\AuditedCollection;
 use DreamCommerce\Component\ObjectAudit\Model\ChangedObject;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditConfiguration;
 use DreamCommerce\Component\ObjectAudit\Repository\RevisionRepositoryInterface;
-use Exception;
-use RuntimeException;
 use Sylius\Component\Resource\Factory\FactoryInterface;
 use Webmozart\Assert\Assert;
 
@@ -108,7 +101,6 @@ class ORMAuditManager extends BaseObjectAuditManager
         Assert::nullOrIsInstanceOf($auditPersistManager, EntityManagerInterface::class);
 
         /** @var EntityManagerInterface $auditPersistManager */
-
         $revisionClass = $configuration->getRevisionClass();
         $this->revisionMetadata = $auditPersistManager->getClassMetadata($revisionClass);
         $this->auditQuoteStrategy = $auditPersistManager->getConfiguration()->getQuoteStrategy();
@@ -144,7 +136,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         $queryBuilder->setMaxResults(1);
 
         if (!is_array($objectIds)) {
-            if(count($classMetadata->identifier) > 1) {
+            if (count($classMetadata->identifier) > 1) {
                 throw new \Exception(); // TODO
             }
             $entityIdentifiers = $classMetadata->getIdentifierColumnNames();
@@ -152,20 +144,20 @@ class ORMAuditManager extends BaseObjectAuditManager
         }
 
         $revisionColumns = $this->getAuditRevisionColumns();
-        foreach($revisionColumns as $revisionColumn) {
-            if(isset($objectIds[$revisionColumn])) {
+        foreach ($revisionColumns as $revisionColumn) {
+            if (isset($objectIds[$revisionColumn])) {
                 unset($objectIds[$revisionColumn]);
             }
         }
 
         $fieldRevisionTypeName = $configuration->getRevisionTypeFieldName();
-        $queryBuilder->addSelect('e.' . $fieldRevisionTypeName);
+        $queryBuilder->addSelect('e.'.$fieldRevisionTypeName);
 
-        if(count($classMetadata->identifier) !== count($objectIds)) {
+        if (count($classMetadata->identifier) !== count($objectIds)) {
             throw new \Exception(); // TODO
         } else {
             $entityIdentifiers = $classMetadata->getIdentifierColumnNames();
-            if(!empty(array_diff($entityIdentifiers, array_keys($objectIds)))) {
+            if (!empty(array_diff($entityIdentifiers, array_keys($objectIds)))) {
                 throw new \Exception(); // TODO
             }
         }
@@ -173,7 +165,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         foreach ($revisionColumns as $revisionColumn) {
             $queryBuilder->andWhere('e.'.$revisionColumn.' <= :'.$revisionColumn);
             $queryBuilder->addSelect('e.'.$revisionColumn);
-            $queryBuilder->orderBy('e.' . $revisionColumn, 'DESC');
+            $queryBuilder->orderBy('e.'.$revisionColumn, 'DESC');
         }
 
         foreach ($classMetadata->identifier as $idField) {
@@ -185,8 +177,8 @@ class ORMAuditManager extends BaseObjectAuditManager
                 continue;
             }
 
-            $queryBuilder->andWhere('e.' . $columnName . ' = :' . $columnName);
-            $queryBuilder->addSelect('e.' . $columnName);
+            $queryBuilder->andWhere('e.'.$columnName.' = :'.$columnName);
+            $queryBuilder->addSelect('e.'.$columnName);
         }
 
         $columnMap = array();
@@ -328,7 +320,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         }
 
         foreach ($fields as $column => $value) {
-            $queryBuilder->andWhere($column . ' = ' . $queryBuilder->createPositionalParameter($value));
+            $queryBuilder->andWhere($column.' = '.$queryBuilder->createPositionalParameter($value));
         }
 
         //we check for revisions greater than current belonging to other entities
@@ -367,7 +359,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         $entities = array();
         foreach ($result as $identifiers) {
             $key = null;
-            if($indexBy !== null) {
+            if ($indexBy !== null) {
                 $key = $identifiers[$indexBy];
                 unset($identifiers[$indexBy]);
             }
@@ -617,11 +609,10 @@ class ORMAuditManager extends BaseObjectAuditManager
             ->select($revisionFieldName)
             ->from($tableName, 'e');
 
-        foreach($revisionIdentifierNames as $revisionIdentifierName) {
+        foreach ($revisionIdentifierNames as $revisionIdentifierName) {
             $revisionIdentifierName = $this->getRevisionColumnName($revisionIdentifierName);
             $queryBuilder->addSelect($revisionIdentifierName);
             $queryBuilder->orderBy($revisionIdentifierName, 'DESC');
-
         }
 
         if (!is_array($objectIds)) {
@@ -632,7 +623,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         $queryBuilder->setParameters($objectIds);
         $entityColumns = $classMetadata->getIdentifierColumnNames();
         foreach ($entityColumns as $entityColumn) {
-            $queryBuilder->andWhere($entityColumn . ' = :' . $entityColumn);
+            $queryBuilder->andWhere($entityColumn.' = :'.$entityColumn);
         }
         $columnMap = array();
         foreach ($classMetadata->fieldNames as $columnName => $field) {
@@ -643,8 +634,8 @@ class ORMAuditManager extends BaseObjectAuditManager
             ));
             $columnMap[$field] = $this->auditPlatform->getSQLResultCasing($columnName);
         }
-        foreach ($classMetadata->associationMappings AS $assoc) {
-            if (($assoc['type'] & ClassMetadata::TO_ONE) == 0 || ! $assoc['isOwningSide']) {
+        foreach ($classMetadata->associationMappings as $assoc) {
+            if (($assoc['type'] & ClassMetadata::TO_ONE) == 0 || !$assoc['isOwningSide']) {
                 continue;
             }
             foreach ($assoc['targetToSourceKeyColumns'] as $sourceCol) {
@@ -659,8 +650,8 @@ class ORMAuditManager extends BaseObjectAuditManager
 
         while ($row = $stmt->fetch(Query::HYDRATE_ARRAY)) {
             $revisionIdentifiers = array();
-            foreach($revisionIdentifierNames as $revisionIdentifierName) {
-                if(isset($row[$revisionIdentifierName])) {
+            foreach ($revisionIdentifierNames as $revisionIdentifierName) {
+                if (isset($row[$revisionIdentifierName])) {
                     $revisionIdentifiers[$revisionIdentifierName] = $row[$revisionIdentifierName];
                     unset($row[$revisionIdentifierName]);
                 }
@@ -678,7 +669,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             $entity = $this->objectAuditFactory->createNewAudit($className, $columnMap, $row, $revision, $this, $persistManager);
 
             $identifiers = array();
-            foreach ($classMetadata->identifier AS $idField) {
+            foreach ($classMetadata->identifier as $idField) {
                 $identifiers[$idField] = $row[$idField];
             }
 
@@ -692,6 +683,7 @@ class ORMAuditManager extends BaseObjectAuditManager
                 $objectRevType
             );
         }
+
         return $result;
     }
 
@@ -741,7 +733,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         $types = array($configuration->getRevisionTypeFieldType());
         $fields = array();
 
-        foreach($this->revisionMetadata->getIdentifierValues($revision) as $identifier) {
+        foreach ($this->revisionMetadata->getIdentifierValues($revision) as $identifier) {
             $params[] = $identifier;
             $types[] = \PDO::PARAM_INT;
         }
@@ -750,14 +742,14 @@ class ORMAuditManager extends BaseObjectAuditManager
             if ($classMetadata->isInheritanceTypeJoined() && $classMetadata->isInheritedAssociation($field)) {
                 continue;
             }
-            if (! (($assoc['type'] & ClassMetadata::TO_ONE) > 0 && $assoc['isOwningSide'])) {
+            if (!(($assoc['type'] & ClassMetadata::TO_ONE) > 0 && $assoc['isOwningSide'])) {
                 continue;
             }
 
             $data = null;
-            if(isset($identifiers[$field])) {
+            if (isset($identifiers[$field])) {
                 $data = $identifiers[$field];
-            } elseif(isset($entityData[$field])) {
+            } elseif (isset($entityData[$field])) {
                 $data = $entityData[$field];
             }
 
@@ -784,7 +776,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             }
             if ($classMetadata->isInheritanceTypeJoined()
                 && $classMetadata->isInheritedField($field)
-                && ! $classMetadata->isIdentifier($field)
+                && !$classMetadata->isIdentifier($field)
             ) {
                 continue;
             }
@@ -919,7 +911,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     }
 
     /**
-     * @param string                $columnName
+     * @param string $columnName
      *
      * @return string
      */
@@ -932,12 +924,13 @@ class ORMAuditManager extends BaseObjectAuditManager
     }
 
     /**
-     * @param string $tableName
-     * @param array $foreignKeys
-     * @param array $revisionIdentifiers
-     * @param array $identifierColumnNames
-     * @param Connection $connection
+     * @param string       $tableName
+     * @param array        $foreignKeys
+     * @param array        $revisionIdentifiers
+     * @param array        $identifierColumnNames
+     * @param Connection   $connection
      * @param QueryBuilder $parentQueryBuilder
+     *
      * @return QueryBuilder
      */
     protected function createBelongingToOtherEntitiesQueryBuilder(
@@ -967,8 +960,8 @@ class ORMAuditManager extends BaseObjectAuditManager
         //master entity query, not equals
         $notEqualParts = $nullParts = array();
         foreach ($foreignKeys as $column => $value) {
-            $notEqualParts[] = $column . ' <> ' . $parentQueryBuilder->createPositionalParameter($value);
-            $nullParts[] = $column . ' IS NULL';
+            $notEqualParts[] = $column.' <> '.$parentQueryBuilder->createPositionalParameter($value);
+            $nullParts[] = $column.' IS NULL';
         }
 
         $expr = $queryBuilder->expr();
@@ -983,11 +976,12 @@ class ORMAuditManager extends BaseObjectAuditManager
     }
 
     /**
-     * @param string $tableName
-     * @param array $revisionIdentifiers
-     * @param array $identifierColumnNames
-     * @param Connection $connection
+     * @param string       $tableName
+     * @param array        $revisionIdentifiers
+     * @param array        $identifierColumnNames
+     * @param Connection   $connection
      * @param QueryBuilder $parentQueryBuilder
+     *
      * @return QueryBuilder
      */
     protected function createDeletedRevisionsQueryBuilder(
@@ -1032,6 +1026,7 @@ class ORMAuditManager extends BaseObjectAuditManager
      * @param ClassMetadata $classMetadata
      *
      * @return string
+     *
      * @throws \Doctrine\DBAL\DBALException
      */
     protected function getInsertRevisionSQL(ClassMetadata $classMetadata)
@@ -1043,7 +1038,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             $configuration = $this->configuration;
             $params = array($configuration->getRevisionTypeFieldName());
 
-            foreach($this->revisionMetadata->getIdentifierFieldNames() as $identifier) {
+            foreach ($this->revisionMetadata->getIdentifierFieldNames() as $identifier) {
                 $params[] = $this->getRevisionColumnName($identifier);
             }
 
@@ -1067,12 +1062,12 @@ class ORMAuditManager extends BaseObjectAuditManager
                 }
                 if ($classMetadata->isInheritanceTypeJoined()
                     && $classMetadata->isInheritedField($field)
-                    && ! $classMetadata->isIdentifier($field)
+                    && !$classMetadata->isIdentifier($field)
                 ) {
                     continue;
                 }
                 $type = Type::getType($classMetadata->fieldMappings[$field]['type']);
-                $placeholders[] = (! empty($classMetadata->fieldMappings[$field]['requireSQLConversion']))
+                $placeholders[] = (!empty($classMetadata->fieldMappings[$field]['requireSQLConversion']))
                     ? $type->convertToDatabaseValueSQL('?', $this->auditPlatform)
                     : '?';
                 $params[] = $this->auditQuoteStrategy->getColumnName($field, $classMetadata, $this->auditPlatform);
@@ -1084,7 +1079,7 @@ class ORMAuditManager extends BaseObjectAuditManager
                 $placeholders[] = '?';
             }
 
-            $sql = 'INSERT INTO ' . $auditTableName . ' (' . implode(', ', $params) . ') VALUES (' . implode(', ', $placeholders) . ')';
+            $sql = 'INSERT INTO '.$auditTableName.' ('.implode(', ', $params).') VALUES ('.implode(', ', $placeholders).')';
             $this->insertRevisionSQL[$classMetadata->name] = $sql;
         }
 
@@ -1096,10 +1091,10 @@ class ORMAuditManager extends BaseObjectAuditManager
      */
     protected function getAuditRevisionColumns(): array
     {
-        if($this->auditRevisionColumns === null) {
+        if ($this->auditRevisionColumns === null) {
             $this->auditRevisionColumns = array();
             $revisionColumns = $this->revisionMetadata->getIdentifierColumnNames();
-            foreach($revisionColumns as $revisionColumn) {
+            foreach ($revisionColumns as $revisionColumn) {
                 $this->auditRevisionColumns[] = $this->getRevisionColumnName($revisionColumn);
             }
         }

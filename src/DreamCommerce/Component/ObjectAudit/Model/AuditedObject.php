@@ -62,20 +62,20 @@ class AuditedObject
     private $persistManager;
 
     /**
-     * @param object $object
-     * @param string $className
-     * @param array $identifiers
+     * @param object            $object
+     * @param string            $className
+     * @param array             $identifiers
      * @param RevisionInterface $revision
-     * @param ObjectManager $persistManager
+     * @param ObjectManager     $persistManager
      */
     public function __construct($object, string $className = null, array $identifiers, RevisionInterface $revision,
                                 ObjectManager $persistManager)
     {
         Assert::object($object);
 
-        if($className === null) {
+        if ($className === null) {
             $className = get_class($object);
-        } elseif(!($object instanceof $className)) {
+        } elseif (!($object instanceof $className)) {
             throw new InvalidArgumentException();
         }
 

@@ -69,7 +69,7 @@ class CreateSchemaSubscriber implements EventSubscriber
     {
         /** @var ORMAuditManager $auditObjectManager */
         $auditObjectManager = $this->container->get('dream_commerce_object_audit.manager');
-        if($auditObjectManager === null) {
+        if ($auditObjectManager === null) {
             return;
         }
 

@@ -77,7 +77,7 @@ class ResourceHistoryCommand extends BaseCommand
         $dumper = new CliDumper();
 
         $changedResources = $resourceAuditManager->getResourceHistory($resourceName, $resourceId);
-        foreach($changedResources as $changedResource) {
+        foreach ($changedResources as $changedResource) {
             $dumper->dump($cloner->cloneVar($changedResource->getRevision()));
             $rows = array();
 

@@ -50,6 +50,7 @@ class AuditedCollectionException extends AuditException
 
     /**
      * @param string $className
+     *
      * @return $this
      */
     public function setClassName(string $className)
@@ -61,11 +62,12 @@ class AuditedCollectionException extends AuditException
 
     /**
      * @param string $className
+     *
      * @return AuditedCollectionException
      */
     public static function readOnly(string $className): AuditedCollectionException
     {
-        $exception = new self('Collection "' . $className . '" is read-only', self::CODE_COLLECTION_IS_READ_ONLY);
+        $exception = new self('Collection "'.$className.'" is read-only', self::CODE_COLLECTION_IS_READ_ONLY);
         $exception->setClassName($className);
 
         return $exception;
@@ -73,12 +75,13 @@ class AuditedCollectionException extends AuditException
 
     /**
      * @param string $className
-     * @param int $offset
+     * @param int    $offset
+     *
      * @return AuditedCollectionException
      */
     public static function forNotDefinedOffset(string $className, int $offset): AuditedCollectionException
     {
-        $exception = new self('Offset "' . $offset . '" is not defined', self::CODE_NOT_DEFINED_OFFSET);
+        $exception = new self('Offset "'.$offset.'" is not defined', self::CODE_NOT_DEFINED_OFFSET);
         $exception->setClassName($className);
 
         return $exception;

@@ -59,12 +59,12 @@ interface ObjectAuditManagerInterface
     public function findObjectByRevision(string $className, $objectIds, RevisionInterface $revision, ObjectManager $persistManager = null, array $options = array());
 
     /**
-     * @param string $className
-     * @param array $fields
-     * @param string|null $indexBy
-     * @param RevisionInterface $revision
+     * @param string             $className
+     * @param array              $fields
+     * @param string|null        $indexBy
+     * @param RevisionInterface  $revision
      * @param ObjectManager|null $persistManager
-     * @param array $options
+     * @param array              $options
      *
      * @throws ObjectNotAuditedException
      *
@@ -107,8 +107,8 @@ interface ObjectAuditManagerInterface
     public function findObjectRevisions(string $className, $objectIds, ObjectManager $persistManager = null): Collection;
 
     /**
-     * @param string $className
-     * @param mixed  $objectIds
+     * @param string             $className
+     * @param mixed              $objectIds
      * @param ObjectManager|null $persistManager
      * @param array              $options
      *

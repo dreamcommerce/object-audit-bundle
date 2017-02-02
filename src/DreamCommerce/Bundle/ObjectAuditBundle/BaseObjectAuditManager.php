@@ -32,13 +32,9 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\ObjectManager;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
-use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotFoundException;
-use DreamCommerce\Component\ObjectAudit\Factory\AuditObjectFactoryInterface;
 use DreamCommerce\Component\ObjectAudit\Factory\ObjectAuditFactoryInterface;
-use DreamCommerce\Component\ObjectAudit\Model\ChangedObject;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditConfiguration;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditManagerInterface;

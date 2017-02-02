@@ -90,6 +90,7 @@ class ObjectAuditConfiguration
 
     /**
      * @param string $revisionClass
+     *
      * @return $this
      */
     public function setRevisionClass(string $revisionClass)

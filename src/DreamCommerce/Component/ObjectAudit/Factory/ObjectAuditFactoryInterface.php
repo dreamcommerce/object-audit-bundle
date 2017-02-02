@@ -11,12 +11,13 @@ use Sylius\Component\Resource\Factory\FactoryInterface;
 interface ObjectAuditFactoryInterface extends FactoryInterface
 {
     /**
-     * @param string $className
-     * @param array $columnMap
-     * @param array $data
-     * @param RevisionInterface $revision
+     * @param string                      $className
+     * @param array                       $columnMap
+     * @param array                       $data
+     * @param RevisionInterface           $revision
      * @param ObjectAuditManagerInterface $objectAuditManager
-     * @param ObjectManager $objectManager
+     * @param ObjectManager               $objectManager
+     *
      * @return stdClass
      */
     public function createNewAudit(string $className, array $columnMap, array $data, RevisionInterface $revision,

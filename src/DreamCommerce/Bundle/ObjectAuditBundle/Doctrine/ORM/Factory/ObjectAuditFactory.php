@@ -46,7 +46,6 @@ final class ObjectAuditFactory implements ObjectAuditFactoryInterface
         $this->entityCache = array();
     }
 
-
     /**
      * Simplified and stolen code from UnitOfWork::createEntity.
      *
@@ -157,7 +156,7 @@ final class ObjectAuditFactory implements ObjectAuditFactoryInterface
 
                     $pk = array_filter($pk);
 
-                    if (! empty($pk)) {
+                    if (!empty($pk)) {
                         try {
                             $value = $objectAuditManager->findObjectByRevision(
                                 $targetClass->name,
@@ -182,7 +181,7 @@ final class ObjectAuditFactory implements ObjectAuditFactoryInterface
                                 $associatedId[$targetClass->fieldNames[$targetColumn]] = $joinColumnValue;
                             }
                         }
-                        if (! empty($associatedId)) {
+                        if (!empty($associatedId)) {
                             $value = $persistManager->getReference($targetClass->name, $associatedId);
                         }
                     } else {
@@ -204,7 +203,7 @@ final class ObjectAuditFactory implements ObjectAuditFactoryInterface
                     }
 
                     $indexBy = null;
-                    if(isset($assoc['indexBy'])) {
+                    if (isset($assoc['indexBy'])) {
                         $indexBy = $assoc['indexBy'];
                     }
 
@@ -234,9 +233,9 @@ final class ObjectAuditFactory implements ObjectAuditFactoryInterface
     }
 
     /**
-     * @param ClassMetadata $classMetadata
-     * @param ClassMetadata $revisionMetadata
-     * @param array         $data
+     * @param ClassMetadata     $classMetadata
+     * @param ClassMetadata     $revisionMetadata
+     * @param array             $data
      * @param RevisionInterface $revision
      *
      * @return string
@@ -261,6 +260,6 @@ final class ObjectAuditFactory implements ObjectAuditFactoryInterface
         }
         ksort($keyParts);
 
-        return $classMetadata->name . '_' . implode('_', array_values($keyParts)) . '_' . implode('_', array_values($revisionIds));
+        return $classMetadata->name.'_'.implode('_', array_values($keyParts)).'_'.implode('_', array_values($revisionIds));
     }
 }

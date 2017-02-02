@@ -36,7 +36,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\UnitOfWork;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORMAuditConfiguration;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORMAuditManager;
@@ -78,21 +77,22 @@ class LogRevisionsSubscriber implements EventSubscriber
     {
         return array(
             Events::onFlush,
-            Events::postFlush
+            Events::postFlush,
         );
     }
 
     /**
      * @param PostFlushEventArgs $eventArgs
+     *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Exception
      */
     public function postFlush(PostFlushEventArgs $eventArgs)
     {
-        if(count($this->changedObjects) > 0) {
+        if (count($this->changedObjects) > 0) {
             /** @var ORMAuditManager $auditObjectManager */
             $auditObjectManager = $this->container->get('dream_commerce_object_audit.manager');
-            if($auditObjectManager === null) {
+            if ($auditObjectManager === null) {
                 return;
             }
 
@@ -107,7 +107,7 @@ class LogRevisionsSubscriber implements EventSubscriber
                 );
 
                 $changedIdentifiers = $uow->getEntityIdentifier($changedObject->getObject());
-                if($changedIdentifiers !== null) {
+                if ($changedIdentifiers !== null) {
                     $revisionData = array_merge(
                         $revisionData,
                         $changedIdentifiers
@@ -135,7 +135,7 @@ class LogRevisionsSubscriber implements EventSubscriber
     {
         /** @var ORMAuditManager $auditObjectManager */
         $auditObjectManager = $this->container->get('dream_commerce_object_audit.manager');
-        if($auditObjectManager === null) {
+        if ($auditObjectManager === null) {
             return;
         }
 
@@ -227,7 +227,7 @@ class LogRevisionsSubscriber implements EventSubscriber
             );
         }
 
-        if(count($this->changedObjects) > 0) {
+        if (count($this->changedObjects) > 0) {
             $auditObjectManager->saveCurrentRevision();
         }
     }

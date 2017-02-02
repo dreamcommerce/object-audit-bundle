@@ -57,10 +57,11 @@ interface ResourceAuditManagerInterface
     public function findResourceByRevision(string $resourceName, int $resourceId, RevisionInterface $revision, array $options = array());
 
     /**
-     * @param string $resourceName
-     * @param array $fields
+     * @param string            $resourceName
+     * @param array             $fields
      * @param RevisionInterface $revision
-     * @param array $options
+     * @param array             $options
+     *
      * @return array
      */
     public function findResourcesByFieldsAndRevision(string $resourceName, array $fields, RevisionInterface $revision, array $options = array()): array;
@@ -98,8 +99,8 @@ interface ResourceAuditManagerInterface
 
     /**
      * @param string $resourceName
-     * @param int $resourceId
-     * @param array $options
+     * @param int    $resourceId
+     * @param array  $options
      *
      * @throws ResourceNotFoundException
      * @throws ResourceNotAuditedException

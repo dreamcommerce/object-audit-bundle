@@ -75,6 +75,7 @@ class ChangedObject extends AuditedObject
 
     /**
      * @param array $revisionData
+     *
      * @return $this
      */
     public function setRevisionData(array $revisionData)
