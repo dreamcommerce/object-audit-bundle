@@ -32,6 +32,7 @@ namespace DreamCommerce\Tests\ObjectAuditBundle;
 
 use DateTime;
 use Doctrine\Common\Collections\Collection;
+use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Core\PetAudit;
 use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\RevisionTest;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotFoundException;
@@ -42,7 +43,6 @@ use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Core\ArticleAudit;
 use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Core\Cat;
 use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Core\Dog;
 use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Core\Fox;
-use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Core\PetAudit;
 use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Core\ProfileAudit;
 use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Core\Rabbit;
 use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Core\UserAudit;
@@ -166,7 +166,10 @@ class CoreTest extends BaseTest
         $this->expectException(ObjectNotFoundException::class);
         $this->expectExceptionCode(ObjectNotFoundException::CODE_OBJECT_NOT_EXIST_AT_SPECIFIC_REVISION);
 
-        $revision = $this->getRevision(1);
+        $revision = new RevisionTest();
+        $this->em->persist($revision);
+        $this->em->flush();
+
         $this->auditManager->findObjectByRevision(UserAudit::class, 1, $revision);
     }
 
@@ -180,7 +183,10 @@ class CoreTest extends BaseTest
         $this->expectException(ObjectNotAuditedException::class);
         $this->expectExceptionCode(ObjectNotAuditedException::CODE_OBJECT_IS_NOT_AUDITED);
 
-        $revision = $this->getRevision(1);
+        $revision = new RevisionTest();
+        $this->em->persist($revision);
+        $this->em->flush();
+
         $this->auditManager->findObjectByRevision("stdClass", 1, $revision);
     }
 
@@ -202,10 +208,10 @@ class CoreTest extends BaseTest
         $this->assertEquals(2, count($revisions));
         $this->assertContainsOnly(RevisionInterface::class, $revisions);
 
-        $this->assertEquals(2, $revisions[0]->getId());
+        $this->assertEquals(1, $revisions[0]->getId());
         $this->assertInstanceOf(DateTime::class, $revisions[0]->getCreatedAt());
 
-        $this->assertEquals(1, $revisions[1]->getRev());
+        $this->assertEquals(2, $revisions[1]->getId());
         $this->assertInstanceOf(DateTime::class, $revisions[1]->getCreatedAt());
     }
 
@@ -232,19 +238,26 @@ class CoreTest extends BaseTest
 
         //duplicated entries means a bug with discriminators
         $this->assertEquals(6, count($changedEntities));
+
+        usort($changedEntities, function(ChangedObject $a, ChangedObject $b) {
+            return strcmp($a->getClassName(), $b->getClassName());
+        });
+
         $this->assertContainsOnly(ChangedObject::class, $changedEntities);
 
         $this->assertEquals($revision, $changedEntities[0]->getRevision());
         $this->assertEquals(RevisionInterface::ACTION_INSERT, $changedEntities[0]->getRevisionType());
+        $this->assertEquals(ArticleAudit::class, $changedEntities[0]->getClassName());
         $this->assertInstanceOf(ArticleAudit::class, $changedEntities[0]->getObject());
         $this->assertEquals(1, $changedEntities[0]->getObject()->getId());
-        $this->assertEquals($this->em, $changedEntities[0]->getObjectManager());
+        $this->assertEquals($this->em, $changedEntities[0]->getPersistManager());
 
         $this->assertEquals($revision, $changedEntities[1]->getRevision());
         $this->assertEquals(RevisionInterface::ACTION_INSERT, $changedEntities[1]->getRevisionType());
-        $this->assertInstanceOf(UserAudit::class, $changedEntities[1]->getObject());
+        $this->assertEquals(Cat::class, $changedEntities[1]->getClassName());
+        $this->assertInstanceOf(Cat::class, $changedEntities[1]->getObject());
         $this->assertEquals(1, $changedEntities[1]->getObject()->getId());
-        $this->assertEquals($this->em, $changedEntities[1]->getObjectManager());
+        $this->assertEquals($this->em, $changedEntities[1]->getPersistManager());
     }
 
     public function testNotVersionedRelationFind()

@@ -36,6 +36,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\UnitOfWork;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORMAuditConfiguration;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORMAuditManager;
@@ -91,16 +92,29 @@ class LogRevisionsSubscriber implements EventSubscriber
         if(count($this->changedObjects) > 0) {
             /** @var ORMAuditManager $auditObjectManager */
             $auditObjectManager = $this->container->get('dream_commerce_object_audit.manager');
+            if($auditObjectManager === null) {
+                return;
+            }
 
             foreach ($this->changedObjects as $changedObject) {
                 /** @var EntityManagerInterface $entityManager */
-                $entityManager = $changedObject->getObjectManager();
+                $entityManager = $changedObject->getPersistManager();
                 $uow = $entityManager->getUnitOfWork();
 
-                $changedObject->setRevisionData(array_merge(
+                $revisionData = array_merge(
                     $changedObject->getRevisionData(),
-                    $uow->getEntityIdentifier($changedObject->getObject())
-                ));
+                    $changedObject->getIdentifiers()
+                );
+
+                $changedIdentifiers = $uow->getEntityIdentifier($changedObject->getObject());
+                if($changedIdentifiers !== null) {
+                    $revisionData = array_merge(
+                        $revisionData,
+                        $changedIdentifiers
+                    );
+                }
+
+                $changedObject->setRevisionData($revisionData);
 
                 $this->eventDispatcher->dispatch(
                     DreamCommerceObjectAuditEvents::OBJECT_CHANGED,
@@ -121,6 +135,9 @@ class LogRevisionsSubscriber implements EventSubscriber
     {
         /** @var ORMAuditManager $auditObjectManager */
         $auditObjectManager = $this->container->get('dream_commerce_object_audit.manager');
+        if($auditObjectManager === null) {
+            return;
+        }
 
         /** @var ORMAuditConfiguration $configuration */
         $configuration = $auditObjectManager->getConfiguration();
@@ -131,15 +148,17 @@ class LogRevisionsSubscriber implements EventSubscriber
         $currentRevision = $auditObjectManager->getCurrentRevision();
 
         foreach ($uow->getScheduledEntityInsertions() as $entity) {
-            $className = get_class($entity);
+            $className = ClassUtils::getRealClass(get_class($entity));
             if (!$configuration->isClassAudited($className)) {
                 continue;
             }
             $entityManager = $eventArgs->getEntityManager();
+            $classMetadata = $entityManager->getClassMetadata($className);
 
             $this->changedObjects[spl_object_hash($entity)] = new ChangedObject(
                 $entity,
                 $className,
+                $classMetadata->getIdentifierValues($entity),
                 $currentRevision,
                 $entityManager,
                 $this->getOriginalEntityData($entity, $entityManager),
@@ -148,7 +167,7 @@ class LogRevisionsSubscriber implements EventSubscriber
         }
 
         foreach ($uow->getScheduledEntityUpdates() as $entity) {
-            $className = get_class($entity);
+            $className = ClassUtils::getRealClass(get_class($entity));
             if (!$configuration->isClassAudited($className)) {
                 continue;
             }
@@ -168,9 +187,12 @@ class LogRevisionsSubscriber implements EventSubscriber
                 return;
             }
 
+            $classMetadata = $entityManager->getClassMetadata($className);
+
             $this->changedObjects[spl_object_hash($entity)] = new ChangedObject(
                 $entity,
                 $className,
+                $classMetadata->getIdentifierValues($entity),
                 $currentRevision,
                 $entityManager,
                 $this->getOriginalEntityData($entity, $entityManager),
@@ -181,21 +203,23 @@ class LogRevisionsSubscriber implements EventSubscriber
         $processedEntities = array();
 
         foreach ($uow->getScheduledEntityDeletions() as $entity) {
-            $className = get_class($entity);
+            $className = ClassUtils::getRealClass(get_class($entity));
             if (!$configuration->isClassAudited($className)) {
                 continue;
             }
 
             //doctrine is fine deleting elements multiple times. We are not.
-            $hash = $this->getHash($entity, $uow);
+            $hash = $this->getHash($entity, $className, $uow);
             if (in_array($hash, $processedEntities)) {
                 continue;
             }
             $processedEntities[] = $hash;
+            $classMetadata = $entityManager->getClassMetadata($className);
 
             $this->changedObjects[spl_object_hash($entity)] = new ChangedObject(
                 $entity,
                 $className,
+                $classMetadata->getIdentifierValues($entity),
                 $currentRevision,
                 $entityManager,
                 $this->getOriginalEntityData($entity, $entityManager),
@@ -230,16 +254,17 @@ class LogRevisionsSubscriber implements EventSubscriber
 
     /**
      * @param object     $entity
+     * @param string     $className
      * @param UnitOfWork $uow
      *
      * @return string
      */
-    private function getHash($entity, UnitOfWork $uow)
+    private function getHash($entity, string $className, UnitOfWork $uow)
     {
         return implode(
             ' ',
             array_merge(
-                array(ClassUtils::getRealClass(get_class($entity))),
+                array($className),
                 $uow->getEntityIdentifier($entity)
             )
         );

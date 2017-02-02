@@ -48,12 +48,13 @@ class ChangedObject extends AuditedObject
     /**
      * @param object            $object
      * @param string            $className
+     * @param array             $identifiers
      * @param RevisionInterface $revision
      * @param ObjectManager     $objectManager
      * @param array             $revisionData
      * @param string            $revisionType
      */
-    public function __construct($object, string $className = null, RevisionInterface $revision,
+    public function __construct($object, string $className = null, array $identifiers, RevisionInterface $revision,
                                 ObjectManager $objectManager, array $revisionData, string $revisionType)
     {
         Assert::oneOf($revisionType, array(RevisionInterface::ACTION_INSERT, RevisionInterface::ACTION_UPDATE, RevisionInterface::ACTION_DELETE));
@@ -61,7 +62,7 @@ class ChangedObject extends AuditedObject
         $this->revisionData = $revisionData;
         $this->revisionType = $revisionType;
 
-        parent::__construct($object, $className, $revision, $objectManager);
+        parent::__construct($object, $className, $identifiers, $revision, $objectManager);
     }
 
     /**

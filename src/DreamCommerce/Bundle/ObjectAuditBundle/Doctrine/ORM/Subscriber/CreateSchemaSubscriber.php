@@ -69,6 +69,9 @@ class CreateSchemaSubscriber implements EventSubscriber
     {
         /** @var ORMAuditManager $auditObjectManager */
         $auditObjectManager = $this->container->get('dream_commerce_object_audit.manager');
+        if($auditObjectManager === null) {
+            return;
+        }
 
         /** @var ORMAuditConfiguration $configuration */
         $configuration = $auditObjectManager->getConfiguration();
@@ -82,11 +85,11 @@ class CreateSchemaSubscriber implements EventSubscriber
             throw new RuntimeException(sprintf('Inheritance type "%s" is not yet supported', $classMetadata->inheritanceType));
         }
 
-        /** @var EntityManagerInterface $objectManager */
-        $objectManager = $auditObjectManager->getAuditObjectManager();
+        /** @var EntityManagerInterface $persistManager */
+        $persistManager = $auditObjectManager->getAuditPersistManager();
         $auditTableName = $auditObjectManager->getAuditTableNameForClass($classMetadata->name);
-        $revisionClass = $auditObjectManager->getRevisionClass();
-        $revisionClassMetadata = $objectManager->getClassMetadata($revisionClass);
+        $revisionClass = $configuration->getRevisionClass();
+        $revisionClassMetadata = $persistManager->getClassMetadata($revisionClass);
 
         $schema = $eventArgs->getSchema();
         $entityTable = $eventArgs->getClassTable();

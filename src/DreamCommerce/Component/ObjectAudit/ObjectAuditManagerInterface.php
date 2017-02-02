@@ -47,7 +47,7 @@ interface ObjectAuditManagerInterface
      * @param string             $className
      * @param mixed              $objectIds
      * @param RevisionInterface  $revision
-     * @param ObjectManager|null $objectManager
+     * @param ObjectManager|null $persistManager
      * @param array              $options
      *
      * @throws ObjectDeletedException
@@ -56,60 +56,60 @@ interface ObjectAuditManagerInterface
      *
      * @return object
      */
-    public function findObjectByRevision(string $className, $objectIds, RevisionInterface $revision, ObjectManager $objectManager = null, array $options = array());
+    public function findObjectByRevision(string $className, $objectIds, RevisionInterface $revision, ObjectManager $persistManager = null, array $options = array());
 
     /**
      * @param string $className
      * @param array $fields
      * @param string|null $indexBy
      * @param RevisionInterface $revision
-     * @param ObjectManager|null $objectManager
+     * @param ObjectManager|null $persistManager
      * @param array $options
      *
      * @throws ObjectNotAuditedException
      *
      * @return array
      */
-    public function findObjectsByFieldsAndRevision(string $className, array $fields, string $indexBy = null, RevisionInterface $revision, ObjectManager $objectManager = null, array $options = array()): array;
+    public function findObjectsByFieldsAndRevision(string $className, array $fields, string $indexBy = null, RevisionInterface $revision, ObjectManager $persistManager = null, array $options = array()): array;
 
     /**
      * @param RevisionInterface  $revision
-     * @param ObjectManager|null $objectManager
+     * @param ObjectManager|null $persistManager
      * @param array              $options
      *
      * @return ChangedObject[]
      */
-    public function findAllObjectsChangedAtRevision(RevisionInterface $revision, ObjectManager $objectManager = null, array $options = array()): array;
+    public function findAllObjectsChangedAtRevision(RevisionInterface $revision, ObjectManager $persistManager = null, array $options = array()): array;
 
     /**
      * @param string             $className
      * @param RevisionInterface  $revision
-     * @param ObjectManager|null $objectManager
+     * @param ObjectManager|null $persistManager
      * @param array              $options
      *
      * @throws ObjectNotAuditedException
      *
      * @return ChangedObject[]
      */
-    public function findObjectsChangedAtRevision(string $className, RevisionInterface $revision, ObjectManager $objectManager = null, array $options = array()): array;
+    public function findObjectsChangedAtRevision(string $className, RevisionInterface $revision, ObjectManager $persistManager = null, array $options = array()): array;
 
     /**
      * Find all revisions that were made of object class with given id.
      *
      * @param string             $className
-     * @param mixed              $objectId
-     * @param ObjectManager|null $objectManager
+     * @param mixed              $objectIds
+     * @param ObjectManager|null $persistManager
      *
      * @throws ObjectNotAuditedException
      *
      * @return Collection|RevisionInterface[]
      */
-    public function findObjectRevisions(string $className, $objectId, ObjectManager $objectManager = null): Collection;
+    public function findObjectRevisions(string $className, $objectIds, ObjectManager $persistManager = null): Collection;
 
     /**
      * @param string $className
-     * @param mixed  $objectId
-     * @param ObjectManager|null $objectManager
+     * @param mixed  $objectIds
+     * @param ObjectManager|null $persistManager
      * @param array              $options
      *
      * @return ChangedObject[]
@@ -117,34 +117,34 @@ interface ObjectAuditManagerInterface
      * @throws ObjectNotFoundException
      * @throws ObjectNotAuditedException
      */
-    public function getObjectHistory(string $className, $objectId, ObjectManager $objectManager = null, array $options = array()): array;
+    public function getObjectHistory(string $className, $objectIds, ObjectManager $persistManager = null, array $options = array()): array;
 
     /**
      * Gets the initialize revision of the object with given ID.
      *
      * @param string             $className
-     * @param mixed              $objectId
-     * @param ObjectManager|null $objectManager
+     * @param mixed              $objectIds
+     * @param ObjectManager|null $persistManager
      *
      * @throws ObjectNotAuditedException
      *
      * @return RevisionInterface|null
      */
-    public function getInitializeObjectRevision(string $className, $objectId, ObjectManager $objectManager = null);
+    public function getInitializeObjectRevision(string $className, $objectIds, ObjectManager $persistManager = null);
 
     /**
      * Gets the current revision of the object with given ID.
      *
      * @param string             $className
-     * @param mixed              $objectId
-     * @param ObjectManager|null $objectManager
+     * @param mixed              $objectIds
+     * @param ObjectManager|null $persistManager
      *
      * @throws ObjectNotAuditedException
      * @throws ObjectNotFoundException
      *
      * @return RevisionInterface|null
      */
-    public function getCurrentObjectRevision(string $className, $objectId, ObjectManager $objectManager = null);
+    public function getCurrentObjectRevision(string $className, $objectIds, ObjectManager $persistManager = null);
 
     /**
      * @param ChangedObject $changedObject
@@ -160,26 +160,26 @@ interface ObjectAuditManagerInterface
      * an object with a given id.
      *
      * @param string             $className
-     * @param mixed              $objectId
+     * @param mixed              $objectIds
      * @param RevisionInterface  $oldRevision
      * @param RevisionInterface  $newRevision
-     * @param ObjectManager|null $objectManager
+     * @param ObjectManager|null $persistManager
      *
      * @throws ObjectNotAuditedException
      *
      * @return array
      */
-    public function diffObjectRevisions(string $className, $objectId, RevisionInterface $oldRevision, RevisionInterface $newRevision, ObjectManager $objectManager = null): array;
+    public function diffObjectRevisions(string $className, $objectIds, RevisionInterface $oldRevision, RevisionInterface $newRevision, ObjectManager $persistManager = null): array;
 
     /**
      * Get the values for a specific object as an associative array.
      *
      * @param object             $object
-     * @param ObjectManager|null $objectManager
+     * @param ObjectManager|null $persistManager
      *
      * @return array
      */
-    public function getObjectValues($object, ObjectManager $objectManager = null): array;
+    public function getObjectValues($object, ObjectManager $persistManager = null): array;
 
     /**
      * @return ObjectAuditConfiguration
@@ -189,17 +189,12 @@ interface ObjectAuditManagerInterface
     /**
      * @return ObjectManager
      */
-    public function getDefaultObjectManager(): ObjectManager;
+    public function getDefaultPersistManager(): ObjectManager;
 
     /**
      * @return ObjectManager
      */
-    public function getAuditObjectManager(): ObjectManager;
-
-    /**
-     * @return string
-     */
-    public function getRevisionClass(): string;
+    public function getAuditPersistManager(): ObjectManager;
 
     /**
      * @return RevisionRepositoryInterface
@@ -217,9 +212,4 @@ interface ObjectAuditManagerInterface
      * @return mixed
      */
     public function saveCurrentRevision();
-
-    /**
-     * @return $this
-     */
-    public function clearObjectCache();
 }

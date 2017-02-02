@@ -10,16 +10,20 @@
     </parameters>
 
     <services>
-        <service id="dream_commerce_object_audit.configuration" class="%dream_commerce_object_audit.configuration.class%" />
+        <service id="dream_commerce_object_audit.configuration" class="%dream_commerce_object_audit.configuration.class%">
+            <argument>%dream_commerce.model.revision.class%</argument>
+        </service>
 
         <service id="dream_commerce_object_audit.manager" class="%dream_commerce_object_audit.manager.class%">
             <argument type="service" id="dream_commerce_object_audit.configuration" />
-            <argument>%dream_commerce.model.revision.class%</argument>
             <argument type="service" id="dream_commerce.factory.revision" />
+            <argument type="service" id="dream_commerce.factory.object_audit" />
             <argument type="service" id="dream_commerce.repository.revision" />
             <argument type="expression">service(container.hasParameter('dream_commerce_object_audit.persist_manager.service') ? parameter('dream_commerce_object_audit.persist_manager.service') : 'doctrine.orm.default_entity_manager')</argument>
             <argument type="expression">service(container.hasParameter('dream_commerce_object_audit.persist_audit_manager.service') ? parameter('dream_commerce_object_audit.persist_audit_manager.service') : 'doctrine.orm.default_entity_manager')</argument>
         </service>
+
+        <service id="dream_commerce.factory.object_audit" class="%dream_commerce_object_audit.object_audit_factory.class%" />
 
         <service id="dream_commerce_object_audit.resource_configuration" class="%dream_commerce_object_audit.resource_configuration.class%">
             <argument type="service" id="dream_commerce_object_audit.configuration" />

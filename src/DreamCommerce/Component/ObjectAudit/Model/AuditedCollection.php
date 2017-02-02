@@ -98,9 +98,14 @@ class AuditedCollection implements Collection
      * @param ObjectManager $objectManager
      * @param ObjectAuditManagerInterface $objectAuditManager
      */
-    public function __construct(string $className, array $foreignKeys, string $indexBy = null, RevisionInterface $revision,
-                                ObjectManager $objectManager, ObjectAuditManagerInterface $objectAuditManager)
-    {
+    public function __construct(
+        string $className,
+        array $foreignKeys,
+        string $indexBy = null,
+        RevisionInterface $revision,
+        ObjectManager $objectManager,
+        ObjectAuditManagerInterface $objectAuditManager
+    ) {
         $this->className = $className;
         $this->foreignKeys = $foreignKeys;
         $this->indexBy = $indexBy;

@@ -33,8 +33,11 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotFoundException;
+use DreamCommerce\Component\ObjectAudit\Factory\AuditObjectFactoryInterface;
+use DreamCommerce\Component\ObjectAudit\Factory\ObjectAuditFactoryInterface;
 use DreamCommerce\Component\ObjectAudit\Model\ChangedObject;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditConfiguration;
@@ -61,11 +64,6 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
     protected $currentRevision;
 
     /**
-     * @var string|null
-     */
-    protected $revisionClass;
-
-    /**
      * @var RevisionRepositoryInterface|null
      */
     protected $revisionRepository;
@@ -76,36 +74,41 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
     protected $revisionFactory;
 
     /**
-     * @var ObjectManager
+     * @var ObjectAuditFactoryInterface
      */
-    protected $auditObjectManager;
+    protected $objectAuditFactory;
 
     /**
      * @var ObjectManager
      */
-    protected $defaultObjectManager;
+    protected $auditPersistManager;
+
+    /**
+     * @var ObjectManager
+     */
+    protected $defaultPersistManager;
 
     /**
      * @param ObjectAuditConfiguration    $configuration
-     * @param string                      $revisionClass
      * @param FactoryInterface            $revisionFactory
+     * @param ObjectAuditFactoryInterface $objectAuditFactory
      * @param RevisionRepositoryInterface $revisionRepository
-     * @param ObjectManager               $defaultObjectManager
-     * @param ObjectManager|null          $auditObjectManager
+     * @param ObjectManager               $defaultPersistManager
+     * @param ObjectManager|null          $auditPersistManager
      */
     public function __construct(ObjectAuditConfiguration $configuration,
-                                string $revisionClass,
                                 FactoryInterface $revisionFactory,
+                                ObjectAuditFactoryInterface $objectAuditFactory,
                                 RevisionRepositoryInterface $revisionRepository,
-                                ObjectManager $defaultObjectManager,
-                                ObjectManager $auditObjectManager = null
+                                ObjectManager $defaultPersistManager,
+                                ObjectManager $auditPersistManager = null
     ) {
         $this->configuration = $configuration;
-        $this->revisionClass = $revisionClass;
+        $this->objectAuditFactory = $objectAuditFactory;
         $this->revisionFactory = $revisionFactory;
         $this->revisionRepository = $revisionRepository;
-        $this->defaultObjectManager = $defaultObjectManager;
-        $this->auditObjectManager = $auditObjectManager;
+        $this->defaultPersistManager = $defaultPersistManager;
+        $this->auditPersistManager = $auditPersistManager;
     }
 
     /**
@@ -118,23 +121,6 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
         }
 
         return $this->currentRevision;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function saveCurrentRevision()
-    {
-        if ($this->currentRevision !== null) {
-            /** @var EntityManagerInterface $auditObjectManager */
-            $auditObjectManager = $this->auditObjectManager;
-            $uow = $auditObjectManager->getUnitOfWork();
-            $revisionName = get_class($this->currentRevision);
-            $revisionMetadata = $auditObjectManager->getClassMetadata($revisionName);
-            $uow->persist($this->currentRevision);
-            $uow->computeChangeSet($revisionMetadata, $this->currentRevision);
-            $this->currentRevision = null;
-        }
     }
 
     /**
@@ -178,15 +164,24 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
         Assert::object($object);
 
         if ($objectManager === null) {
-            $objectManager = $this->getDefaultObjectManager();
+            $objectManager = $this->getDefaultPersistManager();
         }
         $objectClass = get_class($object);
+        /** @var ClassMetadata $metadata */
         $metadata = $objectManager->getClassMetadata($objectClass);
         $fields = $metadata->getFieldNames();
 
         $return = array();
         foreach ($fields as $fieldName) {
             $return[$fieldName] = $metadata->getFieldValue($object, $fieldName);
+        }
+
+        // Fetch associations identifiers values
+        foreach ($metadata->getAssociationNames() as $associationName) {
+            // Do not get OneToMany or ManyToMany collections because not relevant to the revision.
+            if ($metadata->getAssociationMapping($associationName)['isOwningSide']) {
+                $return[$associationName] = $metadata->getFieldValue($object, $associationName);
+            }
         }
 
         return $return;
@@ -227,28 +222,20 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function getRevisionClass(): string
+    public function getDefaultPersistManager(): ObjectManager
     {
-        return $this->revisionClass;
+        return $this->defaultPersistManager;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getDefaultObjectManager(): ObjectManager
+    public function getAuditPersistManager(): ObjectManager
     {
-        return $this->defaultObjectManager;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getAuditObjectManager(): ObjectManager
-    {
-        if ($this->auditObjectManager === null) {
-            $this->auditObjectManager = $this->getDefaultObjectManager();
+        if ($this->auditPersistManager === null) {
+            $this->auditPersistManager = $this->getDefaultPersistManager();
         }
 
-        return $this->auditObjectManager;
+        return $this->auditPersistManager;
     }
 }

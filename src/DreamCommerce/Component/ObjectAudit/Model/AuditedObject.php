@@ -47,6 +47,11 @@ class AuditedObject
     private $object;
 
     /**
+     * @var array
+     */
+    private $identifiers;
+
+    /**
      * @var RevisionInterface
      */
     private $revision;
@@ -54,15 +59,17 @@ class AuditedObject
     /**
      * @var ObjectManager
      */
-    private $objectManager;
+    private $persistManager;
 
     /**
      * @param object $object
      * @param string $className
+     * @param array $identifiers
      * @param RevisionInterface $revision
-     * @param ObjectManager $objectManager
+     * @param ObjectManager $persistManager
      */
-    public function __construct($object, string $className = null, RevisionInterface $revision, ObjectManager $objectManager)
+    public function __construct($object, string $className = null, array $identifiers, RevisionInterface $revision,
+                                ObjectManager $persistManager)
     {
         Assert::object($object);
 
@@ -72,10 +79,11 @@ class AuditedObject
             throw new InvalidArgumentException();
         }
 
+        $this->identifiers = $identifiers;
         $this->object = $object;
         $this->className = $className;
         $this->revision = $revision;
-        $this->objectManager = $objectManager;
+        $this->persistManager = $persistManager;
     }
 
     /**
@@ -95,6 +103,14 @@ class AuditedObject
     }
 
     /**
+     * @return array
+     */
+    public function getIdentifiers(): array
+    {
+        return $this->identifiers;
+    }
+
+    /**
      * @return RevisionInterface
      */
     public function getRevision(): RevisionInterface
@@ -105,8 +121,8 @@ class AuditedObject
     /**
      * @return ObjectManager
      */
-    public function getObjectManager(): ObjectManager
+    public function getPersistManager(): ObjectManager
     {
-        return $this->objectManager;
+        return $this->persistManager;
     }
 }

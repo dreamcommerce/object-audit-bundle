@@ -33,6 +33,11 @@ namespace DreamCommerce\Component\ObjectAudit;
 class ObjectAuditConfiguration
 {
     /**
+     * @var string
+     */
+    protected $revisionClass;
+
+    /**
      * @var array
      */
     protected $auditedClasses = array();
@@ -54,7 +59,7 @@ class ObjectAuditConfiguration
      *
      * @var bool
      */
-    protected $loadAuditedEntities = true;
+    protected $loadAuditedObjects = true;
 
     /**
      * Decides if native (not audited) ToMany collections are loaded.
@@ -68,7 +73,31 @@ class ObjectAuditConfiguration
      *
      * @var bool
      */
-    protected $loadNativeEntities = true;
+    protected $loadNativeObjects = true;
+
+    public function __construct(string $revisionClass)
+    {
+        $this->revisionClass = $revisionClass;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRevisionClass(): string
+    {
+        return $this->revisionClass;
+    }
+
+    /**
+     * @param string $revisionClass
+     * @return $this
+     */
+    public function setRevisionClass(string $revisionClass)
+    {
+        $this->revisionClass = $revisionClass;
+
+        return $this;
+    }
 
     /**
      * @param string $className
@@ -174,19 +203,19 @@ class ObjectAuditConfiguration
     /**
      * @return bool
      */
-    public function isLoadAuditedEntities(): bool
+    public function isLoadAuditedObjects(): bool
     {
-        return $this->loadAuditedEntities;
+        return $this->loadAuditedObjects;
     }
 
     /**
-     * @param bool $loadAuditedEntities
+     * @param bool $loadAuditedObjects
      *
      * @return $this
      */
-    public function setLoadAuditedEntities(bool $loadAuditedEntities)
+    public function setLoadAuditedObjects(bool $loadAuditedObjects)
     {
-        $this->loadAuditedEntities = $loadAuditedEntities;
+        $this->loadAuditedObjects = $loadAuditedObjects;
 
         return $this;
     }
@@ -214,19 +243,19 @@ class ObjectAuditConfiguration
     /**
      * @return bool
      */
-    public function isLoadNativeEntities(): bool
+    public function isLoadNativeObjects(): bool
     {
-        return $this->loadNativeEntities;
+        return $this->loadNativeObjects;
     }
 
     /**
-     * @param bool $loadNativeEntities
+     * @param bool $loadNativeObjects
      *
      * @return $this
      */
-    public function setLoadNativeEntities(bool $loadNativeEntities)
+    public function setLoadNativeObjects(bool $loadNativeObjects)
     {
-        $this->loadNativeEntities = $loadNativeEntities;
+        $this->loadNativeObjects = $loadNativeObjects;
 
         return $this;
     }

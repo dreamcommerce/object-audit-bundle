@@ -38,6 +38,7 @@ abstract class MapEnumType extends EnumType
 {
     const TYPE_UINT8 = 'UINT8';
     const TYPE_UINT16 = 'UINT16';
+    const TYPE_UINT32 = 'UINT32';
 
     protected $enumType;
 
@@ -60,6 +61,10 @@ abstract class MapEnumType extends EnumType
                 $definition = $platform->getSmallIntTypeDeclarationSQL($fieldDeclaration);
                 break;
 
+            case static::TYPE_UINT32:
+                $definition = $platform->getIntegerTypeDeclarationSQL($fieldDeclaration);
+                break;
+
             default:
                 throw new InvalidArgumentException('Unsupported enum type "'.$this->enumType.'"');
         }
@@ -67,11 +72,10 @@ abstract class MapEnumType extends EnumType
         switch ($this->enumType) {
             case static::TYPE_UINT8:
             case static::TYPE_UINT16:
+            case static::TYPE_UINT32:
                 $definition .= ' unsigned';
                 break;
         }
-
-        $definition .= ' COMMENT "(DC2Type:'.$this->getName().')"';
 
         return $definition;
     }
@@ -108,6 +112,7 @@ abstract class MapEnumType extends EnumType
         switch ($this->enumType) {
             case static::TYPE_UINT8:
             case static::TYPE_UINT16:
+            case static::TYPE_UINT32:
                 return \PDO::PARAM_INT;
         }
 

@@ -52,6 +52,7 @@ use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Issue\Issue87Project;
 use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Issue\Issue87ProjectComment;
 use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Issue\Issue9Address;
 use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Issue\Issue9Customer;
+use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\RevisionTest;
 use DreamCommerce\Tests\ObjectAuditBundle\Types\Issue196Type;
 
 class IssueTest extends BaseTest
@@ -79,6 +80,7 @@ class IssueTest extends BaseTest
         Issue196Entity::class,
         Issue198Car::class,
         Issue198Owner::class,
+        RevisionTest::class,
     );
 
     protected $auditedEntities = array(

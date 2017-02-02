@@ -34,6 +34,7 @@ use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\RevisionEnumType;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\RevisionUInt16Type;
+use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\RevisionUInt32Type;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\RevisionUInt8Type;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\UTCDateTimeType;
 use Sylius\Bundle\ResourceBundle\AbstractResourceBundle;
@@ -53,6 +54,7 @@ class DreamCommerceObjectAuditBundle extends AbstractResourceBundle
             RevisionEnumType::TYPE_NAME => RevisionEnumType::class,
             RevisionUInt8Type::TYPE_NAME => RevisionUInt8Type::class,
             RevisionUInt16Type::TYPE_NAME => RevisionUInt16Type::class,
+            RevisionUInt32Type::TYPE_UINT32 => RevisionUInt32Type::class,
             UTCDateTimeType::TYPE_NAME => UTCDateTimeType::class,
         );
 

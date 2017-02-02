@@ -165,6 +165,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
             $rows[$k] = new ChangedResource(
                 $object,
                 $className,
+                $object->getId(),
                 $resourceName,
                 $row->getRevision(),
                 $objectManager,

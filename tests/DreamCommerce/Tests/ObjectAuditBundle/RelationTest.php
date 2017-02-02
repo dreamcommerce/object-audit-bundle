@@ -58,6 +58,7 @@ use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Relation\RelationFoobarEntity
 use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Relation\RelationOneToOneEntity;
 use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Relation\RelationReferencedEntity;
 use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\Relation\WineProduct;
+use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\RevisionTest;
 
 class RelationTest extends BaseTest
 {
@@ -87,6 +88,7 @@ class RelationTest extends BaseTest
         RelationReferencedEntity::class,
         ChildEntity::class,
         RelatedEntity::class,
+        RevisionTest::class
     );
 
     protected $auditedEntities = array(
@@ -268,22 +270,22 @@ class RelationTest extends BaseTest
         $this->assertEquals('notaudited', $audited->getNotAudited()->getTitle());
 
         $configuration = $this->auditManager->getConfiguration();
-        $configuration->setLoadAuditedEntities(false);
-        $this->auditManager->clearObjectCache();
+        $configuration->setLoadAuditedObjects(false);
+        $this->objectAuditFactory->clearAuditCache();
 
         $audited = $this->auditManager->findObjectByRevision(get_class($master), $master->getId(), $revision);
         $this->assertEquals(null, $audited->getAudited());
         $this->assertEquals('notaudited', $audited->getNotAudited()->getTitle());
 
-        $configuration->setLoadAuditedEntities(true);
-        $configuration->setLoadNativeEntities(false);
-        $this->auditManager->clearObjectCache();
+        $configuration->setLoadAuditedObjects(true);
+        $configuration->setLoadNativeObjects(false);
+        $this->objectAuditFactory->clearAuditCache();
 
         $audited = $this->auditManager->findObjectByRevision(get_class($master), $master->getId(), $revision);
         $this->assertEquals('changed#4', $audited->getAudited()->getTitle());
         $this->assertEquals(null, $audited->getNotAudited());
 
-        $configuration->setLoadNativeEntities(true);
+        $configuration->setLoadNativeObjects(true);
 
         $revision = $this->getRevision(5);
         $audited = $this->auditManager->findObjectByRevision(get_class($master), $master->getId(), $revision);
@@ -434,7 +436,7 @@ class RelationTest extends BaseTest
 
         $configuration = $this->auditManager->getConfiguration();
         $configuration->setLoadAuditedCollections(false);
-        $this->auditManager->clearObjectCache();
+        $this->objectAuditFactory->clearAuditCache();
 
         $audited = $this->auditManager->findObjectByRevision(get_class($owner), $owner->getId(), $revision);
         $this->assertCount(0, $audited->getOwned1());
@@ -442,7 +444,7 @@ class RelationTest extends BaseTest
 
         $configuration->setLoadNativeCollections(false);
         $configuration->setLoadAuditedCollections(true);
-        $this->auditManager->clearObjectCache();
+        $this->objectAuditFactory->clearAuditCache();
 
         $audited = $this->auditManager->findObjectByRevision(get_class($owner), $owner->getId(), $revision);
         $this->assertCount(2, $audited->getOwned1());
@@ -450,7 +452,7 @@ class RelationTest extends BaseTest
 
         //checking fifth revision
         $configuration->setLoadNativeCollections(true);
-        $this->auditManager->clearObjectCache();
+        $this->objectAuditFactory->clearAuditCache();
 
         $revision = $this->getRevision(5);
         $audited = $this->auditManager->findObjectByRevision(get_class($owner), $owner->getId(), $revision);

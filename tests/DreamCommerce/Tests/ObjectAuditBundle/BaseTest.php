@@ -38,17 +38,21 @@ use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Events;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Proxy\ProxyFactory;
 use Doctrine\ORM\Tools\ResolveTargetEntityListener;
 use Doctrine\ORM\Tools\SchemaTool;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\RevisionEnumType;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\RevisionUInt16Type;
+use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\RevisionUInt32Type;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\RevisionUInt8Type;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\UTCDateTimeType;
+use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORM\Factory\ObjectAuditFactory;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORM\Subscriber\CreateSchemaSubscriber;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORM\Subscriber\LogRevisionsSubscriber;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORMAuditConfiguration;
 use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORMAuditManager;
+use DreamCommerce\Component\ObjectAudit\Factory\ObjectAuditFactoryInterface;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\Repository\RevisionRepositoryInterface;
 use DreamCommerce\Tests\ObjectAuditBundle\Fixtures\RevisionTest;
@@ -80,9 +84,16 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
     protected $auditManager;
 
     /**
+     * @var ObjectAuditFactoryInterface
+     */
+    protected $objectAuditFactory;
+
+    /**
      * @var ORMAuditConfiguration
      */
     protected $auditConfiguration;
+
+    protected $customTypes = array();
 
     protected $schemaEntities = array();
 
@@ -99,6 +110,9 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
     public function tearDown()
     {
         $this->tearDownEntitySchema();
+        $this->em = null;
+        $this->auditManager = null;
+        $this->schemaTool = null;
     }
 
     /**
@@ -217,6 +231,15 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         return self::$conn;
     }
 
+    protected function getObjectAuditFactory()
+    {
+        if($this->objectAuditFactory === null) {
+            $this->objectAuditFactory = new ObjectAuditFactory();
+        }
+
+        return $this->objectAuditFactory;
+    }
+
     /**
      * @return ORMAuditManager
      */
@@ -226,17 +249,18 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             return $this->auditManager;
         }
 
-        $configuration = $this->getAuditConfiguration();
         $revisionClass = RevisionTest::class;
+        $configuration = $this->getAuditConfiguration($revisionClass);
         $revisionFactory = new Factory($revisionClass);
+        $objectAuditFactory = $this->getObjectAuditFactory();
         $auditObjectManager = $defaultObjectManager = $this->getEntityManager();
         /** @var RevisionRepositoryInterface $revisionRepository */
         $revisionRepository = $auditObjectManager->getRepository($revisionClass);
 
         $auditManager = new ORMAuditManager(
             $configuration,
-            $revisionClass,
             $revisionFactory,
+            $objectAuditFactory,
             $revisionRepository,
             $defaultObjectManager,
             $auditObjectManager
@@ -271,6 +295,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             RevisionEnumType::TYPE_NAME => RevisionEnumType::class,
             RevisionUInt8Type::TYPE_NAME => RevisionUInt8Type::class,
             RevisionUInt16Type::TYPE_NAME => RevisionUInt16Type::class,
+            RevisionUInt32Type::TYPE_NAME => RevisionUInt32Type::class,
             UTCDateTimeType::TYPE_NAME => UTCDateTimeType::class,
         );
 
@@ -284,13 +309,13 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         return $this->auditManager = $auditManager;
     }
 
-    protected function getAuditConfiguration()
+    protected function getAuditConfiguration($revisionClass)
     {
         if ($this->auditConfiguration !== null) {
             return $this->auditConfiguration;
         }
 
-        $auditConfig = new ORMAuditConfiguration();
+        $auditConfig = new ORMAuditConfiguration($revisionClass);
         $auditConfig->setAuditedClasses($this->auditedEntities);
         $auditConfig->setGlobalIgnoreProperties(array('ignoreMe'));
 
@@ -314,15 +339,34 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             return $em->getClassMetadata($value);
         }, $this->schemaEntities);
 
+        $auditTables = array();
+        $auditManager = $this->getAuditManager();
+        $configuration = $auditManager->getConfiguration();
+
+        /** @var ClassMetadata $classMetadata */
+        foreach($classes as $classMetadata) {
+            if($configuration->isClassAudited($classMetadata->name)) {
+                $auditTables[] = $auditManager->getAuditTableNameForClass($classMetadata->name);
+                if($classMetadata->name != $classMetadata->rootEntityName) {
+                    $auditTables[] = $auditManager->getAuditTableNameForClass($classMetadata->rootEntityName);
+                }
+            }
+        }
+
+        $auditTables = array_unique($auditTables);
+
         $this->getSchemaTool()->dropSchema($classes);
+        $sm = $this->em->getConnection()->getSchemaManager();
+        foreach($auditTables as $auditTable) {
+            if($sm->tablesExist($auditTable)) {
+                $sm->dropTable($auditTable);
+            }
+        }
     }
 
     protected function getRevision(int $id)
     {
-        $revision = $this->createMock(RevisionInterface::class);
-        $revision->method('getId')->willReturn($id);
-        $revision->method('getCreatedAt')->willReturn(new DateTime());
-
-        return $revision;
+        $repository = $this->em->getRepository(RevisionTest::class);
+        return $repository->find($id);
     }
 }
