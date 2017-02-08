@@ -80,7 +80,7 @@ class LogRevisionsSubscriber implements EventSubscriber
         if (count($this->objects) > 0) {
             $entityManager = $eventArgs->getEntityManager();
             $objectAuditManager = $this->objectAuditRegistry->getByPersistManager($entityManager);
-            if($objectAuditManager === null) {
+            if ($objectAuditManager === null) {
                 throw new \Exception(); // TODO
             }
 
@@ -109,13 +109,14 @@ class LogRevisionsSubscriber implements EventSubscriber
 
     /**
      * @param OnFlushEventArgs $eventArgs
+     *
      * @throws \Exception
      */
     public function onFlush(OnFlushEventArgs $eventArgs)
     {
         $entityManager = $eventArgs->getEntityManager();
         $objectAuditManager = $this->objectAuditRegistry->getByPersistManager($entityManager);
-        if($objectAuditManager === null) {
+        if ($objectAuditManager === null) {
             throw new \Exception(); // TODO
         }
 
@@ -162,7 +163,7 @@ class LogRevisionsSubscriber implements EventSubscriber
             }
 
             $objectAuditMetadata = $objectMetadataFactory->getMetadataForClass($className);
-            foreach($objectAuditMetadata->ignoredProperties as $property) {
+            foreach ($objectAuditMetadata->ignoredProperties as $property) {
                 if (isset($changeset[$property])) {
                     unset($changeset[$property]);
                 }

@@ -9,7 +9,7 @@ class ResourceAuditMetadata extends ObjectAuditMetadata
     public $resourceName;
 
     /**
-     * @param string $resourceName
+     * @param string        $resourceName
      * @param ClassMetadata $classMetadata
      */
     public function __construct(string $resourceName, ClassMetadata $classMetadata)

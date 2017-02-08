@@ -19,13 +19,13 @@ final class ObjectAuditRegistry
     private $persistManagers;
 
     /**
-     * @param string $name
-     * @param ObjectManager $persistManager
+     * @param string                      $name
+     * @param ObjectManager               $persistManager
      * @param ObjectAuditManagerInterface $objectAuditManager
      */
     public function registerObjectAuditManager(string $name, ObjectManager $persistManager, ObjectAuditManagerInterface $objectAuditManager)
     {
-        if($this->persistManagers === null) {
+        if ($this->persistManagers === null) {
             $this->persistManagers = new SplObjectStorage();
         }
 
@@ -35,11 +35,12 @@ final class ObjectAuditRegistry
 
     /**
      * @param string $name
+     *
      * @return ObjectAuditManagerInterface|null
      */
     public function getByName(string $name)
     {
-        if(!isset($this->objectAuditManagers[$name])) {
+        if (!isset($this->objectAuditManagers[$name])) {
             return null;
         }
 
@@ -48,11 +49,12 @@ final class ObjectAuditRegistry
 
     /**
      * @param ObjectManager $persistManager
+     *
      * @return null|ObjectAuditManagerInterface
      */
     public function getByPersistManager(ObjectManager $persistManager)
     {
-        if(!isset($this->persistManagers[$persistManager])) {
+        if (!isset($this->persistManagers[$persistManager])) {
             return null;
         }
 

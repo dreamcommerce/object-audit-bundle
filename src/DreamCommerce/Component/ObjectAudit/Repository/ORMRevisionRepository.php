@@ -30,7 +30,6 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Repository;
 
-use DreamCommerce\Component\ObjectAudit\Repository\RevisionRepositoryInterface;
 use Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository;
 
 class ORMRevisionRepository extends EntityRepository implements RevisionRepositoryInterface

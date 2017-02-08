@@ -30,7 +30,7 @@ final class ObjectAuditMetadataFactory
     private $loaded = false;
 
     /**
-     * @param ObjectManager $persistManager
+     * @param ObjectManager   $persistManager
      * @param DriverInterface $driver
      */
     public function __construct(ObjectManager $persistManager, DriverInterface $driver)
@@ -41,6 +41,7 @@ final class ObjectAuditMetadataFactory
 
     /**
      * @param string $class
+     *
      * @return bool
      */
     public function isClassAudited(string $class)
@@ -52,6 +53,7 @@ final class ObjectAuditMetadataFactory
 
     /**
      * @param string $class
+     *
      * @return ObjectAuditMetadata
      */
     public function getMetadataForClass(string $class)
@@ -71,9 +73,6 @@ final class ObjectAuditMetadataFactory
         return array_keys($this->objectAuditMetadatas);
     }
 
-    /**
-     *
-     */
     private function load()
     {
         if ($this->loaded) {

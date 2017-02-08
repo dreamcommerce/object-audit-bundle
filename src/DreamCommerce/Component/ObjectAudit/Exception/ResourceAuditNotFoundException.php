@@ -89,7 +89,7 @@ class ResourceAuditNotFoundException extends ResourceException
 
     /**
      * @param ObjectAuditNotFoundException $exception
-     * @param string                  $resourceName
+     * @param string                       $resourceName
      *
      * @return ResourceAuditNotFoundException
      */

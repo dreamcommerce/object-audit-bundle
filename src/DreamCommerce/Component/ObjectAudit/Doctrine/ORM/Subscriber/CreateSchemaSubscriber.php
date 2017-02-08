@@ -59,7 +59,7 @@ class CreateSchemaSubscriber implements EventSubscriber
 
     /**
      * @param ObjectAuditRegistry $objectAuditRegistry
-     * @param string $objectManagerName
+     * @param string              $objectManagerName
      */
     public function __construct(ObjectAuditRegistry $objectAuditRegistry, string $objectManagerName)
     {
@@ -78,10 +78,10 @@ class CreateSchemaSubscriber implements EventSubscriber
     {
         /** @var EntityManagerInterface $objectAuditManager */
         $objectAuditManager = $this->objectAuditRegistry->getByName($this->objectManagerName);
-        if($objectAuditManager === null) {
+        if ($objectAuditManager === null) {
             throw new \Exception(); // TODO
         }
-        if(!($objectAuditManager instanceof ORMAuditManager)) {
+        if (!($objectAuditManager instanceof ORMAuditManager)) {
             throw new \Exception(); // TODO
         }
 
@@ -89,7 +89,7 @@ class CreateSchemaSubscriber implements EventSubscriber
         $configuration = $objectAuditManager->getConfiguration();
         $revisionManager = $objectAuditManager->getRevisionManager();
         $auditPersistManager = $revisionManager->getAuditPersistManager();
-        if(!($auditPersistManager instanceof EntityManagerInterface)) {
+        if (!($auditPersistManager instanceof EntityManagerInterface)) {
             throw new \Exception(); // TODO
         }
 
@@ -106,7 +106,7 @@ class CreateSchemaSubscriber implements EventSubscriber
         $revisionClassMetadata = $objectAuditManager->getRevisionManager()->getRevisionMetadata();
 
         $schemaManager = $auditPersistManager->getConnection()->getSchemaManager();
-        if($schemaManager->tablesExist($auditTableName)) {
+        if ($schemaManager->tablesExist($auditTableName)) {
             return;
         }
 
@@ -147,7 +147,7 @@ class CreateSchemaSubscriber implements EventSubscriber
 
     /**
      * @param ObjectAuditMetadataFactory $objectAuditMetadataFactory
-     * @param ClassMetadata         $classMetadata
+     * @param ClassMetadata              $classMetadata
      *
      * @return bool
      */

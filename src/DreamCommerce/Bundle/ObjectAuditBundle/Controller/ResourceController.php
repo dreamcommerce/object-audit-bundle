@@ -80,7 +80,7 @@ final class ResourceController
      * @param ContainerInterface            $container
      * @param EngineInterface               $templatingEngine
      * @param ResourceAuditManagerInterface $resourceAuditManager
-     * @param RevisionManagerInterface   $revisionManager
+     * @param RevisionManagerInterface      $revisionManager
      * @param RegistryInterface             $resourceRegistry
      */
     public function __construct(

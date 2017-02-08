@@ -19,6 +19,7 @@ class ResourceException extends ObjectException
 
     /**
      * @param string $resourceName
+     *
      * @return $this
      */
     public function setResourceName(string $resourceName)

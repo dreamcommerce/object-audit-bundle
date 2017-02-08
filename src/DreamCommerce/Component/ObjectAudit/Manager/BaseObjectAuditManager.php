@@ -67,11 +67,11 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
     protected $revisionManager;
 
     /**
-     * @param BaseAuditConfiguration $configuration
-     * @param ObjectManager $persistManager
-     * @param RevisionManagerInterface $revisionManager
+     * @param BaseAuditConfiguration      $configuration
+     * @param ObjectManager               $persistManager
+     * @param RevisionManagerInterface    $revisionManager
      * @param ObjectAuditFactoryInterface $objectAuditFactory
-     * @param ObjectAuditMetadataFactory $objectAuditMetadataFactory
+     * @param ObjectAuditMetadataFactory  $objectAuditMetadataFactory
      */
     public function __construct(BaseAuditConfiguration $configuration,
                                 ObjectManager $persistManager,

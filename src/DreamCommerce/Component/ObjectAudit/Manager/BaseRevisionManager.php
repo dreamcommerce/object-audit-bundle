@@ -36,9 +36,9 @@ abstract class BaseRevisionManager implements RevisionManagerInterface
     protected $revisionFactory;
 
     /**
-     * @param string $revisionClassName
-     * @param ObjectManager $auditPersistManager
-     * @param FactoryInterface $revisionFactory
+     * @param string                      $revisionClassName
+     * @param ObjectManager               $auditPersistManager
+     * @param FactoryInterface            $revisionFactory
      * @param RevisionRepositoryInterface $revisionRepository
      */
     public function __construct(string $revisionClassName,

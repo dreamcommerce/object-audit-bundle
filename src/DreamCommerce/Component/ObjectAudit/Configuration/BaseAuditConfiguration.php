@@ -74,6 +74,7 @@ class BaseAuditConfiguration
 
     /**
      * @param DriverInterface $driver
+     *
      * @return $this
      */
     public function setObjectMetadataDriver(DriverInterface $driver)

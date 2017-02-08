@@ -64,7 +64,7 @@ class ResourceDeletedException extends ResourceException
 
     /**
      * @param ObjectAuditDeletedException $exception
-     * @param string                 $resourceName
+     * @param string                      $resourceName
      *
      * @throws ResourceDeletedException
      *

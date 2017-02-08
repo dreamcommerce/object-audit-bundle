@@ -45,10 +45,10 @@ interface ObjectAuditManagerInterface
     /**
      * Find an object at the specific revision.
      *
-     * @param string             $className
-     * @param mixed              $objectIds
-     * @param RevisionInterface  $revision
-     * @param array              $options
+     * @param string            $className
+     * @param mixed             $objectIds
+     * @param RevisionInterface $revision
+     * @param array             $options
      *
      * @throws ObjectAuditDeletedException
      * @throws ObjectAuditNotFoundException
@@ -59,11 +59,11 @@ interface ObjectAuditManagerInterface
     public function findObjectByRevision(string $className, $objectIds, RevisionInterface $revision, array $options = array());
 
     /**
-     * @param string             $className
-     * @param array              $fields
-     * @param string|null        $indexBy
-     * @param RevisionInterface  $revision
-     * @param array              $options
+     * @param string            $className
+     * @param array             $fields
+     * @param string|null       $indexBy
+     * @param RevisionInterface $revision
+     * @param array             $options
      *
      * @throws ObjectNotAuditedException
      *
@@ -72,17 +72,17 @@ interface ObjectAuditManagerInterface
     public function findObjectsByFieldsAndRevision(string $className, array $fields, string $indexBy = null, RevisionInterface $revision, array $options = array()): array;
 
     /**
-     * @param RevisionInterface  $revision
-     * @param array              $options
+     * @param RevisionInterface $revision
+     * @param array             $options
      *
      * @return ObjectAudit[]
      */
     public function findAllObjectsChangedAtRevision(RevisionInterface $revision, array $options = array()): array;
 
     /**
-     * @param string             $className
-     * @param RevisionInterface  $revision
-     * @param array              $options
+     * @param string            $className
+     * @param RevisionInterface $revision
+     * @param array             $options
      *
      * @throws ObjectNotAuditedException
      *
@@ -93,8 +93,8 @@ interface ObjectAuditManagerInterface
     /**
      * Find all revisions that were made of object class with given id.
      *
-     * @param string             $className
-     * @param mixed              $objectIds
+     * @param string $className
+     * @param mixed  $objectIds
      *
      * @throws ObjectNotAuditedException
      *
@@ -103,9 +103,9 @@ interface ObjectAuditManagerInterface
     public function findObjectRevisions(string $className, $objectIds): Collection;
 
     /**
-     * @param string             $className
-     * @param mixed              $objectIds
-     * @param array              $options
+     * @param string $className
+     * @param mixed  $objectIds
+     * @param array  $options
      *
      * @return ObjectAudit[]
      *
@@ -117,8 +117,8 @@ interface ObjectAuditManagerInterface
     /**
      * Gets the initialize revision of the object with given ID.
      *
-     * @param string             $className
-     * @param mixed              $objectIds
+     * @param string $className
+     * @param mixed  $objectIds
      *
      * @throws ObjectNotAuditedException
      *
@@ -129,8 +129,8 @@ interface ObjectAuditManagerInterface
     /**
      * Gets the current revision of the object with given ID.
      *
-     * @param string             $className
-     * @param mixed              $objectIds
+     * @param string $className
+     * @param mixed  $objectIds
      *
      * @throws ObjectNotAuditedException
      * @throws ObjectAuditNotFoundException
@@ -152,10 +152,10 @@ interface ObjectAuditManagerInterface
      * Get an array with the differences of between two specific revisions of
      * an object with a given id.
      *
-     * @param string             $className
-     * @param mixed              $objectIds
-     * @param RevisionInterface  $oldRevision
-     * @param RevisionInterface  $newRevision
+     * @param string            $className
+     * @param mixed             $objectIds
+     * @param RevisionInterface $oldRevision
+     * @param RevisionInterface $newRevision
      *
      * @throws ObjectNotAuditedException
      *
@@ -166,7 +166,7 @@ interface ObjectAuditManagerInterface
     /**
      * Get the values for a specific object as an associative array.
      *
-     * @param object             $object
+     * @param object $object
      *
      * @return array
      */

@@ -776,7 +776,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     }
 
     /**
-     * @param string             $className
+     * @param string $className
      *
      * @return string
      */
@@ -792,9 +792,9 @@ class ORMAuditManager extends BaseObjectAuditManager
     }
 
     /**
-     * @param string        $className
-     * @param mixed         $objectIds
-     * @param string        $sort
+     * @param string $className
+     * @param mixed  $objectIds
+     * @param string $sort
      *
      * @throws ObjectNotAuditedException
      * @throws ObjectAuditNotFoundException
@@ -848,7 +848,6 @@ class ORMAuditManager extends BaseObjectAuditManager
             $revisionIds[$newFieldName] = $fieldValue;
             unset($revisionIds[$fieldName]);
         }
-
 
         return $this->revisionManager->getRevisionRepository()->find($revisionIds);
     }

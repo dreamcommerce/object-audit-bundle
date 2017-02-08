@@ -27,9 +27,8 @@ class AnnotationDriver implements DriverInterface
     }
 
     /**
-     * @param string $class
+     * @param string              $class
      * @param ObjectAuditMetadata $objectAuditMetadata
-     * @return void
      */
     public function loadMetadataForClass($class, ObjectAuditMetadata $objectAuditMetadata)
     {
@@ -44,13 +43,14 @@ class AnnotationDriver implements DriverInterface
 
     /**
      * @param string $class
+     *
      * @return bool
      */
     public function isTransient($class)
     {
         $reflection = new \ReflectionClass($class);
 
-        return (bool)$this->reader->getClassAnnotation($reflection, Auditable::class);
+        return (bool) $this->reader->getClassAnnotation($reflection, Auditable::class);
     }
 
     /**
@@ -61,6 +61,7 @@ class AnnotationDriver implements DriverInterface
         // use composer autoloader
         AnnotationRegistry::registerLoader('class_exists');
         $reader = new AnnotationReader();
+
         return new self($reader);
     }
 }

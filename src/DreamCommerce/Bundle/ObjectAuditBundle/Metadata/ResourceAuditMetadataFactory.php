@@ -37,7 +37,7 @@ final class ResourceAuditMetadataFactory
 
     /**
      * @param ObjectAuditRegistry $objectAuditRegistry
-     * @param ContainerInterface $container
+     * @param ContainerInterface  $container
      */
     public function __construct(ObjectAuditRegistry $objectAuditRegistry, ContainerInterface $container)
     {
@@ -47,6 +47,7 @@ final class ResourceAuditMetadataFactory
 
     /**
      * @param string $class
+     *
      * @return bool
      */
     public function isAudited($class)
@@ -58,6 +59,7 @@ final class ResourceAuditMetadataFactory
 
     /**
      * @param string $resourceName
+     *
      * @return ResourceAuditMetadata
      */
     public function getMetadataFor(string $resourceName)
@@ -77,23 +79,20 @@ final class ResourceAuditMetadataFactory
         return array_keys($this->resourceAuditMetadatas);
     }
 
-    /**
-     *
-     */
     private function load()
     {
         if ($this->loaded) {
             return;
         }
 
-        foreach($this->resourceRegistry->getAll() as $resourceMetadata) {
+        foreach ($this->resourceRegistry->getAll() as $resourceMetadata) {
             $serviceId = $resourceMetadata->getServiceId('manager');
             $className = $resourceMetadata->getClass('model');
             /** @var ObjectManager $persistManager */
             $persistManager = $this->container->get($serviceId);
             $objectAuditManager = $this->objectAuditRegistry->getByPersistManager($persistManager);
             $objectAuditMetadataFactory = $objectAuditManager->getObjectAuditMetadataFactory();
-            if($objectAuditMetadataFactory->isClassAudited($className)) {
+            if ($objectAuditMetadataFactory->isClassAudited($className)) {
                 $this->resourceAuditMetadatas[] = $resourceMetadata->getName();
             }
         }
