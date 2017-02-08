@@ -56,16 +56,16 @@ final class Configuration implements ConfigurationInterface
         ;
 
         $this->addResourcesSection($rootNode);
-        //$this->addConfigurationSection($rootNode);
+        $this->addManagersSection($rootNode);
 
         return $treeBuilder;
     }
 
-    private function addConfigurationSection(ArrayNodeDefinition $node)
+    private function addManagersSection(ArrayNodeDefinition $node)
     {
         $node
             ->children()
-                ->arrayNode('configuration')
+                ->arrayNode('managers')
                     // TODO
                 ->end()
             ->end()

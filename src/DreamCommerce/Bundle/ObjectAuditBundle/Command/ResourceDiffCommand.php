@@ -32,6 +32,7 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle\Command;
 
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\ResourceAuditManagerInterface;
+use DreamCommerce\Component\ObjectAudit\Manager\RevisionManagerInterface;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -81,10 +82,12 @@ class ResourceDiffCommand extends BaseCommand
         $oldRevisionId = $input->getArgument('old_revision_id');
         $newRevisionId = $input->getArgument('new_revision_id');
 
+        $container = $this->getContainer();
+        /** @var RevisionManagerInterface $revisionManager */
+        $revisionManager = $container->get('dream_commerce_object_audit.revision_manager');
         /** @var ResourceAuditManagerInterface $resourceAuditManager */
-        $resourceAuditManager = $this->getContainer()->get('dream_commerce_object_audit.resource_manager');
-        $objectAuditManager = $resourceAuditManager->getObjectAuditManager();
-        $revisionRepository = $objectAuditManager->getRevisionRepository();
+        $resourceAuditManager = $container->get('dream_commerce_object_audit.resource_manager');
+        $revisionRepository = $revisionManager->getRevisionRepository();
 
         /** @var RevisionInterface $oldRevision */
         $oldRevision = null;

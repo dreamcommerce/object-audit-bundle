@@ -32,11 +32,11 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle;
 
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
-use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\RevisionEnumType;
-use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\RevisionUInt16Type;
-use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\RevisionUInt32Type;
-use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\RevisionUInt8Type;
-use DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\DBAL\Types\UTCDateTimeType;
+use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionEnumType;
+use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt16Type;
+use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt32Type;
+use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt8Type;
+use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\UTCDateTimeType;
 use Sylius\Bundle\ResourceBundle\AbstractResourceBundle;
 use Sylius\Bundle\ResourceBundle\SyliusResourceBundle;
 

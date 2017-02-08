@@ -32,6 +32,7 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle\Command;
 
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\ResourceAuditManagerInterface;
+use DreamCommerce\Component\ObjectAudit\Manager\RevisionManagerInterface;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -63,11 +64,13 @@ class ResourceChangesCommand extends BaseCommand
     {
         $revisionId = $input->getArgument('revision_id');
 
+        $container = $this->getContainer();
+        /** @var RevisionManagerInterface $revisionManager */
+        $revisionManager = $container->get('dream_commerce_object_audit.revision_manager');
         /** @var ResourceAuditManagerInterface $resourceAuditManager */
-        $resourceAuditManager = $this->getContainer()->get('dream_commerce_object_audit.resource_manager');
-        $objectAuditManager = $resourceAuditManager->getObjectAuditManager();
+        $resourceAuditManager = $container->get('dream_commerce_object_audit.resource_manager');
 
-        $revisionRepository = $objectAuditManager->getRevisionRepository();
+        $revisionRepository = $revisionManager->getRevisionRepository();
         /** @var RevisionInterface $revision */
         $revision = $revisionRepository->find($revisionId);
 
@@ -79,12 +82,12 @@ class ResourceChangesCommand extends BaseCommand
 
             $dumper->dump($cloner->cloneVar($revision));
 
-            $changedResources = $resourceAuditManager->findAllResourcesChangedAtRevision($revision);
+            $auditResources = $resourceAuditManager->findAllResourcesChangedAtRevision($revision);
             $rows = array();
 
-            foreach ($changedResources as $changedResource) {
-                $object = $changedResource->getObject();
-                $rows[] = array($object->getId(), get_class($object), $changedResource->getRevisionType());
+            foreach ($auditResources as $auditResource) {
+                $object = $auditResource->getObject();
+                $rows[] = array($object->getId(), get_class($object), $auditResource->getRevisionType());
             }
 
             $table = new Table($output);

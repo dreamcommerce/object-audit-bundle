@@ -30,6 +30,7 @@
 
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Controller;
 
+use DreamCommerce\Component\ObjectAudit\Manager\RevisionManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\ResourceAuditManagerInterface;
 use Pagerfanta\Pagerfanta;
@@ -63,7 +64,7 @@ final class ResourceController
     /**
      * @var ResourceAuditManagerInterface
      */
-    private $auditManager;
+    private $resourceAuditManager;
 
     /**
      * @var RegistryInterface
@@ -71,20 +72,28 @@ final class ResourceController
     private $resourceRegistry;
 
     /**
+     * @var RevisionManagerInterface
+     */
+    private $revisionManager;
+
+    /**
      * @param ContainerInterface            $container
      * @param EngineInterface               $templatingEngine
-     * @param ResourceAuditManagerInterface $auditManager
+     * @param ResourceAuditManagerInterface $resourceAuditManager
+     * @param RevisionManagerInterface   $revisionManager
      * @param RegistryInterface             $resourceRegistry
      */
     public function __construct(
         ContainerInterface $container,
         EngineInterface $templatingEngine,
-        ResourceAuditManagerInterface $auditManager,
+        ResourceAuditManagerInterface $resourceAuditManager,
+        RevisionManagerInterface $revisionManager,
         RegistryInterface $resourceRegistry
     ) {
         $this->templatingEngine = $templatingEngine;
-        $this->auditManager = $auditManager;
+        $this->resourceAuditManager = $resourceAuditManager;
         $this->resourceRegistry = $resourceRegistry;
+        $this->revisionManager = $revisionManager;
     }
 
     /**
@@ -97,7 +106,7 @@ final class ResourceController
     public function indexAction($page = 1)
     {
         /** @var Pagerfanta $paginator */
-        $paginator = $this->auditManager->getObjectAuditManager()->getRevisionRepository()->createPaginator();
+        $paginator = $this->revisionManager->getRevisionRepository()->createPaginator();
         $paginator->setCurrentPage($page);
 
         return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:index.html.twig', array(
@@ -118,7 +127,7 @@ final class ResourceController
 
         return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:view_revision.html.twig', array(
             'revision' => $revision,
-            'changedResources' => $this->auditManager->findAllResourcesChangedAtRevision($revision),
+            'changedResources' => $this->resourceAuditManager->findAllResourcesChangedAtRevision($revision),
         ));
     }
 
@@ -138,7 +147,7 @@ final class ResourceController
             'resourceId' => $resourceId,
             'resourceName' => $resourceName,
             'resource' => $resource,
-            'revisions' => $this->auditManager->findResourceRevisions($resourceName, $resourceId),
+            'revisions' => $this->resourceAuditManager->findResourceRevisions($resourceName, $resourceId),
         ));
     }
 
@@ -155,9 +164,9 @@ final class ResourceController
     {
         $this->getResourceMetadata($resourceName);
         $revision = $this->getRevision($revisionId);
-        $resource = $this->auditManager->findResourceByRevision($resourceName, $resourceId, $revision);
+        $resource = $this->resourceAuditManager->findResourceByRevision($resourceName, $resourceId, $revision);
 
-        $data = $this->auditManager->getResourceValues($resource);
+        $data = $this->resourceAuditManager->getResourceValues($resource);
         krsort($data);
 
         return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:view_detail.html.twig', array(
@@ -182,8 +191,6 @@ final class ResourceController
      */
     public function compareAction(Request $request, $resourceName, $resourceId, $oldRevisionId = null, $newRevisionId = null)
     {
-        $revisionRepository = $this->auditManager->getObjectAuditManager()->getRevisionRepository();
-
         if ($oldRevisionId === null) {
             $oldRevisionId = $request->query->get('oldRev');
         }
@@ -194,23 +201,23 @@ final class ResourceController
         $this->getResourceMetadata($resourceName);
 
         if (empty($oldRevisionId)) {
-            $oldRevision = $this->auditManager->getInitializeResourceRevision($resourceName, $resourceId);
+            $oldRevision = $this->resourceAuditManager->getInitializeResourceRevision($resourceName, $resourceId);
             if ($oldRevision === null) {
                 throw new NotFoundHttpException('The resource identified by name #'.$resourceName.' and ID #'.$resourceId.' does not exist');
             }
         } else {
             /** @var RevisionInterface $oldRevision */
-            $oldRevision = $revisionRepository->find($oldRevisionId);
+            $oldRevision = $this->revisionManager->getRevisionRepository()->find($oldRevisionId);
             if ($oldRevision === null) {
                 throw new NotFoundHttpException('The revision identified by ID #'.$oldRevisionId.' does not exist');
             }
         }
 
         if (empty($newRevisionId)) {
-            $newRevision = $this->auditManager->getCurrentResourceRevision($resourceName, $resourceId);
+            $newRevision = $this->resourceAuditManager->getCurrentResourceRevision($resourceName, $resourceId);
         } else {
             /** @var RevisionInterface $newRevision */
-            $newRevision = $revisionRepository->find($newRevisionId);
+            $newRevision = $this->revisionManager->getRevisionRepository()->find($newRevisionId);
             if ($newRevision === null) {
                 throw new NotFoundHttpException('The revision identified by ID #'.$newRevisionId.' does not exist');
             }
@@ -226,7 +233,7 @@ final class ResourceController
             $newRevision = $tmpRevision;
         }
 
-        $diff = $this->auditManager->diffResourceRevisions($resourceName, $resourceId, $oldRevision, $newRevision);
+        $diff = $this->resourceAuditManager->diffResourceRevisions($resourceName, $resourceId, $oldRevision, $newRevision);
 
         return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:compare.html.twig', array(
             'resourceName' => $resourceName,
@@ -284,9 +291,8 @@ final class ResourceController
      */
     private function getRevision($revisionId)
     {
-        $revisionRepository = $this->auditManager->getObjectAuditManager()->getRevisionRepository();
         /** @var RevisionInterface $revision */
-        $revision = $revisionRepository->find($revisionId);
+        $revision = $this->revisionManager->getRevisionRepository()->find($revisionId);
         if ($revision === null) {
             throw new NotFoundHttpException('Revision identified by ID #'.$revisionId.' does not exist');
         }

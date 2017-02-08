@@ -5,8 +5,7 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="dream_commerce_object_audit.resource_manager.class">DreamCommerce\Bundle\ObjectAuditBundle\ResourceAuditManager</parameter>
-        <parameter key="dream_commerce_object_audit.resource_configuration.class">DreamCommerce\Component\ObjectAudit\ResourceAuditConfiguration</parameter>
+        <parameter key="dream_commerce_object_audit.resource_manager.class">DreamCommerce\Bundle\ObjectAuditBundle\Manager\ORMResourceAuditManager</parameter>
     </parameters>
 
     <services>
@@ -24,11 +23,6 @@
         </service>
 
         <service id="dream_commerce.factory.object_audit" class="%dream_commerce_object_audit.object_audit_factory.class%" />
-
-        <service id="dream_commerce_object_audit.resource_configuration" class="%dream_commerce_object_audit.resource_configuration.class%">
-            <argument type="service" id="dream_commerce_object_audit.configuration" />
-            <argument type="service" id="sylius.resource_registry" />
-        </service>
 
         <service id="dream_commerce_object_audit.resource_manager" class="%dream_commerce_object_audit.resource_manager.class%">
             <argument type="service" id="dream_commerce_object_audit.manager" />

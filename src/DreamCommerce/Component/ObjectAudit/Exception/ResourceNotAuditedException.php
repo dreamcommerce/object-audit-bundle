@@ -30,13 +30,9 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Exception;
 
-use DreamCommerce\Component\ObjectAudit\Exception\Traits\ResourceTrait;
-
-class ResourceNotAuditedException extends ObjectNotAuditedException
+class ResourceNotAuditedException extends ResourceException
 {
     const CODE_RESOURCE_IS_NOT_AUDITED = 35;
-
-    use ResourceTrait;
 
     /**
      * @param string $resourceName

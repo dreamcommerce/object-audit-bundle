@@ -38,9 +38,14 @@
             "@cs-check",
             "@test"
         ],
+        "test": [
+            "@test-php-7.0",
+            "@test-php-7.1"
+        ],
         "cs-check": "bin/php-cs-fixer --version && bin/php-cs-fixer fix -v --diff --dry-run src",
         "cs-fix": "bin/php-cs-fixer fix -v src",
-        "test": "bin/phpunit"
+        "test-php-7.0": "tests/docker/bin/phpunit-7.0.sh",
+        "test-php-7.1": "tests/docker/bin/phpunit-7.1.sh"
     },
     "autoload": {
         "psr-4": {
@@ -50,7 +55,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "DreamCommerce\\Tests\\ObjectAuditBundle\\": "tests/DreamCommerce/Tests/ObjectAuditBundle"
+            "DreamCommerce\\Tests\\ObjectAudit\\": "tests/DreamCommerce/Tests/ObjectAudit"
         }
     },
     "extra": {

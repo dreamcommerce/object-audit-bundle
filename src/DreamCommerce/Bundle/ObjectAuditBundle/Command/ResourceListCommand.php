@@ -30,7 +30,6 @@
 
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Command;
 
-use DreamCommerce\Component\ObjectAudit\ResourceAuditConfiguration;
 use DreamCommerce\Component\ObjectAudit\ResourceAuditManagerInterface;
 use Sylius\Component\Resource\Metadata\RegistryInterface;
 use Symfony\Component\Console\Helper\Table;
@@ -54,14 +53,13 @@ class ResourceListCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        /** @var ResourceAuditManagerInterface $auditManager */
+        /** @var ResourceAuditManagerInterface $resourceAuditManager */
         $resourceAuditManager = $this->getContainer()->get('dream_commerce_object_audit.resource_manager');
+        $resourceMetadataFactory = $resourceAuditManager->getResourceAuditMetadataFactory();
 
         /** @var RegistryInterface $resourceRegistry */
         $resourceRegistry = $this->getContainer()->get('sylius.resource_registry');
-        /** @var ResourceAuditConfiguration $configuration */
-        $configuration = $resourceAuditManager->getConfiguration();
-        $resources = $configuration->getAuditedResources();
+        $resources = $resourceMetadataFactory->getAllResourceNames();
         ksort($resources);
 
         $table = new Table($output);

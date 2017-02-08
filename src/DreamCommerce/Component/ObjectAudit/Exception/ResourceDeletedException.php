@@ -30,14 +30,11 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Exception;
 
-use DreamCommerce\Component\ObjectAudit\Exception\Traits\ResourceTrait;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 
-class ResourceDeletedException extends ObjectDeletedException
+class ResourceDeletedException extends ResourceException
 {
-    const CODE_RESOURCE_NOT_EXIST_AT_SPECIFIC_REVISION = 25;
-
-    use ResourceTrait;
+    const CODE_RESOURCE_HAS_BEEN_REMOVED_AT_SPECIFIC_REVISION = 25;
 
     /**
      * @param string            $resourceName
@@ -56,7 +53,7 @@ class ResourceDeletedException extends ObjectDeletedException
             $revision->getId()
         );
 
-        $exception = new self($message, self::CODE_OBJECT_HAS_BEEN_REMOVED_AT_SPECIFIC_REVISION);
+        $exception = new self($message, self::CODE_RESOURCE_HAS_BEEN_REMOVED_AT_SPECIFIC_REVISION);
         $exception->setResourceName($resourceName)
             ->setClassName($className)
             ->setId($id)
@@ -66,14 +63,14 @@ class ResourceDeletedException extends ObjectDeletedException
     }
 
     /**
-     * @param ObjectDeletedException $exception
+     * @param ObjectAuditDeletedException $exception
      * @param string                 $resourceName
      *
      * @throws ResourceDeletedException
      *
      * @return ResourceDeletedException
      */
-    public static function forObjectDeletedException(ObjectDeletedException $exception, string $resourceName): ResourceDeletedException
+    public static function forObjectDeletedException(ObjectAuditDeletedException $exception, string $resourceName): ResourceDeletedException
     {
         $id = $exception->getId();
         if (is_array($id)) {

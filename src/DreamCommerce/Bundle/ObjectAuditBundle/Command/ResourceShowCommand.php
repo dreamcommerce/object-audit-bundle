@@ -30,6 +30,7 @@
 
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Command;
 
+use DreamCommerce\Component\ObjectAudit\Repository\RevisionRepositoryInterface;
 use DreamCommerce\Component\ObjectAudit\ResourceAuditManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -75,7 +76,8 @@ class ResourceShowCommand extends BaseCommand
 
         /** @var ResourceAuditManagerInterface $resourceAuditManager */
         $resourceAuditManager = $this->getContainer()->get('dream_commerce_object_audit.resource_manager');
-        $revisionRepository = $resourceAuditManager->getObjectAuditManager()->getRevisionRepository();
+        /** @var RevisionRepositoryInterface $revisionRepository */
+        $revisionRepository = $this->getContainer()->get('dream_commerce.repository.revision');
 
         if (empty($revisionId)) {
             $revision = $resourceAuditManager->getCurrentResourceRevision($resourceName, $resourceId);

@@ -30,13 +30,9 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Exception;
 
-use DreamCommerce\Component\ObjectAudit\Exception\Traits\ObjectTrait;
-
-class ObjectNotAuditedException extends AuditException
+class ObjectNotAuditedException extends ObjectException
 {
     const CODE_OBJECT_IS_NOT_AUDITED = 30;
-
-    use ObjectTrait;
 
     /**
      * @param string $className
