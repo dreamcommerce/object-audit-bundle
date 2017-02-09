@@ -21,7 +21,9 @@
         "symfony/framework-bundle": "^3.2",
         "symfony/var-dumper": "^3.2",
         "sylius/resource-bundle": "v1.0.0-beta.1@dev",
-        "friendsofphp/php-cs-fixer": "^1.11"
+        "friendsofphp/php-cs-fixer": "^1.11",
+        "polishsymfonycommunity/symfony-mocker-container": "^1.0",
+        "symfony/browser-kit": "^3.2"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -44,8 +46,8 @@
         ],
         "cs-check": "bin/php-cs-fixer --version && bin/php-cs-fixer fix -v --diff --dry-run src",
         "cs-fix": "bin/php-cs-fixer fix -v src",
-        "test-php-7.0": "tests/docker/bin/phpunit-7.0.sh",
-        "test-php-7.1": "tests/docker/bin/phpunit-7.1.sh"
+        "test-php-7.0": "test/docker/bin/phpunit-7.0.sh",
+        "test-php-7.1": "test/docker/bin/phpunit-7.1.sh"
     },
     "autoload": {
         "psr-4": {
@@ -55,7 +57,9 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "DreamCommerce\\Tests\\ObjectAudit\\": "tests/DreamCommerce/Tests/ObjectAudit"
+            "DreamCommerce\\Tests\\ObjectAudit\\": "test/src/DreamCommerce/Tests/ObjectAudit",
+            "DreamCommerce\\Tests\\ObjectAuditBundle\\": "test/src/DreamCommerce/Tests/ObjectAuditBundle",
+            "AppBundle\\": "test/src/AppBundle/"
         }
     },
     "extra": {

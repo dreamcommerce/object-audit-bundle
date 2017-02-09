@@ -30,6 +30,7 @@
 
 namespace DreamCommerce\Tests\ObjectAudit;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
@@ -370,7 +371,8 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
     protected function getObjectAuditMetadataDriver(): AnnotationDriver
     {
         if($this->objectAuditMetadataDriver === null) {
-            $this->objectAuditMetadataDriver = AnnotationDriver::create();
+            $annotationReader = new AnnotationReader();
+            $this->objectAuditMetadataDriver = new AnnotationDriver($annotationReader);
         }
 
         return $this->objectAuditMetadataDriver;

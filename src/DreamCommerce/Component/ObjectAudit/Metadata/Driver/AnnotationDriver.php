@@ -23,6 +23,8 @@ class AnnotationDriver implements DriverInterface
      */
     public function __construct(AnnotationReader $reader)
     {
+        // use composer autoloader
+        AnnotationRegistry::registerLoader('class_exists');
         $this->reader = $reader;
     }
 
@@ -51,17 +53,5 @@ class AnnotationDriver implements DriverInterface
         $reflection = new \ReflectionClass($class);
 
         return (bool) $this->reader->getClassAnnotation($reflection, Auditable::class);
-    }
-
-    /**
-     * @return AnnotationDriver
-     */
-    public static function create()
-    {
-        // use composer autoloader
-        AnnotationRegistry::registerLoader('class_exists');
-        $reader = new AnnotationReader();
-
-        return new self($reader);
     }
 }

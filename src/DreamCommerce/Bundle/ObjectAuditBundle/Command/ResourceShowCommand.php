@@ -31,7 +31,7 @@
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Command;
 
 use DreamCommerce\Component\ObjectAudit\Repository\RevisionRepositoryInterface;
-use DreamCommerce\Component\ObjectAudit\ResourceAuditManagerInterface;
+use DreamCommerce\Component\ObjectAudit\Manager\ResourceAuditManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

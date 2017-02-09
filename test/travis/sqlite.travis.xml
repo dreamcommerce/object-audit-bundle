@@ -3,7 +3,7 @@
 
     <testsuites>
         <testsuite name="DreamCommerce ObjectAudit">
-            <directory>./../DreamCommerce/Tests/ObjectAudit</directory>
+            <directory>./../src/DreamCommerce/Tests</directory>
         </testsuite>
     </testsuites>
 

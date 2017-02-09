@@ -5,30 +5,36 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="dream_commerce_object_audit.resource_manager.class">DreamCommerce\Bundle\ObjectAuditBundle\Manager\ORMResourceAuditManager</parameter>
+        <parameter key="dream_commerce_object_audit.resource_manager.class">DreamCommerce\Bundle\ObjectAuditBundle\Manager\ResourceAuditManager</parameter>
+        <parameter key="dream_commerce_object_audit.resource_metadata_factory.class">DreamCommerce\Bundle\ObjectAuditBundle\Metadata\ResourceAuditMetadataFactory</parameter>
+        <parameter key="dream_commerce_object_audit.registry.class">DreamCommerce\Component\ObjectAudit\ObjectAuditRegistry</parameter>
+        <parameter key="dream_commerce_object_audit.metadata_factory.class">DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadataFactory</parameter>
     </parameters>
 
     <services>
-        <service id="dream_commerce_object_audit.configuration" class="%dream_commerce_object_audit.configuration.class%">
+        <service id="dream_commerce_object_audit.factory" class="%dream_commerce_object_audit.factory.class%">
+            <argument type="service" id="dream_commerce_object_audit.revision_manager" />
+        </service>
+
+        <service id="dream_commerce_object_audit.revision_manager" class="%dream_commerce_object_audit.revision_manager.class%">
             <argument>%dream_commerce.model.revision.class%</argument>
-        </service>
-
-        <service id="dream_commerce_object_audit.manager" class="%dream_commerce_object_audit.manager.class%">
-            <argument type="service" id="dream_commerce_object_audit.configuration" />
+            <argument type="service" id="dream_commerce.manager.revision" />
             <argument type="service" id="dream_commerce.factory.revision" />
-            <argument type="service" id="dream_commerce.factory.object_audit" />
             <argument type="service" id="dream_commerce.repository.revision" />
-            <argument type="expression">service(container.hasParameter('dream_commerce_object_audit.persist_manager.service') ? parameter('dream_commerce_object_audit.persist_manager.service') : 'doctrine.orm.default_entity_manager')</argument>
-            <argument type="expression">service(container.hasParameter('dream_commerce_object_audit.persist_audit_manager.service') ? parameter('dream_commerce_object_audit.persist_audit_manager.service') : 'doctrine.orm.default_entity_manager')</argument>
         </service>
 
-        <service id="dream_commerce.factory.object_audit" class="%dream_commerce_object_audit.object_audit_factory.class%" />
-
-        <service id="dream_commerce_object_audit.resource_manager" class="%dream_commerce_object_audit.resource_manager.class%">
-            <argument type="service" id="dream_commerce_object_audit.manager" />
-            <argument type="service" id="dream_commerce_object_audit.resource_configuration" />
-            <argument type="service" id="sylius.resource_registry" />
+        <service id="dream_commerce_object_audit.resource_metadata_factory" class="%dream_commerce_object_audit.resource_metadata_factory.class%">
+            <argument type="service" id="dream_commerce_object_audit.registry" />
             <argument type="service" id="service_container" />
         </service>
+
+        <service id="dream_commerce_object_audit.resource_manager" class="%dream_commerce_object_audit.resource_manager.class%">
+            <argument type="service" id="dream_commerce_object_audit.registry" />
+            <argument type="service" id="sylius.resource_registry" />
+            <argument type="service" id="dream_commerce_object_audit.resource_metadata_factory" />
+            <argument type="service" id="service_container" />
+        </service>
+
+        <service id="dream_commerce_object_audit.registry" class="%dream_commerce_object_audit.registry.class%" />
     </services>
 </container>

@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <phpunit bootstrap="./tests/bootstrap.php" colors="true">
+    <php>
+        <server name="KERNEL_DIR" value="test/app/" />
+        <server name="IS_DOCTRINE_ORM_SUPPORTED" value="true" />
+    </php>
     <testsuites>
         <testsuite name="DreamCommerce ObjectAudit">
-            <directory>./tests/DreamCommerce/Tests/ObjectAudit</directory>
+            <directory>./test/src/DreamCommerce/Tests</directory>
         </testsuite>
     </testsuites>
 </phpunit>

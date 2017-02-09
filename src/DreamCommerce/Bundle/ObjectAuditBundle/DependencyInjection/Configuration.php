@@ -30,6 +30,8 @@
 
 namespace DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection;
 
+use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Configuration\BaseConfiguration;
+use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Configuration\ORMConfiguration;
 use DreamCommerce\Component\ObjectAudit\Model\Revision;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use Sylius\Bundle\ResourceBundle\SyliusResourceBundle;
@@ -50,15 +52,39 @@ final class Configuration implements ConfigurationInterface
 
         $rootNode
             ->addDefaultsIfNotSet()
+            ->fixXmlConfig('manager')
             ->children()
                 ->scalarNode('driver')->defaultValue(SyliusResourceBundle::DRIVER_DOCTRINE_ORM)->end()
             ->end()
         ;
 
+        $this->addConfigurationSection($rootNode);
         $this->addResourcesSection($rootNode);
         $this->addManagersSection($rootNode);
 
         return $treeBuilder;
+    }
+
+    private function addConfigurationSection(ArrayNodeDefinition $node)
+    {
+        $baseConfiguration = new BaseConfiguration();
+        $baseNode = new ArrayNodeDefinition('base');
+        $baseConfiguration->injectPartialNode($baseNode);
+
+        $ormConfiguration = new ORMConfiguration();
+        $ormNode = new ArrayNodeDefinition('orm');
+        $ormConfiguration->injectPartialNode($ormNode);
+
+        $node
+            ->children()
+                ->arrayNode('configuration')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->append($baseNode)
+                        ->append($ormNode)
+                    ->end()
+                ->end()
+            ->end();
     }
 
     private function addManagersSection(ArrayNodeDefinition $node)
@@ -66,7 +92,16 @@ final class Configuration implements ConfigurationInterface
         $node
             ->children()
                 ->arrayNode('managers')
-                    // TODO
+                    ->useAttributeAsKey('name')
+                    ->requiresAtLeastOneElement()
+                    ->prototype('array')
+                        ->children()
+                            ->arrayNode('ignore_properties')
+                                ->treatNullLike(array())
+                                ->prototype('scalar')->end()
+                            ->end()
+                        ->end()
+                    ->end()
                 ->end()
             ->end()
         ;

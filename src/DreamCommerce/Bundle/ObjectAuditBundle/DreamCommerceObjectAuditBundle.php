@@ -30,8 +30,9 @@
 
 namespace DreamCommerce\Bundle\ObjectAuditBundle;
 
+use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\ORM\EntityManager;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionEnumType;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt16Type;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt32Type;
@@ -46,22 +47,25 @@ class DreamCommerceObjectAuditBundle extends AbstractResourceBundle
     {
         parent::boot();
 
-        /** @var EntityManager $em */
-        $em = $this->container->get('doctrine.orm.entity_manager');
-        $platform = $em->getConnection()->getDatabasePlatform();
+        /** @var Registry $registry */
+        $registry = $this->container->get('doctrine');
+        /** @var Connection $connection */
+        foreach ($registry->getConnections() as $connection) {
+            $platform = $connection->getDatabasePlatform();
 
-        $types = array(
-            RevisionEnumType::TYPE_NAME => RevisionEnumType::class,
-            RevisionUInt8Type::TYPE_NAME => RevisionUInt8Type::class,
-            RevisionUInt16Type::TYPE_NAME => RevisionUInt16Type::class,
-            RevisionUInt32Type::TYPE_UINT32 => RevisionUInt32Type::class,
-            UTCDateTimeType::TYPE_NAME => UTCDateTimeType::class,
-        );
+            $types = array(
+                RevisionEnumType::TYPE_NAME => RevisionEnumType::class,
+                RevisionUInt8Type::TYPE_NAME => RevisionUInt8Type::class,
+                RevisionUInt16Type::TYPE_NAME => RevisionUInt16Type::class,
+                RevisionUInt32Type::TYPE_UINT32 => RevisionUInt32Type::class,
+                UTCDateTimeType::TYPE_NAME => UTCDateTimeType::class,
+            );
 
-        foreach ($types as $type => $className) {
-            if (!Type::hasType($type)) {
-                Type::addType($type, $className);
-                $platform->registerDoctrineTypeMapping($type, $type);
+            foreach ($types as $type => $className) {
+                if (!Type::hasType($type)) {
+                    Type::addType($type, $className);
+                    $platform->registerDoctrineTypeMapping($type, $type);
+                }
             }
         }
     }

@@ -28,7 +28,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Component\ObjectAudit;
+namespace DreamCommerce\Component\ObjectAudit\Manager;
 
 use Doctrine\Common\Collections\Collection;
 use DreamCommerce\Bundle\ObjectAuditBundle\Metadata\ResourceAuditMetadataFactory;

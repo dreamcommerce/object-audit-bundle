@@ -1,0 +1,3 @@
+dream_commerce_object_audit:
+    resource: "@DreamCommerceObjectAuditBundle/Resources/config/routing.yml"
+    prefix: /

@@ -32,7 +32,7 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle\Controller;
 
 use DreamCommerce\Component\ObjectAudit\Manager\RevisionManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
-use DreamCommerce\Component\ObjectAudit\ResourceAuditManagerInterface;
+use DreamCommerce\Component\ObjectAudit\Manager\ResourceAuditManagerInterface;
 use Pagerfanta\Pagerfanta;
 use Sylius\Component\Resource\Metadata\MetadataInterface;
 use Sylius\Component\Resource\Metadata\RegistryInterface;

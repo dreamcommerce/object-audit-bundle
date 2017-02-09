@@ -30,26 +30,63 @@
 
 namespace DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection;
 
+use Doctrine\Common\Annotations\AnnotationRegistry;
+use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Compiler\ManagerCompilerPass;
+use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Configuration\ORMConfiguration;
 use Sylius\Bundle\ResourceBundle\DependencyInjection\Extension\AbstractResourceExtension;
+use Sylius\Bundle\ResourceBundle\SyliusResourceBundle;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use RuntimeException;
 
 final class DreamCommerceObjectAuditExtension extends AbstractResourceExtension
 {
+    const ALIAS = 'dream_commerce_object_audit';
+
     /**
      * {@inheritdoc}
      */
     public function load(array $config, ContainerBuilder $container)
     {
-        $config = $this->processConfiguration($this->getConfiguration($config, $container), $config);
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        // use composer autoloader
+        AnnotationRegistry::registerLoader('class_exists');
 
+        $config = $this->processConfiguration($this->getConfiguration($config, $container), $config);
+
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load(sprintf('services/integrations/%s.xml', $config['driver']));
 
         $this->registerResources('dream_commerce', $config['driver'], $config['resources'], $container);
         $this->mapFormValidationGroupsParameters($config, $container);
-
         $loader->load('services.xml');
+
+        $partialConfiguration = null;
+        $configPartName = null;
+
+        switch ($config['driver']) {
+            case SyliusResourceBundle::DRIVER_DOCTRINE_ORM:
+                $partialConfiguration = new ORMConfiguration();
+                $configPartName = 'orm';
+                break;
+            default:
+                throw new RuntimeException('Unsupported type of driver "'.$config['driver'].'"');
+        }
+
+        foreach ($config['managers'] as $name => $managerConfig) {
+            if (isset($config['configuration'][$configPartName])) {
+                $managerConfig = array_merge($config['configuration'][$configPartName], $managerConfig);
+            }
+            $managerConfig = $this->processConfiguration($partialConfiguration, array($managerConfig));
+            $config['managers'][$name] = $managerConfig;
+        }
+
+        $container->setParameter($this->getAlias().'.managers', $config['managers']);
+        $container->addCompilerPass(new ManagerCompilerPass($config['driver']));
+    }
+
+    public function getAlias()
+    {
+        return self::ALIAS;
     }
 }

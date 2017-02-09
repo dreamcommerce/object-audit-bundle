@@ -31,7 +31,7 @@
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Command;
 
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
-use DreamCommerce\Component\ObjectAudit\ResourceAuditManagerInterface;
+use DreamCommerce\Component\ObjectAudit\Manager\ResourceAuditManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Manager\RevisionManagerInterface;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;

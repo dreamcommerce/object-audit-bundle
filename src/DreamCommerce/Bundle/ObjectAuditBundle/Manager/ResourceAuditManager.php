@@ -43,7 +43,7 @@ use DreamCommerce\Component\ObjectAudit\Model\ResourceAudit;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditRegistry;
-use DreamCommerce\Component\ObjectAudit\ResourceAuditManagerInterface;
+use DreamCommerce\Component\ObjectAudit\Manager\ResourceAuditManagerInterface;
 use Sylius\Component\Resource\Metadata\RegistryInterface;
 use Sylius\Component\Resource\Model\ResourceInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -71,16 +71,19 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     protected $container;
 
     /**
-     * @param ObjectAuditRegistry $objectAuditRegistry
-     * @param RegistryInterface   $resourceRegistry
-     * @param ContainerInterface  $container
+     * @param ObjectAuditRegistry          $objectAuditRegistry
+     * @param RegistryInterface            $resourceRegistry
+     * @param ResourceAuditMetadataFactory $resourceAuditMetadataFactory
+     * @param ContainerInterface           $container
      */
     public function __construct(ObjectAuditRegistry $objectAuditRegistry,
                                 RegistryInterface $resourceRegistry,
+                                ResourceAuditMetadataFactory $resourceAuditMetadataFactory,
                                 ContainerInterface $container
     ) {
         $this->objectAuditRegistry = $objectAuditRegistry;
         $this->resourceRegistry = $resourceRegistry;
+        $this->resourceAuditMetadataFactory = $resourceAuditMetadataFactory;
         $this->container = $container;
     }
 
