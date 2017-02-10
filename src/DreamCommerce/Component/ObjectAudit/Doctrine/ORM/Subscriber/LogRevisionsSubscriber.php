@@ -36,6 +36,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
+use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Persisters\Entity\BasicEntityPersister;
+use Doctrine\ORM\Persisters\Entity\EntityPersister;
 use Doctrine\ORM\UnitOfWork;
 use DreamCommerce\Component\ObjectAudit\Model\ObjectAudit;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
@@ -86,10 +89,22 @@ class LogRevisionsSubscriber implements EventSubscriber
 
             foreach ($this->objects as $objectAudit) {
                 $uow = $entityManager->getUnitOfWork();
+                $className = $objectAudit->getClassName();
+
                 $revisionData = array_merge(
                     $objectAudit->getRevisionData(),
                     $objectAudit->getIdentifiers()
                 );
+
+                $persister = $uow->getEntityPersister($className);
+                $updateData = $this->prepareUpdateData($entityManager, $persister, $objectAudit->getObject());
+
+                if (is_array($updateData) && count($updateData) > 0) {
+                    $revisionData = array_merge(
+                        $revisionData,
+                        $updateData
+                    );
+                }
 
                 $changedIdentifiers = $uow->getEntityIdentifier($objectAudit->getObject());
                 if ($changedIdentifiers !== null) {
@@ -126,6 +141,32 @@ class LogRevisionsSubscriber implements EventSubscriber
         $globalIgnoredProperties = $configuration->getGlobalIgnoreProperties();
         $revisionManager = $objectAuditManager->getRevisionManager();
         $currentRevision = $revisionManager->getCurrentRevision();
+        $processedEntities = array();
+
+        foreach ($uow->getScheduledEntityDeletions() as $entity) {
+            $className = ClassUtils::getRealClass(get_class($entity));
+            if (!$objectMetadataFactory->isClassAudited($className)) {
+                continue;
+            }
+
+            //doctrine is fine deleting elements multiple times. We are not.
+            $hash = $this->getHash($entity, $className, $uow);
+            if (in_array($hash, $processedEntities)) {
+                continue;
+            }
+            $processedEntities[] = $hash;
+            $classMetadata = $entityManager->getClassMetadata($className);
+
+            $this->objects[spl_object_hash($entity)] = new ObjectAudit(
+                $entity,
+                $className,
+                $classMetadata->getIdentifierValues($entity),
+                $currentRevision,
+                $entityManager,
+                $this->getOriginalEntityData($entity, $entityManager),
+                RevisionInterface::ACTION_DELETE
+            );
+        }
 
         foreach ($uow->getScheduledEntityInsertions() as $entity) {
             $className = ClassUtils::getRealClass(get_class($entity));
@@ -188,33 +229,6 @@ class LogRevisionsSubscriber implements EventSubscriber
             );
         }
 
-        $processedEntities = array();
-
-        foreach ($uow->getScheduledEntityDeletions() as $entity) {
-            $className = ClassUtils::getRealClass(get_class($entity));
-            if (!$objectMetadataFactory->isClassAudited($className)) {
-                continue;
-            }
-
-            //doctrine is fine deleting elements multiple times. We are not.
-            $hash = $this->getHash($entity, $className, $uow);
-            if (in_array($hash, $processedEntities)) {
-                continue;
-            }
-            $processedEntities[] = $hash;
-            $classMetadata = $entityManager->getClassMetadata($className);
-
-            $this->objects[spl_object_hash($entity)] = new ObjectAudit(
-                $entity,
-                $className,
-                $classMetadata->getIdentifierValues($entity),
-                $currentRevision,
-                $entityManager,
-                $this->getOriginalEntityData($entity, $entityManager),
-                RevisionInterface::ACTION_DELETE
-            );
-        }
-
         if (count($this->objects) > 0) {
             $revisionManager->saveCurrentRevision();
         }
@@ -256,5 +270,101 @@ class LogRevisionsSubscriber implements EventSubscriber
                 $uow->getEntityIdentifier($entity)
             )
         );
+    }
+
+    /**
+     * Modified version of BasicEntityPersister::prepareUpdateData()
+     * git revision d9fc5388f1aa1751a0e148e76b4569bd207338e9 (v2.5.3)
+     *
+     * @license MIT
+     *
+     * @author  Roman Borschel <roman@code-factory.org>
+     * @author  Giorgio Sironi <piccoloprincipeazzurro@gmail.com>
+     * @author  Benjamin Eberlei <kontakt@beberlei.de>
+     * @author  Alexander <iam.asm89@gmail.com>
+     * @author  Fabio B. Silva <fabio.bat.silva@gmail.com>
+     * @author  Rob Caiger <rob@clocal.co.uk>
+     * @author  Simon Mönch <simonmoench@gmail.com>
+     *
+     * @param EntityPersister|BasicEntityPersister $persister
+     * @param object                               $entity
+     *
+     * @return array
+     */
+    private function prepareUpdateData(EntityManagerInterface $em, EntityPersister $persister, $entity)
+    {
+        $uow = $em->getUnitOfWork();
+        $classMetadata = $persister->getClassMetadata();
+
+        $versionField = null;
+        $result = array();
+
+        if (($versioned = $classMetadata->isVersioned) != false) {
+            $versionField = $classMetadata->versionField;
+        }
+
+        foreach ($uow->getEntityChangeSet($entity) as $field => $change) {
+            if (isset($versionField) && $versionField == $field) {
+                continue;
+            }
+
+            if (isset($classMetadata->embeddedClasses[$field])) {
+                continue;
+            }
+
+            $newVal = $change[1];
+
+            if (! isset($classMetadata->associationMappings[$field])) {
+                $columnName = $classMetadata->columnNames[$field];
+                $fieldName = $classMetadata->getFieldName($columnName);
+
+                $result[$persister->getOwningTable($field)][$fieldName] = $newVal;
+                continue;
+            }
+
+            $assoc = $classMetadata->associationMappings[$field];
+
+            // Only owning side of x-1 associations can have a FK column.
+            if (! $assoc['isOwningSide'] || ! ($assoc['type'] & ClassMetadata::TO_ONE)) {
+                continue;
+            }
+
+            if ($newVal !== null) {
+                if ($uow->isScheduledForInsert($newVal)) {
+                    $newVal = null;
+                }
+            }
+
+            $newValId = null;
+
+            if ($newVal !== null) {
+                if (! $uow->isInIdentityMap($newVal)) {
+                    continue;
+                }
+                $newValId = $uow->getEntityIdentifier($newVal);
+            }
+
+            $targetClass = $em->getClassMetadata($assoc['targetEntity']);
+            $owningTable = $persister->getOwningTable($field);
+
+            foreach ($assoc['joinColumns'] as $joinColumn) {
+                $sourceColumn = $joinColumn['name'];
+                $targetColumn = $joinColumn['referencedColumnName'];
+                $fieldName = $classMetadata->getFieldName($sourceColumn);
+
+                $result[$owningTable][$fieldName] = $newValId
+                    ? $newValId[$targetClass->getFieldForColumn($targetColumn)]
+                    : null;
+            }
+        }
+
+        $className = $classMetadata->getName();
+        $className = substr($className, strrpos($className, '\\') + 1);
+
+        if(!isset($result[$className])) {
+            return array();
+        }
+
+        return $result[$className];
     }
 }
