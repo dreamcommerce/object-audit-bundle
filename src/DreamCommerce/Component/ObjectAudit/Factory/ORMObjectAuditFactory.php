@@ -130,6 +130,7 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
         }
 
         $uow = $persistManager->getUnitOfWork();
+        $options = array('threatDeletionsAsExceptions' => true);
 
         foreach ($classMetadata->associationMappings as $field => $assoc) {
             // Check if the association is not among the fetch-joined associations already.
@@ -145,39 +146,60 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
                 $value = null;
 
                 if ($isAudited && $configuration->isLoadAuditedObjects()) {
-                    // Primary Key. Used for audit tables queries.
-                    $pk = array();
-                    // Primary Field. Used when fallback to Doctrine finder.
-                    $pf = array();
-
                     if ($assoc['isOwningSide']) {
+                        // Primary Key. Used for audit tables queries.
+                        $pk = array();
                         foreach ($assoc['targetToSourceKeyColumns'] as $foreign => $local) {
-                            $pk[$foreign] = $pf[$foreign] = $data[$columnMap[$local]];
+                            $pk[$foreign] = $data[$columnMap[$local]];
+                        }
+                        $pk = array_filter($pk);
+
+                        if (!empty($pk)) {
+                            try {
+                                $value = $objectAuditManager->findObjectByRevision(
+                                    $targetClass->name,
+                                    $pk,
+                                    $revision,
+                                    $options
+                                );
+                            } catch (ObjectAuditDeletedException $e) {
+                                $value = null;
+                            } catch (ObjectAuditNotFoundException $e) {
+                                // The entity does not have any revision yet. So let's get the actual state of it.
+                                $value = $persistManager->getRepository($targetClass->name)->findOneBy($pk);
+                            }
                         }
                     } else {
+                        // Primary Field. Used when fallback to Doctrine finder.
+                        $pf = array();
+
                         /** @var ClassMetadata $otherEntityMeta */
                         $otherEntityAssoc = $persistManager->getClassMetadata($assoc['targetEntity'])->associationMappings[$assoc['mappedBy']];
 
+                        $fields = array();
                         foreach ($otherEntityAssoc['targetToSourceKeyColumns'] as $local => $foreign) {
-                            $pk[$local] = $pf[$otherEntityAssoc['fieldName']] = $data[$classMetadata->getFieldName($local)];
+                            $fields[$foreign] = $pf[$otherEntityAssoc['fieldName']] = $data[$classMetadata->getFieldName($local)];
                         }
-                    }
 
-                    $pk = array_filter($pk);
+                        $objects = $objectAuditManager->findObjectsByFieldsAndRevision(
+                            $targetClass->name,
+                            $fields,
+                            null,
+                            $revision,
+                            $options
+                        );
 
-                    if (!empty($pk)) {
-                        try {
-                            $value = $objectAuditManager->findObjectByRevision(
-                                $targetClass->name,
-                                $pk,
-                                $revision,
-                                array('threatDeletionsAsExceptions' => true)
-                            );
-                        } catch (ObjectAuditDeletedException $e) {
-                            $value = null;
-                        } catch (ObjectAuditNotFoundException $e) {
+                        if(count($objects) == 0) {
                             // The entity does not have any revision yet. So let's get the actual state of it.
                             $value = $persistManager->getRepository($targetClass->name)->findOneBy($pf);
+                        } elseif(count($objects) == 1) {
+                            try {
+                                $value = $objects[0];
+                            } catch (ObjectAuditDeletedException $e) {
+                                $value = null;
+                            }
+                        } else {
+                            throw new \Exception(); // TODO
                         }
                     }
                 } elseif (!$isAudited && $configuration->isLoadNativeObjects()) {
