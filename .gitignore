@@ -1,9 +1,10 @@
 /composer.lock
 /vendor
 /bin
+/build
 /.php_cs.cache
+/docker/docker-compose.yml
 /test/app/cache
 /test/app/logs
-/test/docker/docker-compose.yml
 /test/app/config/parameters.yml
 /test/app/db.sql

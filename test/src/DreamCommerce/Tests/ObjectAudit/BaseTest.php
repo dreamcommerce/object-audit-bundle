@@ -46,7 +46,6 @@ use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionEnumType;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt16Type;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt32Type;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt8Type;
-use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\UTCDateTimeType;
 use DreamCommerce\Component\ObjectAudit\Doctrine\ORM\Subscriber\CreateSchemaSubscriber;
 use DreamCommerce\Component\ObjectAudit\Doctrine\ORM\Subscriber\LogRevisionsSubscriber;
 use DreamCommerce\Component\ObjectAudit\Factory\ORMObjectAuditFactory;
@@ -444,7 +443,6 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             RevisionUInt8Type::TYPE_NAME => RevisionUInt8Type::class,
             RevisionUInt16Type::TYPE_NAME => RevisionUInt16Type::class,
             RevisionUInt32Type::TYPE_NAME => RevisionUInt32Type::class,
-            UTCDateTimeType::TYPE_NAME => UTCDateTimeType::class,
         );
 
         foreach ($types as $type => $className) {

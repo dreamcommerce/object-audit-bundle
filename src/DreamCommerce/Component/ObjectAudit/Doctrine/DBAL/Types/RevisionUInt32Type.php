@@ -30,6 +30,7 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types;
 
+use DreamCommerce\Component\Common\Doctrine\DBAL\Types\MapEnumType;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 
 final class RevisionUInt32Type extends MapEnumType

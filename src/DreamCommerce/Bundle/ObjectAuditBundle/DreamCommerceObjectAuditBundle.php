@@ -37,7 +37,6 @@ use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionEnumType;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt16Type;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt32Type;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt8Type;
-use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\UTCDateTimeType;
 use Sylius\Bundle\ResourceBundle\AbstractResourceBundle;
 use Sylius\Bundle\ResourceBundle\SyliusResourceBundle;
 
@@ -58,7 +57,6 @@ class DreamCommerceObjectAuditBundle extends AbstractResourceBundle
                 RevisionUInt8Type::TYPE_NAME => RevisionUInt8Type::class,
                 RevisionUInt16Type::TYPE_NAME => RevisionUInt16Type::class,
                 RevisionUInt32Type::TYPE_UINT32 => RevisionUInt32Type::class,
-                UTCDateTimeType::TYPE_NAME => UTCDateTimeType::class,
             );
 
             foreach ($types as $type => $className) {

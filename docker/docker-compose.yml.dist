@@ -4,7 +4,7 @@ services:
         build: build/php-7.0
         working_dir: /docker/app
         volumes:
-            - ../../:/docker/app
+            - ../:/docker/app
             - ~/.ssh/id_rsa:/docker/.ssh/id_rsa:ro
             - ~/.composer:/docker/.composer
             - /tmp:/tmp
@@ -15,16 +15,16 @@ services:
         links:
             - mysql
         mem_limit: 2000000000
-        ports:
-            - 19000:9000
-        environment:
-            XDEBUG_CONFIG: idekey=PHPSTORM remote_host=10.100.1.6
+#        ports:
+#            - 19060:9000
+#        environment:
+#            XDEBUG_CONFIG: idekey=PHPSTORM remote_host=xx.yy.zz.vv
 
     php-7.1:
         build: build/php-7.1
         working_dir: /docker/app
         volumes:
-            - ../../:/docker/app
+            - ../:/docker/app
             - ~/.ssh/id_rsa:/docker/.ssh/id_rsa:ro
             - ~/.composer:/docker/.composer
             - /tmp:/tmp
@@ -35,10 +35,10 @@ services:
         links:
             - mysql
         mem_limit: 2000000000
-        ports:
-            - 19001:9000
-        environment:
-            XDEBUG_CONFIG: idekey=PHPSTORM remote_host=10.100.1.6
+#        ports:
+#            - 19061:9000
+#        environment:
+#            XDEBUG_CONFIG: idekey=PHPSTORM remote_host=xx.yy.zz.vv
 
     mysql:
         image: mariadb

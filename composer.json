@@ -11,7 +11,9 @@
         "php": "~7.0",
         "doctrine/dbal": "~2.5",
         "doctrine/orm": "~2.4",
-        "ocramius/proxy-manager": "^2.0"
+        "ocramius/proxy-manager": "^2.0",
+        "dreamcommerce/common-bundle": "dev-master",
+        "dreamcommerce/bugtracker": "^1.1"
     },
     "require-dev": {
         "doctrine/doctrine-bundle": "~1.4",
@@ -46,8 +48,14 @@
         ],
         "cs-check": "bin/php-cs-fixer --version && bin/php-cs-fixer fix -v --diff --dry-run src",
         "cs-fix": "bin/php-cs-fixer fix -v src",
-        "test-php-7.0": "test/docker/bin/phpunit-7.0.sh",
-        "test-php-7.1": "test/docker/bin/phpunit-7.1.sh"
+        "test-php-7.0": "bin/docker-phpunit-7.0",
+        "test-php-7.1": "bin/docker-phpunit-7.1",
+        "post-install-cmd": [
+            "DreamCommerce\\Component\\Common\\Composer\\ScriptHandler::copyTemplateDir"
+        ],
+        "post-update-cmd": [
+            "DreamCommerce\\Component\\Common\\Composer\\ScriptHandler::copyTemplateDir"
+        ]
     },
     "autoload": {
         "psr-4": {
@@ -67,5 +75,15 @@
             "dev-master": "1.0-dev",
             "dev-develop": "1.1-dev"
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/dreamcommerce/common-bundle"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/dreamcommerce/bugtracker-bundle"
+        }
+    ]
 }
