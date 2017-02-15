@@ -31,8 +31,8 @@
 namespace DreamCommerce\Tests\ObjectAudit\Fixtures\Issue;
 
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Mapping\Annotation as Gedmo;
 use DreamCommerce\Component\ObjectAudit\Mapping\Annotation\Auditable;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * @Auditable

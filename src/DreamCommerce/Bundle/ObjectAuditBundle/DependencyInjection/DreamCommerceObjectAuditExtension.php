@@ -33,12 +33,12 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Compiler\ManagerCompilerPass;
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Configuration\ORMConfiguration;
+use RuntimeException;
 use Sylius\Bundle\ResourceBundle\DependencyInjection\Extension\AbstractResourceExtension;
 use Sylius\Bundle\ResourceBundle\SyliusResourceBundle;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use RuntimeException;
 
 final class DreamCommerceObjectAuditExtension extends AbstractResourceExtension
 {

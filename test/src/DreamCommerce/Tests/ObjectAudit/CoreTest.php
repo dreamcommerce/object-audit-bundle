@@ -33,10 +33,10 @@ namespace DreamCommerce\Tests\ObjectAudit;
 use DateTime;
 use Doctrine\Common\Collections\Collection;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectAuditNotFoundException;
-use DreamCommerce\Component\ObjectAudit\Model\ObjectAudit;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Common\RevisionTest;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
+use DreamCommerce\Component\ObjectAudit\Model\ObjectAudit;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
+use DreamCommerce\Tests\ObjectAudit\Fixtures\Common\RevisionTest;
 use DreamCommerce\Tests\ObjectAudit\Fixtures\Core\ArticleAudit;
 use DreamCommerce\Tests\ObjectAudit\Fixtures\Core\Cat;
 use DreamCommerce\Tests\ObjectAudit\Fixtures\Core\Dog;
@@ -215,7 +215,7 @@ class CoreTest extends BaseTest
         //duplicated entries means a bug with discriminators
         $this->assertEquals(6, count($objects));
 
-        usort($objects, function(ObjectAudit $a, ObjectAudit $b) {
+        usort($objects, function (ObjectAudit $a, ObjectAudit $b) {
             return strcmp($a->getClassName(), $b->getClassName());
         });
 

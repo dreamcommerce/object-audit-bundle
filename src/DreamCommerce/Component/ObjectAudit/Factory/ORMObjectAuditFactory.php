@@ -1,5 +1,33 @@
 <?php
 
+/*
+ * (c) 2017 DreamCommerce
+ *
+ * @package DreamCommerce\Component\ObjectAudit
+ * @author Michał Korus <michal.korus@dreamcommerce.com>
+ * @link https://www.dreamcommerce.com
+ *
+ * (c) 2011 SimpleThings GmbH
+ *
+ * @package SimpleThings\EntityAudit
+ * @author Benjamin Eberlei <eberlei@simplethings.de>
+ * @link http://www.simplethings.de
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ */
+
 namespace DreamCommerce\Component\ObjectAudit\Factory;
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -12,10 +40,10 @@ use Doctrine\ORM\PersistentCollection;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectAuditDeletedException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectAuditNotFoundException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
-use DreamCommerce\Component\ObjectAudit\Model\AuditCollection;
-use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Manager\RevisionManagerInterface;
+use DreamCommerce\Component\ObjectAudit\Model\AuditCollection;
+use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -189,10 +217,10 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
                             $options
                         );
 
-                        if(count($objects) == 0) {
+                        if (count($objects) == 0) {
                             // The entity does not have any revision yet. So let's get the actual state of it.
                             $value = $persistManager->getRepository($targetClass->name)->findOneBy($pf);
-                        } elseif(count($objects) == 1) {
+                        } elseif (count($objects) == 1) {
                             try {
                                 $value = $objects[0];
                             } catch (ObjectAuditDeletedException $e) {

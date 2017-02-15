@@ -257,7 +257,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
     protected function getTestConnection(): Connection
     {
-        if(self::$connection === null) {
+        if (self::$connection === null) {
             $params = $this->getConnectionParams();
             self::$connection = $this->getConnection($params);
         }
@@ -267,9 +267,9 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
     protected function getAuditConnection(): Connection
     {
-        if(self::$auditConnection === null) {
+        if (self::$auditConnection === null) {
             $params = $this->getConnectionParams();
-            if(is_array($params) && isset($params['dbname'])) {
+            if (is_array($params) && isset($params['dbname'])) {
                 $params['dbname'] .= '_audit';
             }
 
@@ -319,7 +319,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
     protected function getAuditPersistManager(): EntityManager
     {
-        if($this->auditPersistManager !== null) {
+        if ($this->auditPersistManager !== null) {
             return $this->auditPersistManager;
         }
 
@@ -341,7 +341,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
     protected function getRevisionManager(): ORMRevisionManager
     {
-        if($this->revisionManager === null) {
+        if ($this->revisionManager === null) {
             $revisionClass = RevisionTest::class;
             $revisionFactory = new Factory($revisionClass);
             $auditPersistManager = $this->getAuditPersistManager();
@@ -360,7 +360,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
     protected function getObjectAuditFactory(): ORMObjectAuditFactory
     {
-        if($this->objectAuditFactory === null) {
+        if ($this->objectAuditFactory === null) {
             $this->objectAuditFactory = new ORMObjectAuditFactory($this->getRevisionManager());
         }
 
@@ -369,7 +369,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
     protected function getObjectAuditMetadataDriver(): AnnotationDriver
     {
-        if($this->objectAuditMetadataDriver === null) {
+        if ($this->objectAuditMetadataDriver === null) {
             $annotationReader = new AnnotationReader();
             $this->objectAuditMetadataDriver = new AnnotationDriver($annotationReader);
         }
@@ -379,7 +379,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
     protected function getObjectAuditMetadataFactory(): ObjectAuditMetadataFactory
     {
-        if($this->objectAuditMetadataFactory === null) {
+        if ($this->objectAuditMetadataFactory === null) {
             $this->objectAuditMetadataFactory = new ObjectAuditMetadataFactory(
                 $this->getPersistManager(),
                 $this->getObjectAuditMetadataDriver()
@@ -391,7 +391,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
     protected function getObjectAuditRegistry()
     {
-        if($this->objectAuditRegistry === null) {
+        if ($this->objectAuditRegistry === null) {
             $this->objectAuditRegistry = new ObjectAuditRegistry();
         }
 
@@ -490,7 +490,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
     protected function tearDownAuditSchema()
     {
         $sm = $this->auditPersistManager->getConnection()->getSchemaManager();
-        foreach($sm->listTableNames() as $auditTable) {
+        foreach ($sm->listTableNames() as $auditTable) {
             $sm->dropTable($auditTable);
         }
     }

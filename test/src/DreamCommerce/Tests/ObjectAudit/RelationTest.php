@@ -97,7 +97,7 @@ class RelationTest extends BaseTest
         $this->assertEquals(2, count($objects));
         $changedOwner = $objects[0]->getObject();
         $changedOwned = $objects[1]->getObject();
-        if($changedOwner instanceof OwnedEntity1) {
+        if ($changedOwner instanceof OwnedEntity1) {
             $swap = $changedOwned;
             $changedOwned = $changedOwner;
             $changedOwner = $swap;

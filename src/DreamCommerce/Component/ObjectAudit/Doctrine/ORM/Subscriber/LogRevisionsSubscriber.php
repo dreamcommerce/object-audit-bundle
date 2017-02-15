@@ -361,7 +361,7 @@ class LogRevisionsSubscriber implements EventSubscriber
         $className = $classMetadata->getName();
         $className = substr($className, strrpos($className, '\\') + 1);
 
-        if(!isset($result[$className])) {
+        if (!isset($result[$className])) {
             return array();
         }
 

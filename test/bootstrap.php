@@ -37,7 +37,7 @@ EOT
     );
 }
 
-if(!file_exists(__DIR__ . '/app/config/parameters.yml')) {
+if (!file_exists(__DIR__ . '/app/config/parameters.yml')) {
     die(<<<'EOT'
 You must create parameters.yml, run the following command:
 cp test/app/config/parameters.yml.dist test/app/config/parameters.yml

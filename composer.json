@@ -1,5 +1,6 @@
 {
     "name": "dreamcommerce/object-audit-bundle",
+    "type": "library",
     "license": "LGPL-2.1",
     "keywords": [
         "Persistence",
@@ -13,7 +14,8 @@
         "doctrine/orm": "~2.4",
         "ocramius/proxy-manager": "^2.0",
         "dreamcommerce/common-bundle": "dev-master",
-        "dreamcommerce/bugtracker": "^1.1"
+        "dreamcommerce/bugtracker": "^1.1",
+        "sylius/resource-bundle": "v1.0.0-beta.1@dev"
     },
     "require-dev": {
         "doctrine/doctrine-bundle": "~1.4",
@@ -22,7 +24,6 @@
         "phpunit/phpunit": "^5.5",
         "symfony/framework-bundle": "^3.2",
         "symfony/var-dumper": "^3.2",
-        "sylius/resource-bundle": "v1.0.0-beta.1@dev",
         "friendsofphp/php-cs-fixer": "^1.11",
         "polishsymfonycommunity/symfony-mocker-container": "^1.0",
         "symfony/browser-kit": "^3.2"
@@ -46,8 +47,8 @@
             "@test-php-7.0",
             "@test-php-7.1"
         ],
-        "cs-check": "bin/php-cs-fixer --version && bin/php-cs-fixer fix -v --diff --dry-run src",
-        "cs-fix": "bin/php-cs-fixer fix -v src",
+        "cs-check": "bin/php-cs-fixer --version && bin/php-cs-fixer fix -v --diff --dry-run --config-file .php_cs src",
+        "cs-fix": "bin/php-cs-fixer fix -v --config-file .php_cs src",
         "test-php-7.0": "bin/docker-phpunit-7.0",
         "test-php-7.1": "bin/docker-phpunit-7.1",
         "post-install-cmd": [
