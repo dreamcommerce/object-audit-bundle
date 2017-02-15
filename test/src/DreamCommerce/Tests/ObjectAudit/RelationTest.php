@@ -50,6 +50,7 @@ use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\OwnerEntity;
 use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\Page;
 use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\PageAlias;
 use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\PageLocalization;
+use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\Product;
 use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\RelatedEntity;
 use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\RelationFoobarEntity;
 use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\RelationOneToOneEntity;
@@ -650,6 +651,7 @@ class RelationTest extends BaseTest
 
         $this->persistManager->flush();
 
+        /** @var FoodCategory $auditedFood */
         $auditedFood = $this->objectAuditManager->findObjectByRevision(
             get_class($food),
             $food->getId(),
@@ -657,16 +659,19 @@ class RelationTest extends BaseTest
         );
 
         $this->assertInstanceOf(get_class($food), $auditedFood);
-        $this->assertCount(3, $auditedFood->getProducts());
+        $products = $auditedFood->getProducts();
+        $this->assertCount(3, $products);
 
-        list($productOne, $productTwo, $productThree) = $auditedFood->getProducts()->toArray();
+        $this->assertInstanceOf(get_class($parmesanCheese), $products[0]);
+        $this->assertInstanceOf(get_class($cheddarCheese), $products[1]);
+        $this->assertInstanceOf(get_class($vine), $products[2]);
 
-        $this->assertInstanceOf(get_class($parmesanCheese), $productOne);
-        $this->assertInstanceOf(get_class($cheddarCheese), $productTwo);
-        $this->assertInstanceOf(get_class($vine), $productThree);
+        $this->assertEquals('Parmesan', $products[0]->getName());
+        $this->assertEquals('Cheddar', $products[1]->getName());
+        $this->assertEquals('Champagne', $products[2]->getName());
 
-        $this->assertEquals($parmesanCheese->getId(), $productOne->getId());
-        $this->assertEquals($cheddarCheese->getId(), $productTwo->getId());
+        $this->assertEquals($parmesanCheese->getId(), $products[0]->getId());
+        $this->assertEquals($cheddarCheese->getId(), $products[1]->getId());
     }
 
     public function testOneToManyWithIndexBy()

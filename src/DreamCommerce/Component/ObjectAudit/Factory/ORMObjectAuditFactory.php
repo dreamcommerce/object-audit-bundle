@@ -45,6 +45,7 @@ use DreamCommerce\Component\ObjectAudit\Manager\RevisionManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Model\AuditCollection;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use InvalidArgumentException;
+use ProxyManager\Factory\LazyLoadingValueHolderFactory;
 use RuntimeException;
 
 final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
@@ -116,6 +117,7 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
         /** @var EntityManagerInterface $persistManager */
         $classMetadata = $persistManager->getClassMetadata($className);
         $cacheKey = $this->createEntityCacheKey($classMetadata, $revisionMetadata, $data, $revision);
+        $proxyFactory = new LazyLoadingValueHolderFactory();
 
         if (isset($this->entityCache[$cacheKey])) {
             return $this->entityCache[$cacheKey];
@@ -134,13 +136,21 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
                 $entity = $persistManager->getClassMetadata($classMetadata->discriminatorMap[$discriminator])->newInstance();
             } else {
                 //a complex case when ToOne binding is against AbstractEntity having no discriminator
-                $pk = array();
+                $identifiers = array();
 
                 foreach ($classMetadata->identifier as $field) {
-                    $pk[$classMetadata->getColumnName($field)] = $data[$field];
+                    $identifiers[$classMetadata->getColumnName($field)] = $data[$field];
                 }
 
-                return $objectAuditManager->findObjectByRevision($classMetadata->discriminatorMap[$discriminator], $pk, $revision);
+                $className = $classMetadata->discriminatorMap[$discriminator];
+
+                return $proxyFactory->createProxy(
+                    $className,
+                    function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use($objectAuditManager, $revision, $identifiers, $discriminator, $className) {
+                        $wrappedObject = $objectAuditManager->findObjectByRevision($className, $identifiers, $revision);
+                        $initializer = null;
+                    }
+                );
             }
         } else {
             $entity = $classMetadata->newInstance();
@@ -176,17 +186,17 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
                 if ($isAudited && $configuration->isLoadAuditedObjects()) {
                     if ($assoc['isOwningSide']) {
                         // Primary Key. Used for audit tables queries.
-                        $pk = array();
+                        $identifiers = array();
                         foreach ($assoc['targetToSourceKeyColumns'] as $foreign => $local) {
-                            $pk[$foreign] = $data[$columnMap[$local]];
+                            $identifiers[$foreign] = $data[$columnMap[$local]];
                         }
-                        $pk = array_filter($pk);
+                        $identifiers = array_filter($identifiers);
 
-                        if (!empty($pk)) {
+                        if (!empty($identifiers)) {
                             try {
                                 $value = $objectAuditManager->findObjectByRevision(
                                     $targetClass->name,
-                                    $pk,
+                                    $identifiers,
                                     $revision,
                                     $options
                                 );
@@ -194,7 +204,7 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
                                 $value = null;
                             } catch (ObjectAuditNotFoundException $e) {
                                 // The entity does not have any revision yet. So let's get the actual state of it.
-                                $value = $persistManager->getRepository($targetClass->name)->findOneBy($pk);
+                                $value = $persistManager->getRepository($targetClass->name)->findOneBy($identifiers);
                             }
                         }
                     } else {

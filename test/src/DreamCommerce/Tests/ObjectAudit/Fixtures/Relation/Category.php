@@ -57,6 +57,9 @@ abstract class Category extends SomeEntity
         $this->products->add($product);
     }
 
+    /**
+     * @return ArrayCollection|Product[]
+     */
     public function getProducts()
     {
         return $this->products;

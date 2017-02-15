@@ -32,6 +32,7 @@ namespace DreamCommerce\Component\ObjectAudit\Manager;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Util\ClassUtils;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Query\QueryBuilder;
@@ -50,6 +51,7 @@ use DreamCommerce\Component\ObjectAudit\Factory\ObjectAuditFactoryInterface;
 use DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadataFactory;
 use DreamCommerce\Component\ObjectAudit\Model\ObjectAudit;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
+use ProxyManager\Factory\LazyLoadingValueHolderFactory;
 
 class ORMAuditManager extends BaseObjectAuditManager
 {
@@ -111,6 +113,8 @@ class ORMAuditManager extends BaseObjectAuditManager
      */
     public function findObjectByRevision(string $className, $objectIds, RevisionInterface $revision, array $options = array())
     {
+        $className = ClassUtils::getRealClass($className);
+
         if (!$this->objectAuditMetadataFactory->isClassAudited($className)) {
             throw ObjectNotAuditedException::forClass($className);
         }
@@ -273,6 +277,8 @@ class ORMAuditManager extends BaseObjectAuditManager
      */
     public function findObjectsByFieldsAndRevision(string $className, array $fields, string $indexBy = null, RevisionInterface $revision, array $options = array()): array
     {
+        $className = ClassUtils::getRealClass($className);
+
         if (!$this->objectAuditMetadataFactory->isClassAudited($className)) {
             throw ObjectNotAuditedException::forClass($className);
         }
@@ -344,9 +350,18 @@ class ORMAuditManager extends BaseObjectAuditManager
         foreach ($identifierColumnNames as $identifierColumnName) {
             $queryBuilder->addOrderBy($identifierColumnName, 'ASC');
         }
+
+        $discriminatorColumn = null;
+        if(!$classMetadata->isInheritanceTypeNone()) {
+            $discriminatorColumn = $classMetadata->discriminatorColumn['name'];
+            $queryBuilder->addSelect($discriminatorColumn);
+        }
+
         $result = $queryBuilder->execute()->fetchAll();
 
+        $proxyFactory = new LazyLoadingValueHolderFactory();
         $entities = array();
+
         foreach ($result as $identifiers) {
             $key = null;
             if ($indexBy !== null) {
@@ -354,11 +369,25 @@ class ORMAuditManager extends BaseObjectAuditManager
                 unset($identifiers[$indexBy]);
             }
 
-            $entity = $this->findObjectByRevision($className, $identifiers, $revision, $options);
+            $proxyClassName = $className;
+            if(!$classMetadata->isInheritanceTypeNone()) {
+                $discriminator = $identifiers[$discriminatorColumn];
+                unset($identifiers[$discriminatorColumn]);
+                $proxyClassName = $classMetadata->discriminatorMap[$discriminator];
+            }
+
+            $proxy = $proxyFactory->createProxy(
+                $proxyClassName,
+                function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use($className, $identifiers, $revision, $options) {
+                    $wrappedObject = $this->findObjectByRevision($className, $identifiers, $revision, $options);
+                    $initializer = null;
+                }
+            );
+
             if ($key !== null) {
-                $entities[$key] = $entity;
+                $entities[$key] = $proxy;
             } else {
-                $entities[] = $entity;
+                $entities[] = $proxy;
             }
         }
 
@@ -370,6 +399,8 @@ class ORMAuditManager extends BaseObjectAuditManager
      */
     public function findObjectsChangedAtRevision(string $className, RevisionInterface $revision, array $options = array()): array
     {
+        $className = ClassUtils::getRealClass($className);
+
         if (!$this->objectAuditMetadataFactory->isClassAudited($className)) {
             throw ObjectNotAuditedException::forClass($className);
         }
@@ -502,6 +533,8 @@ class ORMAuditManager extends BaseObjectAuditManager
      */
     public function findObjectRevisions(string $className, $objectIds): Collection
     {
+        $className = ClassUtils::getRealClass($className);
+
         if (!$this->objectAuditMetadataFactory->isClassAudited($className)) {
             throw ObjectNotAuditedException::forClass($className);
         }
@@ -557,6 +590,8 @@ class ORMAuditManager extends BaseObjectAuditManager
      */
     public function getObjectHistory(string $className, $objectIds, array $options = array()): array
     {
+        $className = ClassUtils::getRealClass($className);
+
         if (!$this->objectAuditMetadataFactory->isClassAudited($className)) {
             throw ObjectNotAuditedException::forClass($className);
         }
@@ -782,6 +817,8 @@ class ORMAuditManager extends BaseObjectAuditManager
      */
     public function getAuditTableNameForClass(string $className)
     {
+        $className = ClassUtils::getRealClass($className);
+
         /** @var ClassMetadata $classMetadata */
         $classMetadata = $this->persistManager->getClassMetadata($className);
         $tableName = $classMetadata->getTableName();
@@ -803,6 +840,8 @@ class ORMAuditManager extends BaseObjectAuditManager
      */
     protected function getObjectRevision(string $className, $objectIds, $sort = 'ASC')
     {
+        $className = ClassUtils::getRealClass($className);
+
         if (!$this->objectAuditMetadataFactory->isClassAudited($className)) {
             throw ObjectNotAuditedException::forClass($className);
         }

@@ -57,4 +57,9 @@ abstract class Product extends SomeEntity
     {
         $this->category = $category;
     }
+
+    public function getName()
+    {
+        return $this->name;
+    }
 }
