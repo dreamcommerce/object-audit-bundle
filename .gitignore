@@ -17,4 +17,4 @@
 /test/app/cache
 /test/app/logs
 /test/app/config/parameters.yml
-/test/app/db.sql
+/test/app/db_*.sql

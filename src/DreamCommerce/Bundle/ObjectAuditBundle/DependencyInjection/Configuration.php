@@ -32,6 +32,7 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection;
 
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Configuration\BaseConfiguration;
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Configuration\ORMConfiguration;
+use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Model\Revision;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use Sylius\Bundle\ResourceBundle\SyliusResourceBundle;
@@ -50,11 +51,21 @@ final class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('dream_commerce_object_audit');
 
+        $supportedDrivers = array(
+            SyliusResourceBundle::DRIVER_DOCTRINE_ORM
+        );
+
         $rootNode
             ->addDefaultsIfNotSet()
             ->fixXmlConfig('manager')
             ->children()
-                ->scalarNode('driver')->defaultValue(SyliusResourceBundle::DRIVER_DOCTRINE_ORM)->end()
+                ->scalarNode('driver')
+                    ->defaultValue(SyliusResourceBundle::DRIVER_DOCTRINE_ORM)
+                    ->validate()
+                        ->ifNotInArray($supportedDrivers)
+                        ->thenInvalid('The driver %s is not supported. Please choose one of '.json_encode($supportedDrivers))
+                    ->end()
+                ->end()
             ->end()
         ;
 
@@ -89,6 +100,10 @@ final class Configuration implements ConfigurationInterface
 
     private function addManagersSection(ArrayNodeDefinition $node)
     {
+        $supportedDrivers = array(
+            ObjectAuditManagerInterface::DRIVER_ORM
+        );
+
         $node
             ->children()
                 ->arrayNode('managers')
@@ -96,6 +111,15 @@ final class Configuration implements ConfigurationInterface
                     ->requiresAtLeastOneElement()
                     ->prototype('array')
                         ->children()
+                            ->scalarNode('driver')
+                                ->defaultValue(ObjectAuditManagerInterface::DRIVER_ORM)
+                                ->validate()
+                                    ->ifNotInArray($supportedDrivers)
+                                    ->thenInvalid('The driver %s is not supported. Please choose one of '.json_encode($supportedDrivers))
+                                ->end()
+                            ->end()
+                            ->scalarNode('object_manager')->defaultValue('default')->end()
+                            ->scalarNode('audit_object_manager')->defaultValue('default')->end()
                             ->arrayNode('ignore_properties')
                                 ->treatNullLike(array())
                                 ->prototype('scalar')->end()

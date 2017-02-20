@@ -1,0 +1,11 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="https://dreamcommerce.com/schemas/orm/doctrine-object-audit-mapping"
+            elementFormDefault="qualified"
+>
+    <xs:element name="auditable">
+        <xs:complexType/>
+    </xs:element>
+    <xs:element name="ignore">
+        <xs:complexType/>
+    </xs:element>
+</xs:schema>

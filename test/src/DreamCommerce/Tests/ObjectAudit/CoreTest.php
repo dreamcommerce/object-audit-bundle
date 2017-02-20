@@ -36,18 +36,12 @@ use DreamCommerce\Component\ObjectAudit\Exception\ObjectAuditNotFoundException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
 use DreamCommerce\Component\ObjectAudit\Model\ObjectAudit;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Common\RevisionTest;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Core\ArticleAudit;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Core\Cat;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Core\Dog;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Core\Fox;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Core\ProfileAudit;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Core\Rabbit;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Core\UserAudit;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Common\RevisionTest;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Core\{ ArticleAudit, Cat, Dog, Fox, ProfileAudit, Rabbit, UserAudit };
 
 class CoreTest extends BaseTest
 {
-    protected $fixturesPath = __DIR__ . '/Fixtures/Core';
+    protected $fixturesPath = __DIR__ . '/../../Fixtures/ObjectAudit/Entity/Core';
 
     public function testAuditable()
     {

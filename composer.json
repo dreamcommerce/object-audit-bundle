@@ -68,7 +68,7 @@
         "psr-4": {
             "DreamCommerce\\Tests\\ObjectAudit\\": "test/src/DreamCommerce/Tests/ObjectAudit",
             "DreamCommerce\\Tests\\ObjectAuditBundle\\": "test/src/DreamCommerce/Tests/ObjectAuditBundle",
-            "AppBundle\\": "test/src/AppBundle/"
+            "DreamCommerce\\Fixtures\\ObjectAudit\\": "test/src/DreamCommerce/Fixtures/ObjectAudit"
         }
     },
     "extra": {

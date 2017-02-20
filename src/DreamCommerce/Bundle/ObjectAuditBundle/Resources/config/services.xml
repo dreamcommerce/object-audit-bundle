@@ -9,10 +9,14 @@
         <parameter key="dream_commerce_object_audit.resource_metadata_factory.class">DreamCommerce\Bundle\ObjectAuditBundle\Metadata\ResourceAuditMetadataFactory</parameter>
         <parameter key="dream_commerce_object_audit.registry.class">DreamCommerce\Component\ObjectAudit\ObjectAuditRegistry</parameter>
         <parameter key="dream_commerce_object_audit.metadata_factory.class">DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadataFactory</parameter>
+
+        <parameter key="dream_commerce_object_audit.orm.configuration.class">DreamCommerce\Component\ObjectAudit\Configuration\ORMAuditConfiguration</parameter>
+        <parameter key="dream_commerce_object_audit.orm.factory.class">DreamCommerce\Component\ObjectAudit\Factory\ORMObjectAuditFactory</parameter>
+        <parameter key="dream_commerce_object_audit.orm.manager.class">DreamCommerce\Component\ObjectAudit\Manager\ORMAuditManager</parameter>
     </parameters>
 
     <services>
-        <service id="dream_commerce_object_audit.factory" class="%dream_commerce_object_audit.factory.class%">
+        <service id="dream_commerce_object_audit.orm.factory" class="%dream_commerce_object_audit.orm.factory.class%">
             <argument type="service" id="dream_commerce_object_audit.revision_manager" />
         </service>
 

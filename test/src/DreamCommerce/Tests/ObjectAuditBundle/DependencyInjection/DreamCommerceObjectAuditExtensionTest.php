@@ -31,7 +31,7 @@
 namespace DreamCommerce\Tests\ObjectAuditBundle\DependencyInjection;
 
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\DreamCommerceObjectAuditExtension;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Common\RevisionTest;
+use DreamCommerce\Component\ObjectAudit\Model\Revision;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 
 class DreamCommerceObjectAuditExtensionTest extends AbstractExtensionTestCase
@@ -46,7 +46,7 @@ class DreamCommerceObjectAuditExtensionTest extends AbstractExtensionTestCase
             'resources' => array(
                 'revision' => array(
                     'classes' => array(
-                        'model' => RevisionTest::class,
+                        'model' => Revision::class,
                     )
                 ),
             )
@@ -55,7 +55,7 @@ class DreamCommerceObjectAuditExtensionTest extends AbstractExtensionTestCase
         $this->assertContainerBuilderHasService('dream_commerce.factory.revision');
         $this->assertContainerBuilderHasService('dream_commerce.repository.revision');
         $this->assertContainerBuilderHasService('dream_commerce.manager.revision');
-        $this->assertContainerBuilderHasParameter('dream_commerce.model.revision.class', RevisionTest::class);
+        $this->assertContainerBuilderHasParameter('dream_commerce.model.revision.class', Revision::class);
         $this->assertContainerBuilderHasParameter(DreamCommerceObjectAuditExtension::ALIAS . '.managers');
     }
 

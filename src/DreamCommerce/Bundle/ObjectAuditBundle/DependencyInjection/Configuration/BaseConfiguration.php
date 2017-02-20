@@ -30,6 +30,7 @@
 
 namespace DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Configuration;
 
+use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -49,17 +50,26 @@ final class BaseConfiguration implements ConfigurationInterface
     }
     public function injectPartialNode(ArrayNodeDefinition $node)
     {
+        $supportedDrivers = array(
+            ObjectAuditManagerInterface::DRIVER_ORM
+        );
+
         $node
-            ->fixXmlConfig('ignore_properties')
+            ->fixXmlConfig('ignore_property')
             ->addDefaultsIfNotSet()
             ->children()
+                ->scalarNode('driver')
+                    ->defaultValue(ObjectAuditManagerInterface::DRIVER_ORM)
+                    ->validate()
+                        ->ifNotInArray($supportedDrivers)
+                        ->thenInvalid('The driver %s is not supported. Please choose one of '.json_encode($supportedDrivers))
+                    ->end()
+                ->end()
+                ->scalarNode('object_manager')->defaultValue('default')->end()
+                ->scalarNode('audit_object_manager')->defaultValue('default')->end()
                 ->arrayNode('ignore_properties')
                     ->treatNullLike(array())
                     ->prototype('scalar')->end()
-                ->end()
-                ->arrayNode('options')
-                    ->useAttributeAsKey('key')
-                    ->prototype('variable')->end()
                 ->end()
             ->end();
     }

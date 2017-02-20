@@ -48,13 +48,19 @@ final class ObjectAuditRegistry
 
     /**
      * @param string                      $name
-     * @param ObjectManager               $persistManager
      * @param ObjectAuditManagerInterface $objectAuditManager
      */
-    public function registerObjectAuditManager(string $name, ObjectManager $persistManager, ObjectAuditManagerInterface $objectAuditManager)
+    public function registerObjectAuditManager(string $name, ObjectAuditManagerInterface $objectAuditManager)
     {
         if ($this->persistManagers === null) {
             $this->persistManagers = new SplObjectStorage();
+        }
+        $persistManager = $objectAuditManager->getPersistManager();
+        if(isset($this->objectAuditManagers[$name])) {
+            throw new \InvalidArgumentException(); // TODO
+        }
+        if(isset($this->persistManagers[$persistManager])) {
+            throw new \InvalidArgumentException(); // TODO
         }
 
         $this->objectAuditManagers[$name] = $objectAuditManager;

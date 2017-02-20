@@ -87,11 +87,8 @@ class CreateSchemaSubscriber implements EventSubscriber
 
         /** @var ORMAuditConfiguration $configuration */
         $configuration = $objectAuditManager->getConfiguration();
-        $revisionManager = $objectAuditManager->getRevisionManager();
-        $auditPersistManager = $revisionManager->getAuditPersistManager();
-        if (!($auditPersistManager instanceof EntityManagerInterface)) {
-            throw new \Exception(); // TODO
-        }
+        /** @var EntityManagerInterface $auditPersistManager */
+        $auditPersistManager = $objectAuditManager->getAuditPersistManager();
 
         $classMetadata = $eventArgs->getClassMetadata();
         if (!$this->isAudited($objectAuditManager->getObjectAuditMetadataFactory(), $classMetadata)) {

@@ -31,30 +31,30 @@
 namespace DreamCommerce\Tests\ObjectAudit;
 
 use DateTime;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\DuplicateRevisionFailureTestOwnedElement;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\DuplicateRevisionFailureTestPrimaryOwner;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\DuplicateRevisionFailureTestSecondaryOwner;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\EscapedColumnsEntity;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\Issue111Entity;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\Issue156Client;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\Issue156ContactTelephoneNumber;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\Issue194Address;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\Issue194User;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\Issue196Entity;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\Issue198Car;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\Issue198Owner;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\Issue31Reve;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\Issue31User;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\Issue87Organization;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\Issue87Project;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\Issue87ProjectComment;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\Issue9Address;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Issue\Issue9Customer;
-use DreamCommerce\Tests\ObjectAudit\Types\Issue196Type;
+use DreamCommerce\Fixtures\ObjectAudit\Types\Issue196Type;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\DuplicateRevisionFailureTestOwnedElement;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\DuplicateRevisionFailureTestPrimaryOwner;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\DuplicateRevisionFailureTestSecondaryOwner;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\EscapedColumnsEntity;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue111Entity;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue156Client;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue156ContactTelephoneNumber;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue194Address;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue194User;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue196Entity;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue198Car;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue198Owner;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue31Reve;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue31User;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue87Organization;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue87Project;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue87ProjectComment;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue9Address;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue9Customer;
 
 class IssueTest extends BaseTest
 {
-    protected $fixturesPath = __DIR__ . '/Fixtures/Issue';
+    protected $fixturesPath = __DIR__ . '/../../Fixtures/ObjectAudit/Entity/Issue';
 
     protected $customTypes = array(
         'issue196type' => Issue196Type::class

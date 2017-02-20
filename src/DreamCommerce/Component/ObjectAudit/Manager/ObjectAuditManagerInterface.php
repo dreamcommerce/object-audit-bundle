@@ -42,6 +42,8 @@ use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 
 interface ObjectAuditManagerInterface
 {
+    const DRIVER_ORM = 'orm';
+
     /**
      * Find an object at the specific revision.
      *
@@ -181,6 +183,11 @@ interface ObjectAuditManagerInterface
      * @return ObjectManager
      */
     public function getPersistManager(): ObjectManager;
+
+    /**
+     * @return ObjectManager
+     */
+    public function getAuditPersistManager(): ObjectManager;
 
     /**
      * @return RevisionManagerInterface

@@ -119,7 +119,7 @@ abstract class BaseRevisionManager implements RevisionManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function getAuditPersistManager(): ObjectManager
+    public function getRevisionPersistManager(): ObjectManager
     {
         return $this->auditPersistManager;
     }

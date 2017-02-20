@@ -33,6 +33,7 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Compiler\ManagerCompilerPass;
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Configuration\ORMConfiguration;
+use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 use RuntimeException;
 use Sylius\Bundle\ResourceBundle\DependencyInjection\Extension\AbstractResourceExtension;
 use Sylius\Bundle\ResourceBundle\SyliusResourceBundle;
@@ -61,19 +62,16 @@ final class DreamCommerceObjectAuditExtension extends AbstractResourceExtension
         $this->mapFormValidationGroupsParameters($config, $container);
         $loader->load('services.xml');
 
-        $partialConfiguration = null;
-        $configPartName = null;
-
-        switch ($config['driver']) {
-            case SyliusResourceBundle::DRIVER_DOCTRINE_ORM:
-                $partialConfiguration = new ORMConfiguration();
-                $configPartName = 'orm';
-                break;
-            default:
-                throw new RuntimeException('Unsupported type of driver "'.$config['driver'].'"');
-        }
-
         foreach ($config['managers'] as $name => $managerConfig) {
+            switch ($managerConfig['driver']) {
+                case ObjectAuditManagerInterface::DRIVER_ORM:
+                    $partialConfiguration = new ORMConfiguration();
+                    $configPartName = 'orm';
+                    break;
+                default:
+                    throw new RuntimeException('Unsupported type of driver "'.$managerConfig['driver'].'"');
+            }
+
             if (isset($config['configuration'][$configPartName])) {
                 $managerConfig = array_merge($config['configuration'][$configPartName], $managerConfig);
             }
@@ -82,7 +80,6 @@ final class DreamCommerceObjectAuditExtension extends AbstractResourceExtension
         }
 
         $container->setParameter($this->getAlias().'.managers', $config['managers']);
-        $container->addCompilerPass(new ManagerCompilerPass($config['driver']));
     }
 
     public function getAlias()

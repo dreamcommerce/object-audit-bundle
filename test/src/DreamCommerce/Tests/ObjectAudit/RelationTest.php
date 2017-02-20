@@ -34,31 +34,30 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use DreamCommerce\Component\ObjectAudit\Model\ObjectAudit;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\CheeseProduct;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\ChildEntity;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\DataContainerEntity;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\DataLegalEntity;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\DataPrivateEntity;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\FoodCategory;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\OneToOneAuditedEntity;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\OneToOneMasterEntity;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\OneToOneNotAuditedEntity;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\OwnedEntity1;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\OwnedEntity2;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\OwnedEntity3;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\OwnerEntity;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\Page;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\PageAlias;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\PageLocalization;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\Product;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\RelatedEntity;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\RelationFoobarEntity;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\RelationOneToOneEntity;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Relation\WineProduct;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\CheeseProduct;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\ChildEntity;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\DataContainerEntity;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\DataLegalEntity;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\DataPrivateEntity;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\FoodCategory;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\OneToOneAuditedEntity;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\OneToOneMasterEntity;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\OneToOneNotAuditedEntity;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\OwnedEntity1;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\OwnedEntity2;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\OwnedEntity3;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\OwnerEntity;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\Page;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\PageAlias;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\PageLocalization;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\RelatedEntity;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\RelationFoobarEntity;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\RelationOneToOneEntity;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Relation\WineProduct;
 
 class RelationTest extends BaseTest
 {
-    protected $fixturesPath = __DIR__ . '/Fixtures/Relation';
+    protected $fixturesPath = __DIR__ . '/../../Fixtures/ObjectAudit/Entity/Relation';
 
     public function testUndefinedIndexesInUOWForRelations()
     {

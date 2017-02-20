@@ -57,6 +57,11 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
     protected $persistManager;
 
     /**
+     * @var ObjectManager
+     */
+    protected $auditPersistManager;
+
+    /**
      * @var ObjectAuditMetadataFactory
      */
     protected $objectAuditMetadataFactory;
@@ -69,18 +74,21 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
     /**
      * @param BaseAuditConfiguration      $configuration
      * @param ObjectManager               $persistManager
+     * @param ObjectManager               $auditPersistManager
      * @param RevisionManagerInterface    $revisionManager
      * @param ObjectAuditFactoryInterface $objectAuditFactory
      * @param ObjectAuditMetadataFactory  $objectAuditMetadataFactory
      */
     public function __construct(BaseAuditConfiguration $configuration,
                                 ObjectManager $persistManager,
+                                ObjectManager $auditPersistManager,
                                 RevisionManagerInterface $revisionManager,
                                 ObjectAuditFactoryInterface $objectAuditFactory,
                                 ObjectAuditMetadataFactory $objectAuditMetadataFactory
     ) {
         $this->configuration = $configuration;
         $this->persistManager = $persistManager;
+        $this->auditPersistManager = $auditPersistManager;
         $this->revisionManager = $revisionManager;
         $this->objectAuditFactory = $objectAuditFactory;
         $this->objectAuditMetadataFactory = $objectAuditMetadataFactory;
@@ -176,6 +184,14 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
     public function getPersistManager(): ObjectManager
     {
         return $this->persistManager;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getAuditPersistManager(): ObjectManager
+    {
+        return $this->auditPersistManager;
     }
 
     /**

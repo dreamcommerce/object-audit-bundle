@@ -1,0 +1,10 @@
+dream_commerce_object_audit:
+    managers:
+        default:
+            driver: orm
+            object_manager: default
+            audit_object_manager: audit
+        xml:
+            driver: orm
+            object_manager: xml
+            audit_object_manager: audit

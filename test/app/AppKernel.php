@@ -50,7 +50,8 @@ class AppKernel extends Kernel
             new Symfony\Bundle\TwigBundle\TwigBundle(),
             new winzou\Bundle\StateMachineBundle\winzouStateMachineBundle(),
             new DreamCommerce\Bundle\ObjectAuditBundle\DreamCommerceObjectAuditBundle(),
-            new AppBundle\AppBundle(),
+            new DreamCommerce\Fixtures\ObjectAudit\AnnotationBundle\DreamCommerceFixturesObjectAuditAnnotationBundle(),
+            new DreamCommerce\Fixtures\ObjectAudit\XmlBundle\DreamCommerceFixturesObjectAuditXmlBundle(),
         );
     }
 

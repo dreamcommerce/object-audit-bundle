@@ -32,9 +32,15 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Compiler;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Persistence\Mapping\Driver\AnnotationDriver;
-use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Common\Persistence\Mapping\Driver\DefaultFileLocator;
+use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
+use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
+use Doctrine\ORM\Mapping\Driver\XmlDriver;
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\DreamCommerceObjectAuditExtension;
+use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Metadata\Driver\AnnotationDriver as AuditAnnotationDriver;
+use DreamCommerce\Component\ObjectAudit\Metadata\Driver\MappingDriverChain as AuditMappingDriverChain;
+use DreamCommerce\Component\ObjectAudit\Metadata\Driver\XmlDriver as AuditXmlDriver;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -44,16 +50,6 @@ use Symfony\Component\DependencyInjection\Reference;
 final class ManagerCompilerPass implements CompilerPassInterface
 {
     /**
-     * @var string
-     */
-    private $driver;
-
-    public function __construct(string $driver)
-    {
-        $this->driver = $driver;
-    }
-
-    /**
      * @param ContainerBuilder $container
      */
     public function process(ContainerBuilder $container)
@@ -62,51 +58,91 @@ final class ManagerCompilerPass implements CompilerPassInterface
             DreamCommerceObjectAuditExtension::ALIAS.'.registry'
         );
 
-        $annotationReader = new AnnotationReader();
-
         foreach ($container->getParameter(DreamCommerceObjectAuditExtension::ALIAS.'.managers') as $name => $manager) {
-            $id = DreamCommerceObjectAuditExtension::ALIAS.'.manager.'.$name;
+            $managerId = DreamCommerceObjectAuditExtension::ALIAS.'.'. $name .'_manager';
+            $configurationId = DreamCommerceObjectAuditExtension::ALIAS.'.' . $name . '_configuration';
 
-            $configurationClass = $container->getParameter('dream_commerce_object_audit.configuration.class');
-            $configuration = new Definition($configurationClass);
+            switch($manager['driver']) {
+                case ObjectAuditManagerInterface::DRIVER_ORM:
+                    $configurationClass = $container->getParameter('dream_commerce_object_audit.orm.configuration.class');
+                    $managerClass = $container->getParameter('dream_commerce_object_audit.orm.manager.class');
+                    $auditFactory = $container->getDefinition('dream_commerce_object_audit.orm.factory');
+                    $objectManagerId = 'doctrine.orm.' . $manager['object_manager'] . '_entity_manager';
+                    $auditObjectManagerId = 'doctrine.orm.' . $manager['audit_object_manager'] . '_entity_manager';
 
-            /** @var EntityManagerInterface $persistManager */
-            $persistManager = $container->get($manager['persist_manager']);
-            $driver = $persistManager->getConfiguration()->getMetadataDriverImpl();
-            $auditDriver = null;
-            if ($driver instanceof AnnotationDriver) {
-                $auditDriver = new AuditAnnotationDriver($annotationReader);
-            } else {
-                throw new RuntimeException('Unsupported type of driver "'.get_class($driver).'"');
+                    break;
+                default:
+                    throw new RuntimeException();
             }
+
+            $configuration = new Definition($configurationClass);
+            $container->setDefinition($configurationId, $configuration);
+
+            $objectManager = $container->get($objectManagerId);
+            $driver = $objectManager->getConfiguration()->getMetadataDriverImpl();
+            $auditDriver = $this->getAuditDriver($driver);
 
             $metadataFactoryClass = $container->getParameter('dream_commerce_object_audit.metadata_factory.class');
             $metadataFactory = new Definition($metadataFactoryClass);
             $metadataFactory->setArguments(array(
-                $persistManager,
+                new Reference($objectManagerId),
                 $auditDriver,
             ));
 
-            $managerClass = $container->getParameter('dream_commerce_object_audit.manager.class');
             $managerDefinition = new Definition($managerClass);
             $managerDefinition->setArguments(array(
                 $configuration,
-                $persistManager,
+                new Reference($objectManagerId),
+                new Reference($auditObjectManagerId),
                 $container->getDefinition('dream_commerce_object_audit.revision_manager'),
-                $container->getDefinition('dream_commerce_object_audit.factory'),
+                $auditFactory,
                 $metadataFactory,
             ));
 
-            $container->setDefinition($id, $managerDefinition);
+            $container->setDefinition($managerId, $managerDefinition);
 
             $definition->addMethodCall(
                 'registerObjectAuditManager',
                 array(
                     $name,
-                    $persistManager,
-                    new Reference($id),
+                    new Reference($managerId),
                 )
             );
         }
+    }
+
+    public function getAuditDriver(MappingDriver $driver): Definition
+    {
+        $auditDriver = null;
+        if($driver instanceof MappingDriverChain) {
+            $auditDriver = new Definition(AuditMappingDriverChain::class);
+            foreach($driver->getDrivers() as $namespace => $partDriver) {
+                $auditPartDriver = $this->getAuditDriver($partDriver);
+                $auditDriver->addMethodCall(
+                    'addDriver',
+                    array(
+                        $auditPartDriver, $namespace
+                    )
+                );
+            }
+        } elseif ($driver instanceof AnnotationDriver) {
+            $annotationReader = new Definition(AnnotationReader::class);
+            $auditDriver = new Definition(AuditAnnotationDriver::class);
+            $auditDriver->addArgument($annotationReader);
+        } elseif($driver instanceof XmlDriver) {
+            $locator = new Definition(DefaultFileLocator::class);
+            $locator->addArgument((array)$driver->getLocator()->getPaths());
+            $locator->addArgument($driver->getLocator()->getFileExtension());
+
+            $auditDriver = new Definition(AuditXmlDriver::class);
+            $auditDriver->addMethodCall(
+                'setLocator',
+                array($locator)
+            );
+        } else {
+            throw new RuntimeException('Unsupported type of driver "'.get_class($driver).'"');
+        }
+
+        return $auditDriver;
     }
 }

@@ -55,7 +55,7 @@ use DreamCommerce\Component\ObjectAudit\Metadata\Driver\AnnotationDriver;
 use DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadataFactory;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditRegistry;
-use DreamCommerce\Tests\ObjectAudit\Fixtures\Common\RevisionTest;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Common\RevisionTest;
 use Gedmo;
 use Sylius\Component\Resource\Factory\Factory;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -179,7 +179,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $config->setProxyNamespace('DreamCommerce\Tests\ObjectAuditBundle\Proxies');
 
         $paths = array($this->fixturesPath);
-        $paths[] = realpath(__DIR__ . '/Fixtures/Common');
+        $paths[] = realpath(__DIR__ . '/../../Fixtures/ObjectAudit/Entity/Common');
         $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver($paths, false));
 
         Gedmo\DoctrineExtensions::registerAnnotations();
@@ -330,7 +330,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $config->setAutoGenerateProxyClasses(ProxyFactory::AUTOGENERATE_EVAL);
         $config->setProxyNamespace('DreamCommerce\Tests\ObjectAuditBundle\Audit\Proxies');
 
-        $paths = array(realpath(__DIR__ . '/Fixtures/Common'));
+        $paths = array(realpath(__DIR__ . '/../../Fixtures/ObjectAudit/Entity/Common'));
         $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver($paths, false));
 
         $connection = $this->getAuditConnection();
@@ -413,10 +413,12 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $objectAuditFactory = $this->getObjectAuditFactory();
         $objectAuditMetadataFactory = $this->getObjectAuditMetadataFactory();
         $objectAuditRegistry = $this->getObjectAuditRegistry();
+        $auditPersistManager = $this->getAuditPersistManager();
 
         $objectAuditManager = new ORMAuditManager(
             $configuration,
             $persistManager,
+            $auditPersistManager,
             $revisionManager,
             $objectAuditFactory,
             $objectAuditMetadataFactory

@@ -38,14 +38,15 @@ use DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadata;
 interface DriverInterface
 {
     /**
-     * @param string              $class
+     * @param string              $className
      * @param ObjectAuditMetadata $objectAuditMetadata
      */
-    public function loadMetadataForClass($class, ObjectAuditMetadata $objectAuditMetadata);
+    public function loadMetadataForClass(string $className, ObjectAuditMetadata $objectAuditMetadata);
+
     /**
-     * @param string $class
+     * @param string $className
      *
      * @return bool
      */
-    public function isTransient($class);
+    public function isTransient(string $className): bool;
 }

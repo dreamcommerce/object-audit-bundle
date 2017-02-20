@@ -57,12 +57,12 @@ class AnnotationDriver implements DriverInterface
     }
 
     /**
-     * @param string              $class
+     * @param string              $className
      * @param ObjectAuditMetadata $objectAuditMetadata
      */
-    public function loadMetadataForClass($class, ObjectAuditMetadata $objectAuditMetadata)
+    public function loadMetadataForClass(string $className, ObjectAuditMetadata $objectAuditMetadata)
     {
-        $reflection = new \ReflectionClass($class);
+        $reflection = new \ReflectionClass($className);
 
         foreach ($reflection->getProperties() as $property) {
             if ($this->reader->getPropertyAnnotation($property, Ignore::class)) {
@@ -72,13 +72,13 @@ class AnnotationDriver implements DriverInterface
     }
 
     /**
-     * @param string $class
+     * @param string $className
      *
      * @return bool
      */
-    public function isTransient($class)
+    public function isTransient(string $className): bool
     {
-        $reflection = new \ReflectionClass($class);
+        $reflection = new \ReflectionClass($className);
 
         return (bool) $this->reader->getClassAnnotation($reflection, Auditable::class);
     }

@@ -95,14 +95,17 @@ class ORMAuditManager extends BaseObjectAuditManager
      */
     public function __construct(ORMAuditConfiguration $configuration,
                                 EntityManagerInterface $persistManager,
+                                EntityManagerInterface $auditPersistManager,
                                 RevisionManagerInterface $revisionManager,
                                 ObjectAuditFactoryInterface $objectAuditFactory,
                                 ObjectAuditMetadataFactory $objectAuditMetadataFactory
     ) {
-        parent::__construct($configuration, $persistManager, $revisionManager, $objectAuditFactory, $objectAuditMetadataFactory);
+        parent::__construct(
+            $configuration, $persistManager, $auditPersistManager,
+            $revisionManager, $objectAuditFactory, $objectAuditMetadataFactory
+        );
 
         $this->revisionMetadata = $this->revisionManager->getRevisionMetadata();
-        $this->auditPersistManager = $this->revisionManager->getAuditPersistManager();
         $this->auditQuoteStrategy = $this->auditPersistManager->getConfiguration()->getQuoteStrategy();
         $this->auditConnection = $this->auditPersistManager->getConnection();
         $this->auditPlatform = $this->auditConnection->getDatabasePlatform();

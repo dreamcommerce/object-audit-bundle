@@ -33,12 +33,15 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
+use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Compiler\ManagerCompilerPass;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionEnumType;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt16Type;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt32Type;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt8Type;
 use Sylius\Bundle\ResourceBundle\AbstractResourceBundle;
 use Sylius\Bundle\ResourceBundle\SyliusResourceBundle;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class DreamCommerceObjectAuditBundle extends AbstractResourceBundle
 {
@@ -66,6 +69,16 @@ class DreamCommerceObjectAuditBundle extends AbstractResourceBundle
                 }
             }
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function build(ContainerBuilder $container)
+    {
+        parent::build($container);
+
+        $container->addCompilerPass(new ManagerCompilerPass(), PassConfig::TYPE_REMOVE);
     }
 
     /**

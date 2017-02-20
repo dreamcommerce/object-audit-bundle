@@ -1,6 +1,9 @@
 parameters:
     database_driver: pdo_sqlite
-    database_path: "%kernel.root_dir%/db.sql"
+
+    xml_database_path: "%kernel.root_dir%/db_xml.sql"
+    annotation_database_path: "%kernel.root_dir%/db_annotation.sql"
+    audit_database_path: "%kernel.root_dir%/db_audit.sql"
 
     locale: en_US
     secret: "DreamCommerce secret password"

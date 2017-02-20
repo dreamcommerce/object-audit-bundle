@@ -1,5 +1,18 @@
 sylius_resource:
     resources:
-        app.car:
+        annotation.bus:
             classes:
-                model: AppBundle\Entity\Car
+                model: DreamCommerce\Fixtures\ObjectAudit\AnnotationBundle\Entity\Bus
+        annotation.car:
+            classes:
+                model: DreamCommerce\Fixtures\ObjectAudit\AnnotationBundle\Entity\Car
+        xml.bus:
+            options:
+                object_manager: xml
+            classes:
+                model: DreamCommerce\Fixtures\ObjectAudit\XmlBundle\Entity\Bus
+        xml.car:
+            options:
+                object_manager: xml
+            classes:
+                model: DreamCommerce\Fixtures\ObjectAudit\XmlBundle\Entity\Car

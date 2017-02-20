@@ -18,7 +18,7 @@ services:
 #        ports:
 #            - 19060:9000
 #        environment:
-#            XDEBUG_CONFIG: idekey=PHPSTORM remote_host=xx.yy.zz.vv
+#            XDEBUG_CONFIG: idekey=DC_OBJECT_AUDIT remote_host=xx.yy.zz.vv
 
     php-7.1:
         build: build/php-7.1
@@ -38,7 +38,7 @@ services:
 #        ports:
 #            - 19061:9000
 #        environment:
-#            XDEBUG_CONFIG: idekey=PHPSTORM remote_host=xx.yy.zz.vv
+#            XDEBUG_CONFIG: idekey=DC_OBJECT_AUDIT remote_host=xx.yy.zz.vv
 
     mysql:
         image: mariadb

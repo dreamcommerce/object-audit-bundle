@@ -55,7 +55,7 @@ interface RevisionManagerInterface
     /**
      * @return ObjectManager
      */
-    public function getAuditPersistManager(): ObjectManager;
+    public function getRevisionPersistManager(): ObjectManager;
 
     /**
      * @return RevisionInterface|null

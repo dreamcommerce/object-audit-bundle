@@ -57,7 +57,6 @@ final class ORMConfiguration implements ConfigurationInterface
         $node
             ->addDefaultsIfNotSet()
             ->children()
-                ->scalarNode('object_manager')->defaultValue('default')->end()
                 ->scalarNode('table_prefix')->defaultValue('')->end()
                 ->scalarNode('table_suffix')->defaultValue('_audit')->end()
                 ->scalarNode('revision_id_field_prefix')->defaultValue('revision_')->end()
