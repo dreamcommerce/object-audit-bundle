@@ -31,7 +31,6 @@
 namespace DreamCommerce\Tests\ObjectAudit;
 
 use DateTime;
-use DreamCommerce\Fixtures\ObjectAudit\Types\Issue196Type;
 use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\DuplicateRevisionFailureTestOwnedElement;
 use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\DuplicateRevisionFailureTestPrimaryOwner;
 use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\DuplicateRevisionFailureTestSecondaryOwner;
@@ -51,6 +50,7 @@ use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue87Project;
 use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue87ProjectComment;
 use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue9Address;
 use DreamCommerce\Fixtures\ObjectAudit\Entity\Issue\Issue9Customer;
+use DreamCommerce\Fixtures\ObjectAudit\Types\Issue196Type;
 
 class IssueTest extends BaseTest
 {

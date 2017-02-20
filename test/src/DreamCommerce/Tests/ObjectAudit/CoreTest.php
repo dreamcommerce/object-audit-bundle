@@ -37,7 +37,13 @@ use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
 use DreamCommerce\Component\ObjectAudit\Model\ObjectAudit;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Fixtures\ObjectAudit\Entity\Common\RevisionTest;
-use DreamCommerce\Fixtures\ObjectAudit\Entity\Core\{ ArticleAudit, Cat, Dog, Fox, ProfileAudit, Rabbit, UserAudit };
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Core\ArticleAudit;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Core\Cat;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Core\Dog;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Core\Fox;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Core\ProfileAudit;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Core\Rabbit;
+use DreamCommerce\Fixtures\ObjectAudit\Entity\Core\UserAudit;
 
 class CoreTest extends BaseTest
 {

@@ -355,7 +355,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         }
 
         $discriminatorColumn = null;
-        if(!$classMetadata->isInheritanceTypeNone()) {
+        if (!$classMetadata->isInheritanceTypeNone()) {
             $discriminatorColumn = $classMetadata->discriminatorColumn['name'];
             $queryBuilder->addSelect($discriminatorColumn);
         }
@@ -373,7 +373,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             }
 
             $proxyClassName = $className;
-            if(!$classMetadata->isInheritanceTypeNone()) {
+            if (!$classMetadata->isInheritanceTypeNone()) {
                 $discriminator = $identifiers[$discriminatorColumn];
                 unset($identifiers[$discriminatorColumn]);
                 $proxyClassName = $classMetadata->discriminatorMap[$discriminator];
@@ -381,7 +381,7 @@ class ORMAuditManager extends BaseObjectAuditManager
 
             $proxy = $proxyFactory->createProxy(
                 $proxyClassName,
-                function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use($className, $identifiers, $revision, $options) {
+                function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use ($className, $identifiers, $revision, $options) {
                     $wrappedObject = $this->findObjectByRevision($className, $identifiers, $revision, $options);
                     $initializer = null;
                 }

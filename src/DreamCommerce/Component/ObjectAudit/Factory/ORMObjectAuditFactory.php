@@ -146,7 +146,7 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
 
                 return $proxyFactory->createProxy(
                     $className,
-                    function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use($objectAuditManager, $revision, $identifiers, $discriminator, $className) {
+                    function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use ($objectAuditManager, $revision, $identifiers, $discriminator, $className) {
                         $wrappedObject = $objectAuditManager->findObjectByRevision($className, $identifiers, $revision);
                         $initializer = null;
                     }

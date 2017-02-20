@@ -33,6 +33,7 @@ EOF;
 Symfony\CS\Fixer\Contrib\HeaderCommentFixer::setHeader($header);
 
 $finder = Symfony\CS\Finder\DefaultFinder::create()
+    ->exclude('test/app/cache')
     ->in(array(__DIR__))
 ;
 

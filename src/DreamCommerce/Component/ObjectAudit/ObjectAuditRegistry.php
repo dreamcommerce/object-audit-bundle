@@ -56,10 +56,10 @@ final class ObjectAuditRegistry
             $this->persistManagers = new SplObjectStorage();
         }
         $persistManager = $objectAuditManager->getPersistManager();
-        if(isset($this->objectAuditManagers[$name])) {
+        if (isset($this->objectAuditManagers[$name])) {
             throw new \InvalidArgumentException(); // TODO
         }
-        if(isset($this->persistManagers[$persistManager])) {
+        if (isset($this->persistManagers[$persistManager])) {
             throw new \InvalidArgumentException(); // TODO
         }
 

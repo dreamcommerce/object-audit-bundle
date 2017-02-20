@@ -62,7 +62,7 @@ final class ManagerCompilerPass implements CompilerPassInterface
             $managerId = DreamCommerceObjectAuditExtension::ALIAS.'.'. $name .'_manager';
             $configurationId = DreamCommerceObjectAuditExtension::ALIAS.'.' . $name . '_configuration';
 
-            switch($manager['driver']) {
+            switch ($manager['driver']) {
                 case ObjectAuditManagerInterface::DRIVER_ORM:
                     $configurationClass = $container->getParameter('dream_commerce_object_audit.orm.configuration.class');
                     $managerClass = $container->getParameter('dream_commerce_object_audit.orm.manager.class');
@@ -114,9 +114,9 @@ final class ManagerCompilerPass implements CompilerPassInterface
     public function getAuditDriver(MappingDriver $driver): Definition
     {
         $auditDriver = null;
-        if($driver instanceof MappingDriverChain) {
+        if ($driver instanceof MappingDriverChain) {
             $auditDriver = new Definition(AuditMappingDriverChain::class);
-            foreach($driver->getDrivers() as $namespace => $partDriver) {
+            foreach ($driver->getDrivers() as $namespace => $partDriver) {
                 $auditPartDriver = $this->getAuditDriver($partDriver);
                 $auditDriver->addMethodCall(
                     'addDriver',
@@ -129,7 +129,7 @@ final class ManagerCompilerPass implements CompilerPassInterface
             $annotationReader = new Definition(AnnotationReader::class);
             $auditDriver = new Definition(AuditAnnotationDriver::class);
             $auditDriver->addArgument($annotationReader);
-        } elseif($driver instanceof XmlDriver) {
+        } elseif ($driver instanceof XmlDriver) {
             $locator = new Definition(DefaultFileLocator::class);
             $locator->addArgument((array)$driver->getLocator()->getPaths());
             $locator->addArgument($driver->getLocator()->getFileExtension());
