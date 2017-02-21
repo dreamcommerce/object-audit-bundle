@@ -31,6 +31,7 @@
 namespace DreamCommerce\Component\ObjectAudit\Metadata\Driver;
 
 use DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadata;
+use ReflectionClass;
 use SimpleXMLElement;
 
 class XmlDriver extends FileDriver
@@ -43,6 +44,12 @@ class XmlDriver extends FileDriver
      */
     public function loadMetadataForClass(string $className, ObjectAuditMetadata $objectAuditMetadata)
     {
+        $reflection = new ReflectionClass($className);
+        $parentClassName = $reflection->getParentClass();
+        if ($parentClassName) {
+            $this->loadMetadataForClass($parentClassName->name, $objectAuditMetadata);
+        }
+
         $xml = $this->_getMapping($className);
         if ($xml === null) {
             return;
@@ -55,7 +62,10 @@ class XmlDriver extends FileDriver
                 $mapping = $mapping->children(self::DREAM_COMMERCE_NAMESPACE_URI);
 
                 if (isset($mapping->ignore)) {
-                    $objectAuditMetadata->ignoredProperties[] = $mappingDoctrine->attributes()->name;
+                    $fieldName = (string)$mappingDoctrine->attributes()->name;
+                    if (!in_array($fieldName, $objectAuditMetadata->ignoredProperties)) {
+                        $objectAuditMetadata->ignoredProperties[] = $fieldName;
+                    }
                 }
             }
         }
@@ -66,6 +76,12 @@ class XmlDriver extends FileDriver
      */
     public function isTransient(string $className): bool
     {
+        $reflection = new ReflectionClass($className);
+        $parentClassName = $reflection->getParentClass();
+        if ($parentClassName && $this->isTransient($parentClassName->name)) {
+            return true;
+        }
+
         $xml = $this->_getMapping($className);
         if ($xml === null) {
             return false;

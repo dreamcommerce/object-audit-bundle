@@ -30,11 +30,7 @@ doctrine:
         connections:
             default:
                 driver: "%database_driver%"
-                path: "%annotation_database_path%"
-                charset: UTF8
-            xml:
-                driver: "%database_driver%"
-                path: "%xml_database_path%"
+                path: "%database_path%"
                 charset: UTF8
             audit:
                 driver: "%database_driver%"
@@ -45,10 +41,6 @@ doctrine:
             default:
                 connection: default
                 mappings:
-                    DreamCommerceFixturesObjectAuditAnnotationBundle: ~
-            xml:
-                connection: xml
-                mappings:
-                    DreamCommerceFixturesObjectAuditXmlBundle: ~
+                    DreamCommerceFixturesObjectAuditBundle: ~
             audit:
                 connection: audit

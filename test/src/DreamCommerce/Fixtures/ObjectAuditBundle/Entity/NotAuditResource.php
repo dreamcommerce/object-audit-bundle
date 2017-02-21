@@ -28,8 +28,26 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Fixtures\ObjectAudit\XmlBundle\Entity;
+namespace DreamCommerce\Fixtures\ObjectAuditBundle\Entity;
 
-class Ship extends Vehicle
+use Doctrine\ORM\Mapping as ORM;
+use Sylius\Component\Resource\Model\ResourceInterface;
+
+/**
+ * @ORM\Entity
+ */
+class NotAuditResource implements ResourceInterface
 {
+    /**
+     * @var int
+     */
+    private $id;
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
 }

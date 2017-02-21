@@ -1,0 +1,16 @@
+DreamCommerce\Fixtures\ObjectAuditBundle\Entity\AuditParent:
+  type: mappedSuperclass
+  dreamcommerce:
+    auditable: true
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+  fields:
+    name:
+      type: string
+    ignoredParentField:
+      type: string
+      dreamcommerce:
+        ignore: true

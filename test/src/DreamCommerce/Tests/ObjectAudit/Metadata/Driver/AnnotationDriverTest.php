@@ -28,10 +28,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Fixtures\ObjectAudit\AnnotationBundle;
+namespace DreamCommerce\Tests\ObjectAudit\Metadata\Driver;
 
-use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Doctrine\Common\Annotations\AnnotationReader;
+use DreamCommerce\Component\ObjectAudit\Metadata\Driver\AnnotationDriver;
+use DreamCommerce\Component\ObjectAudit\Metadata\Driver\DriverInterface;
 
-class DreamCommerceFixturesObjectAuditAnnotationBundle extends Bundle
+class AnnotationDriverTest extends BaseDriverTest
 {
+    /**
+     * {@inheritdoc}
+     */
+    protected function getDriver(array $classes): DriverInterface
+    {
+        $annotationReader = new AnnotationReader();
+        return new AnnotationDriver($annotationReader);
+    }
 }

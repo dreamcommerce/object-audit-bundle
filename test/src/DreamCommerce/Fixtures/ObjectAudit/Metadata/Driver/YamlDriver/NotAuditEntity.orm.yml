@@ -1,0 +1,7 @@
+DreamCommerce\Fixtures\ObjectAuditBundle\Entity\NotAuditEntity:
+  type: entity
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO

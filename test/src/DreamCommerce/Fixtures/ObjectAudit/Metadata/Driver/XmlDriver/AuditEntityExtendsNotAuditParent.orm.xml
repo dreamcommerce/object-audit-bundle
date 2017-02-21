@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:dreamcommerce="https://dreamcommerce.com/schemas/orm/doctrine-object-audit-mapping"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <mapped-superclass name="DreamCommerce\Fixtures\ObjectAudit\XmlBundle\Entity\Vehicle">
-        <id name="id" column="id" type="integer">
-            <generator strategy="AUTO" />
-        </id>
-        <field name="name" type="string" />
-    </mapped-superclass>
+    <entity name="DreamCommerce\Fixtures\ObjectAuditBundle\Entity\AuditEntityExtendsNotAuditParent">
+        <field name="ignoredField" type="string">
+            <dreamcommerce:ignore/>
+        </field>
+
+        <dreamcommerce:auditable />
+    </entity>
 </doctrine-mapping>

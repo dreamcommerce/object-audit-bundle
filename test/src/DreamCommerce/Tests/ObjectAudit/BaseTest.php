@@ -424,7 +424,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             $objectAuditMetadataFactory
         );
 
-        $objectAuditRegistry->registerObjectAuditManager('default', $persistManager, $objectAuditManager);
+        $objectAuditRegistry->registerObjectAuditManager('default', $objectAuditManager);
 
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $eventDispatcher->method('dispatch')->willReturn(null);

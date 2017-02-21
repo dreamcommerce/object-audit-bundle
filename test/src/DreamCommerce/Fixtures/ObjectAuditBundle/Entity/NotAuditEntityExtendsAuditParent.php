@@ -28,10 +28,43 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Fixtures\ObjectAudit\XmlBundle;
+namespace DreamCommerce\Fixtures\ObjectAuditBundle\Entity;
 
-use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Doctrine\ORM\Mapping as ORM;
 
-class DreamCommerceFixturesObjectAuditXmlBundle extends Bundle
+/**
+ * @ORM\Entity
+ */
+class NotAuditEntityExtendsAuditParent extends AuditParent
 {
+    /**
+     * @ORM\Column(type="string")
+     */
+    private $ignoredField;
+
+    /**
+     * @param string $name
+     * @param string $ignoredField
+     */
+    public function __construct(string $name, string $ignoredField)
+    {
+        parent::__construct($name);
+        $this->ignoredField = $ignoredField;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIgnoredField(): string
+    {
+        return $this->ignoredField;
+    }
+
+    /**
+     * @param string $ignoredField
+     */
+    public function setIgnoredField(string $ignoredField)
+    {
+        $this->ignoredField = $ignoredField;
+    }
 }

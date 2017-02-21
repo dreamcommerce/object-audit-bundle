@@ -1,18 +1,8 @@
 sylius_resource:
     resources:
-        annotation.bus:
+        dreamcommerce.test.audit:
             classes:
-                model: DreamCommerce\Fixtures\ObjectAudit\AnnotationBundle\Entity\Bus
-        annotation.car:
+                model: DreamCommerce\Fixtures\ObjectAuditBundle\Entity\AuditResource
+        dreamcommerce.test.not_audit:
             classes:
-                model: DreamCommerce\Fixtures\ObjectAudit\AnnotationBundle\Entity\Car
-        xml.bus:
-            options:
-                object_manager: xml
-            classes:
-                model: DreamCommerce\Fixtures\ObjectAudit\XmlBundle\Entity\Bus
-        xml.car:
-            options:
-                object_manager: xml
-            classes:
-                model: DreamCommerce\Fixtures\ObjectAudit\XmlBundle\Entity\Car
+                model: DreamCommerce\Fixtures\ObjectAuditBundle\Entity\NotAuditResource

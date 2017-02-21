@@ -28,40 +28,27 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Fixtures\ObjectAudit\XmlBundle\Entity;
+namespace DreamCommerce\Fixtures\ObjectAuditBundle\Entity;
 
-use Sylius\Component\Resource\Model\ResourceInterface;
+use Doctrine\ORM\Mapping as ORM;
 
-class Car extends Vehicle implements ResourceInterface
+/**
+ * @ORM\Entity
+ */
+class NotAuditEntity
 {
     /**
-     * @var string
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue
      */
-    private $ignoredField;
+    private $id;
 
     /**
-     * @param string $name
-     * @param string $ignoredField
+     * @return int
      */
-    public function __construct(string $name, string $ignoredField)
+    public function getId()
     {
-        parent::__construct($name);
-        $this->ignoredField = $ignoredField;
-    }
-
-    /**
-     * @return string
-     */
-    public function getIgnoredField(): string
-    {
-        return $this->ignoredField;
-    }
-
-    /**
-     * @param string $ignoredField
-     */
-    public function setIgnoredField(string $ignoredField)
-    {
-        $this->ignoredField = $ignoredField;
+        return $this->id;
     }
 }

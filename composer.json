@@ -39,18 +39,8 @@
         "bin-dir": "bin"
     },
     "scripts": {
-        "check": [
-            "@cs-check",
-            "@test"
-        ],
-        "test": [
-            "@test-php-7.0",
-            "@test-php-7.1"
-        ],
         "cs-check": "bin/php-cs-fixer --version && bin/php-cs-fixer fix -v --diff --dry-run --config-file .php_cs src",
         "cs-fix": "bin/php-cs-fixer fix -v --config-file .php_cs src",
-        "test-php-7.0": "bin/docker-phpunit-7.0",
-        "test-php-7.1": "bin/docker-phpunit-7.1",
         "post-install-cmd": [
             "DreamCommerce\\Component\\Common\\Composer\\ScriptHandler::copyTemplateDir"
         ],
@@ -68,7 +58,8 @@
         "psr-4": {
             "DreamCommerce\\Tests\\ObjectAudit\\": "test/src/DreamCommerce/Tests/ObjectAudit",
             "DreamCommerce\\Tests\\ObjectAuditBundle\\": "test/src/DreamCommerce/Tests/ObjectAuditBundle",
-            "DreamCommerce\\Fixtures\\ObjectAudit\\": "test/src/DreamCommerce/Fixtures/ObjectAudit"
+            "DreamCommerce\\Fixtures\\ObjectAudit\\": "test/src/DreamCommerce/Fixtures/ObjectAudit",
+            "DreamCommerce\\Fixtures\\ObjectAuditBundle\\": "test/src/DreamCommerce/Fixtures/ObjectAuditBundle"
         }
     },
     "extra": {

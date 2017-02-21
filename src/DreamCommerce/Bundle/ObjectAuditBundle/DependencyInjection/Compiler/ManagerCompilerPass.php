@@ -33,14 +33,17 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Compiler;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Persistence\Mapping\Driver\AnnotationDriver;
 use Doctrine\Common\Persistence\Mapping\Driver\DefaultFileLocator;
+use Doctrine\Common\Persistence\Mapping\Driver\FileDriver;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\ORM\Mapping\Driver\XmlDriver;
+use Doctrine\ORM\Mapping\Driver\YamlDriver;
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\DreamCommerceObjectAuditExtension;
 use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Metadata\Driver\AnnotationDriver as AuditAnnotationDriver;
 use DreamCommerce\Component\ObjectAudit\Metadata\Driver\MappingDriverChain as AuditMappingDriverChain;
 use DreamCommerce\Component\ObjectAudit\Metadata\Driver\XmlDriver as AuditXmlDriver;
+use DreamCommerce\Component\ObjectAudit\Metadata\Driver\YamlDriver as AuditYamlDriver;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -129,17 +132,24 @@ final class ManagerCompilerPass implements CompilerPassInterface
             $annotationReader = new Definition(AnnotationReader::class);
             $auditDriver = new Definition(AuditAnnotationDriver::class);
             $auditDriver->addArgument($annotationReader);
-        } elseif ($driver instanceof XmlDriver) {
+        } elseif ($driver instanceof FileDriver) {
             $locator = new Definition(DefaultFileLocator::class);
             $locator->addArgument((array)$driver->getLocator()->getPaths());
             $locator->addArgument($driver->getLocator()->getFileExtension());
 
-            $auditDriver = new Definition(AuditXmlDriver::class);
+            if ($driver instanceof XmlDriver) {
+                $auditDriver = new Definition(AuditXmlDriver::class);
+            } elseif ($driver instanceof YamlDriver) {
+                $auditDriver = new Definition(AuditYamlDriver::class);
+            }
+
             $auditDriver->addMethodCall(
                 'setLocator',
                 array($locator)
             );
-        } else {
+        }
+
+        if ($auditDriver === null) {
             throw new RuntimeException('Unsupported type of driver "'.get_class($driver).'"');
         }
 

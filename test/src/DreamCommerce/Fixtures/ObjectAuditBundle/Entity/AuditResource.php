@@ -28,10 +28,28 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Fixtures\ObjectAudit\XmlBundle\Entity;
+namespace DreamCommerce\Fixtures\ObjectAuditBundle\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
+use DreamCommerce\Component\ObjectAudit\Mapping\Annotation as Audit;
 use Sylius\Component\Resource\Model\ResourceInterface;
 
-class Bus extends Vehicle implements ResourceInterface
+/**
+ * @Audit\Auditable
+ * @ORM\Entity
+ */
+class AuditResource implements ResourceInterface
 {
+    /**
+     * @var int
+     */
+    private $id;
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
 }

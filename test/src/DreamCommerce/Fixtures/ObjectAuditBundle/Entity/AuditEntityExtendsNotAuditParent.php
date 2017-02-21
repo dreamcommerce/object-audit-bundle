@@ -28,56 +28,36 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Fixtures\ObjectAudit\AnnotationBundle\Entity;
+namespace DreamCommerce\Fixtures\ObjectAuditBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use DreamCommerce\Component\ObjectAudit\Mapping\Annotation as Audit;
 
 /**
- * @ORM\MappedSuperclass
+ * @Audit\Auditable
+ * @ORM\Entity
  */
-abstract class Vehicle
+class AuditEntityExtendsNotAuditParent extends NotAuditParent
 {
     /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue
-     */
-    private $id;
-
-    /**
      * @ORM\Column(type="string")
+     * @Audit\Ignore
      */
-    private $name;
-
-    /**
-     * @param string $name
-     */
-    public function __construct(string $name)
-    {
-        $this->name = $name;
-    }
+    private $ignoredField;
 
     /**
      * @return mixed
      */
-    public function getId()
+    public function getIgnoredField()
     {
-        return $this->id;
+        return $this->ignoredField;
     }
 
     /**
-     * @return string
+     * @param mixed $ignoredField
      */
-    public function getName()
+    public function setIgnoredField($ignoredField)
     {
-        return $this->name;
-    }
-
-    /**
-     * @param string $name
-     */
-    public function setName(string $name)
-    {
-        $this->name = $name;
+        $this->ignoredField = $ignoredField;
     }
 }

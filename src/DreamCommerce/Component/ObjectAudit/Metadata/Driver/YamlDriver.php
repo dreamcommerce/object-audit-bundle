@@ -30,36 +30,14 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Metadata\Driver;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\AnnotationRegistry;
-use DreamCommerce\Component\ObjectAudit\Mapping\Annotation\Auditable;
-use DreamCommerce\Component\ObjectAudit\Mapping\Annotation\Ignore;
 use DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadata;
 use ReflectionClass;
+use Symfony\Component\Yaml\Yaml;
 
-/**
- * @author David Badura <d.a.badura@gmail.com>
- */
-class AnnotationDriver implements DriverInterface
+class YamlDriver extends FileDriver
 {
     /**
-     * @var AnnotationReader
-     */
-    private $reader;
-
-    /**
-     * @param AnnotationReader $reader
-     */
-    public function __construct(AnnotationReader $reader)
-    {
-        // use composer autoloader
-        AnnotationRegistry::registerLoader('class_exists');
-        $this->reader = $reader;
-    }
-
-    /**
-     * @param string              $className
-     * @param ObjectAuditMetadata $objectAuditMetadata
+     * {@inheritdoc}
      */
     public function loadMetadataForClass(string $className, ObjectAuditMetadata $objectAuditMetadata)
     {
@@ -69,17 +47,22 @@ class AnnotationDriver implements DriverInterface
             $this->loadMetadataForClass($parentClassName->name, $objectAuditMetadata);
         }
 
-        foreach ($reflection->getProperties() as $property) {
-            if ($this->reader->getPropertyAnnotation($property, Ignore::class)) {
-                $objectAuditMetadata->ignoredProperties[] = $property->name;
+        $mapping = $this->_getMapping($className);
+        if ($mapping === null) {
+            return;
+        }
+
+        if (isset($mapping['fields'])) {
+            foreach ($mapping['fields'] as $field => $fieldMapping) {
+                if (isset($fieldMapping['dreamcommerce']['ignore']) && $fieldMapping['dreamcommerce']['ignore']) {
+                    $objectAuditMetadata->ignoredProperties[] = $field;
+                }
             }
         }
     }
 
     /**
-     * @param string $className
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function isTransient(string $className): bool
     {
@@ -89,6 +72,19 @@ class AnnotationDriver implements DriverInterface
             return true;
         }
 
-        return (bool) $this->reader->getClassAnnotation($reflection, Auditable::class);
+        $mapping = $this->_getMapping($className);
+        if ($mapping === null) {
+            return false;
+        }
+
+        return isset($mapping['dreamcommerce']['auditable']) && $mapping['dreamcommerce']['auditable'];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function loadMappingFile(string $file): array
+    {
+        return Yaml::parse(file_get_contents($file));
     }
 }

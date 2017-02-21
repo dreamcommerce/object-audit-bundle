@@ -4,7 +4,7 @@
                   xmlns:dreamcommerce="https://dreamcommerce.com/schemas/orm/doctrine-object-audit-mapping"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="DreamCommerce\Fixtures\ObjectAudit\XmlBundle\Entity\Car">
+    <entity name="DreamCommerce\Fixtures\ObjectAuditBundle\Entity\AuditEntityExtendsAuditParent">
         <field name="ignoredField" type="string">
             <dreamcommerce:ignore/>
         </field>

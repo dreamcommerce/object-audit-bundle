@@ -1,0 +1,9 @@
+DreamCommerce\Fixtures\ObjectAuditBundle\Entity\AuditEntity:
+  type: entity
+  dreamcommerce:
+    auditable: true
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO

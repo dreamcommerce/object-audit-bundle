@@ -1,0 +1,2 @@
+DreamCommerce\Fixtures\ObjectAuditBundle\Entity\NotAuditEntityExtendsAuditParent:
+  type: entity

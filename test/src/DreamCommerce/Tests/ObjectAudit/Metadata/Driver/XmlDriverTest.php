@@ -28,46 +28,28 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Fixtures\ObjectAudit\AnnotationBundle\Entity;
+namespace DreamCommerce\Tests\ObjectAudit\Metadata\Driver;
 
-use Doctrine\ORM\Mapping as ORM;
-use DreamCommerce\Component\ObjectAudit\Mapping\Annotation as Audit;
-use Sylius\Component\Resource\Model\ResourceInterface;
+use DreamCommerce\Component\ObjectAudit\Metadata\Driver\DriverInterface;
+use DreamCommerce\Component\ObjectAudit\Metadata\Driver\XmlDriver;
 
-/**
- * @Audit\Auditable
- * @ORM\Entity
- */
-class Car extends Vehicle implements ResourceInterface
+class XmlDriverTest extends FileDriverTest
 {
     /**
-     * @ORM\Column(type="string")
+     * @var string
      */
-    private $ignoredField;
+    protected $descriptorPath = __DIR__ . '/../../../../Fixtures/ObjectAudit/Metadata/Driver/XmlDriver';
 
     /**
-     * @param string $name
-     * @param string $ignoredField
+     * @var string
      */
-    public function __construct(string $name, string $ignoredField)
-    {
-        parent::__construct($name);
-        $this->ignoredField = $ignoredField;
-    }
+    protected $descriptorExtension = '.orm.xml';
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
-    public function getIgnoredField(): string
+    protected function getAuditDriver(): DriverInterface
     {
-        return $this->ignoredField;
-    }
-
-    /**
-     * @param string $ignoredField
-     */
-    public function setIgnoredField(string $ignoredField)
-    {
-        $this->ignoredField = $ignoredField;
+        return new XmlDriver();
     }
 }

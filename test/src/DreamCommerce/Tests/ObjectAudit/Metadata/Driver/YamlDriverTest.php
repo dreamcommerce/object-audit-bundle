@@ -28,16 +28,28 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Fixtures\ObjectAudit\AnnotationBundle\Entity;
+namespace DreamCommerce\Tests\ObjectAudit\Metadata\Driver;
 
-use Doctrine\ORM\Mapping as ORM;
-use DreamCommerce\Component\ObjectAudit\Mapping\Annotation as Audit;
-use Sylius\Component\Resource\Model\ResourceInterface;
+use DreamCommerce\Component\ObjectAudit\Metadata\Driver\DriverInterface;
+use DreamCommerce\Component\ObjectAudit\Metadata\Driver\YamlDriver;
 
-/**
- * @Audit\Auditable
- * @ORM\Entity
- */
-class Bus extends Vehicle implements ResourceInterface
+class YamlDriverTest extends FileDriverTest
 {
+    /**
+     * @var string
+     */
+    protected $descriptorPath = __DIR__ . '/../../../../Fixtures/ObjectAudit/Metadata/Driver/YamlDriver';
+
+    /**
+     * @var string
+     */
+    protected $descriptorExtension = '.orm.yml';
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getAuditDriver(): DriverInterface
+    {
+        return new YamlDriver();
+    }
 }

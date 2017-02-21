@@ -1,0 +1,14 @@
+DreamCommerce\Fixtures\ObjectAuditBundle\Entity\AuditEntityExtendsNotAuditParent:
+  type: entity
+  dreamcommerce:
+    auditable: true
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+  fields:
+    ignoredField:
+      type: string
+      dreamcommerce:
+        ignore: true

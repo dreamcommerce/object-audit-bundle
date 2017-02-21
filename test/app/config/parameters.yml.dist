@@ -1,8 +1,7 @@
 parameters:
     database_driver: pdo_sqlite
 
-    xml_database_path: "%kernel.root_dir%/db_xml.sql"
-    annotation_database_path: "%kernel.root_dir%/db_annotation.sql"
+    database_path: "%kernel.root_dir%/db.sql"
     audit_database_path: "%kernel.root_dir%/db_audit.sql"
 
     locale: en_US

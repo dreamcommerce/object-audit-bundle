@@ -28,15 +28,48 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Fixtures\ObjectAudit\AnnotationBundle\Entity;
+namespace DreamCommerce\Fixtures\ObjectAuditBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use DreamCommerce\Component\ObjectAudit\Mapping\Annotation as Audit;
 
 /**
- * @Audit\Auditable
- * @ORM\Entity
+ * @ORM\MappedSuperclass
  */
-class Ship extends Vehicle
+abstract class NotAuditParent
 {
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue
+     */
+    private $id;
+
+    /**
+     * @ORM\Column(type="string")
+     */
+    private $name;
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
 }

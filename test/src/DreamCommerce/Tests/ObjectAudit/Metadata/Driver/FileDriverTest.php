@@ -28,57 +28,51 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Component\ObjectAudit\Metadata\Driver;
+namespace DreamCommerce\Tests\ObjectAudit\Metadata\Driver;
 
 use Doctrine\Common\Persistence\Mapping\Driver\FileLocator;
+use DreamCommerce\Component\ObjectAudit\Metadata\Driver\DriverInterface;
 
-abstract class FileDriver implements DriverInterface
+abstract class FileDriverTest extends BaseDriverTest
 {
     /**
-     * @var array
+     * @var string
      */
-    private $mapping = array();
+    protected $descriptorPath = null;
 
     /**
-     * @var FileLocator
+     * @var string|null
      */
-    protected $locator;
+    protected $descriptorExtension = null;
 
     /**
-     * @param FileLocator $locator
+     * {@inheritdoc}
      */
-    public function setLocator(FileLocator $locator)
+    protected function getDriver(array $classes): DriverInterface
     {
-        $this->locator = $locator;
-    }
+        $locator = $this->getMockBuilder(FileLocator::class)
+            ->setMethods(array(
+                'findMappingFile'
+            ))
+            ->getMockForAbstractClass();
 
-    /**
-     * Loads a mapping file with the given name and returns a map
-     * from class/entity names to their corresponding elements.
-     *
-     * @param string $file The mapping file to load.
-     *
-     * @return array
-     */
-    abstract protected function loadMappingFile(string $file): array;
+        $i = 0;
+        foreach ($classes as $fullClassName) {
+            $className = substr($fullClassName, strrpos($fullClassName, '\\') + 1);
+            $path = $this->descriptorPath . '/' . $className . $this->descriptorExtension;
 
-    /**
-     * Tries to get a mapping for a given class
-     *
-     * @param string $className
-     *
-     * @return null|array|object
-     */
-    protected function _getMapping(string $className)
-    {
-        if (!array_key_exists($className, $this->mapping)) {
-            $mapping = $this->loadMappingFile($this->locator->findMappingFile($className));
-            $this->mapping[$className] = null;
-            if (isset($mapping[$className])) {
-                $this->mapping[$className] = $mapping[$className];
-            }
+            $locator->expects($this->at($i))
+                ->method('findMappingFile')
+                ->with($fullClassName)
+                ->willReturn($path);
+            $i++;
         }
 
-        return $this->mapping[$className];
+        $auditDriver = $this->getAuditDriver();
+        $auditDriver->setLocator($locator);
+
+        return $auditDriver;
     }
+
+    abstract protected function getAuditDriver(): DriverInterface;
 }
