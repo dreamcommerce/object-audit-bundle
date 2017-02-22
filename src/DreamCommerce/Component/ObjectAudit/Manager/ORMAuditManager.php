@@ -52,6 +52,7 @@ use DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadataFactory;
 use DreamCommerce\Component\ObjectAudit\Model\ObjectAudit;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use ProxyManager\Factory\LazyLoadingValueHolderFactory;
+use Webmozart\Assert\Assert;
 
 class ORMAuditManager extends BaseObjectAuditManager
 {
@@ -829,6 +830,33 @@ class ORMAuditManager extends BaseObjectAuditManager
         $configuration = $this->getConfiguration();
 
         return $configuration->getTablePrefix().$tableName.$configuration->getTableSuffix();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getObjectValues($object): array
+    {
+        Assert::object($object);
+        $objectClass = get_class($object);
+        /** @var ClassMetadata $metadata */
+        $metadata = $this->persistManager->getClassMetadata($objectClass);
+        $fields = $metadata->getFieldNames();
+
+        $return = array();
+        foreach ($fields as $fieldName) {
+            $return[$fieldName] = $metadata->getFieldValue($object, $fieldName);
+        }
+
+        // Fetch associations identifiers values
+        foreach ($metadata->getAssociationNames() as $associationName) {
+            // Do not get OneToMany or ManyToMany collections because not relevant to the revision.
+            if ($metadata->getAssociationMapping($associationName)['isOwningSide']) {
+                $return[$associationName] = $metadata->getFieldValue($object, $associationName);
+            }
+        }
+
+        return $return;
     }
 
     /**

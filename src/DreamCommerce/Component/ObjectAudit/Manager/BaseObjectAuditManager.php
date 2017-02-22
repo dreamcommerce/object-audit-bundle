@@ -31,13 +31,11 @@
 namespace DreamCommerce\Component\ObjectAudit\Manager;
 
 use Doctrine\Common\Persistence\ObjectManager;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use DreamCommerce\Component\ObjectAudit\Configuration\BaseAuditConfiguration;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
 use DreamCommerce\Component\ObjectAudit\Factory\ObjectAuditFactoryInterface;
 use DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadataFactory;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
-use Webmozart\Assert\Assert;
 
 abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
 {
@@ -125,33 +123,6 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
         }
 
         return $diff;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getObjectValues($object): array
-    {
-        Assert::object($object);
-        $objectClass = get_class($object);
-        /** @var ClassMetadata $metadata */
-        $metadata = $this->persistManager->getClassMetadata($objectClass);
-        $fields = $metadata->getFieldNames();
-
-        $return = array();
-        foreach ($fields as $fieldName) {
-            $return[$fieldName] = $metadata->getFieldValue($object, $fieldName);
-        }
-
-        // Fetch associations identifiers values
-        foreach ($metadata->getAssociationNames() as $associationName) {
-            // Do not get OneToMany or ManyToMany collections because not relevant to the revision.
-            if ($metadata->getAssociationMapping($associationName)['isOwningSide']) {
-                $return[$associationName] = $metadata->getFieldValue($object, $associationName);
-            }
-        }
-
-        return $return;
     }
 
     /**

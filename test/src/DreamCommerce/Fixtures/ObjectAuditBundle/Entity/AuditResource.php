@@ -41,7 +41,9 @@ use Sylius\Component\Resource\Model\ResourceInterface;
 class AuditResource implements ResourceInterface
 {
     /**
-     * @var int
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue
      */
     private $id;
 
