@@ -30,7 +30,7 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Model;
 
-use DreamCommerce\Component\ObjectAudit\Factory\DateTimeFactory;
+use DreamCommerce\Component\Common\Factory\DateTimeFactory;
 
 class Revision implements RevisionInterface
 {
