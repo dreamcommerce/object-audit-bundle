@@ -30,6 +30,7 @@
 
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Command;
 
+use DreamCommerce\Bundle\CommonBundle\Command\BaseCommand;
 use DreamCommerce\Component\ObjectAudit\Manager\ResourceAuditManagerInterface;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;

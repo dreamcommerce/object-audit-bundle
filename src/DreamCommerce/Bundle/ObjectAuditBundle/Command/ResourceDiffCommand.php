@@ -30,6 +30,7 @@
 
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Command;
 
+use DreamCommerce\Bundle\CommonBundle\Command\BaseCommand;
 use DreamCommerce\Component\ObjectAudit\Manager\ResourceAuditManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Manager\RevisionManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;

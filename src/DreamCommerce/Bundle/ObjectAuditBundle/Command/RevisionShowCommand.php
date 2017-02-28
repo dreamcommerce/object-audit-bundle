@@ -30,6 +30,7 @@
 
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Command;
 
+use DreamCommerce\Bundle\CommonBundle\Command\BaseCommand;
 use DreamCommerce\Component\ObjectAudit\Repository\RevisionRepositoryInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
