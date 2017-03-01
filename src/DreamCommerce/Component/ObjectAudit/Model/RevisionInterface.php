@@ -30,6 +30,7 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Model;
 
+use DateTime;
 use Sylius\Component\Resource\Model\ResourceInterface;
 
 interface RevisionInterface extends ResourceInterface
@@ -44,7 +45,7 @@ interface RevisionInterface extends ResourceInterface
     public function getId();
 
     /**
-     * @return \DateTime
+     * @return DateTime
      */
     public function getCreatedAt();
 }

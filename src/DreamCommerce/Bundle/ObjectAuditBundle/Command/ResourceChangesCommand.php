@@ -71,7 +71,7 @@ class ResourceChangesCommand extends BaseCommand
         /** @var ResourceAuditManagerInterface $resourceAuditManager */
         $resourceAuditManager = $container->get('dream_commerce_object_audit.resource_manager');
 
-        $revisionRepository = $revisionManager->getRevisionRepository();
+        $revisionRepository = $revisionManager->getRepository();
         /** @var RevisionInterface $revision */
         $revision = $revisionRepository->find($revisionId);
 
@@ -83,12 +83,12 @@ class ResourceChangesCommand extends BaseCommand
 
             $dumper->dump($cloner->cloneVar($revision));
 
-            $auditResources = $resourceAuditManager->findAllResourcesChangedAtRevision($revision);
+            $auditResources = $resourceAuditManager->findAllChangesAtRevision($revision);
             $rows = array();
 
             foreach ($auditResources as $auditResource) {
                 $object = $auditResource->getObject();
-                $rows[] = array($object->getId(), get_class($object), $auditResource->getRevisionType());
+                $rows[] = array($object->getId(), get_class($object), $auditResource->getType());
             }
 
             $table = new Table($output);

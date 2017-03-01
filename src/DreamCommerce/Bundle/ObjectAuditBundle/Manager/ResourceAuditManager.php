@@ -33,6 +33,7 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle\Manager;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Persistence\ObjectManager;
 use DreamCommerce\Bundle\ObjectAuditBundle\Metadata\ResourceAuditMetadataFactory;
+use DreamCommerce\Component\ObjectAudit\Exception\NotDefinedException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectAuditDeletedException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectAuditNotFoundException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
@@ -90,17 +91,17 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function findResourceByRevision(string $resourceName, int $resourceId, RevisionInterface $revision, array $options = array())
+    public function find(string $resourceName, int $resourceId, RevisionInterface $revision, array $options = array())
     {
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
 
-        if (!$objectAuditManager->getObjectAuditMetadataFactory()->isClassAudited($className)) {
+        if (!$objectAuditManager->getMetadataFactory()->isClassAudited($className)) {
             throw ResourceNotAuditedException::forResource($resourceName);
         }
 
         try {
-            $object = $objectAuditManager->findObjectByRevision($className, $resourceId, $revision, $options);
+            $object = $objectAuditManager->find($className, $resourceId, $revision, $options);
         } catch (ObjectAuditDeletedException $exception) {
             throw ResourceDeletedException::forObjectDeletedException($exception, $resourceName);
         } catch (ObjectAuditNotFoundException $exception) {
@@ -113,27 +114,27 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function findResourcesByFieldsAndRevision(string $resourceName, array $fields, RevisionInterface $revision, array $options = array()): array
+    public function findByFieldsAndRevision(string $resourceName, array $fields, RevisionInterface $revision, array $options = array()): array
     {
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
-        if (!$objectAuditManager->getObjectAuditMetadataFactory()->isClassAudited($className)) {
+        if (!$objectAuditManager->getMetadataFactory()->isClassAudited($className)) {
             throw ResourceNotAuditedException::forResource($resourceName);
         }
 
-        return $objectAuditManager->findObjectsByFieldsAndRevision($className, $fields, $revision, $options);
+        return $objectAuditManager->findByFieldsAndRevision($className, $fields, $revision, $options);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function findAllResourcesChangedAtRevision(RevisionInterface $revision, array $options = array()): array
+    public function findAllChangesAtRevision(RevisionInterface $revision, array $options = array()): array
     {
         $result = array();
         foreach ($this->resourceAuditMetadataFactory->getAllResourceNames() as $resourceName) {
             $result = array_merge(
                 $result,
-                $this->findResourcesChangedAtRevision($resourceName, $revision, $options)
+                $this->findChangesAtRevision($resourceName, $revision, $options)
             );
         }
 
@@ -143,19 +144,19 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function findResourcesChangedAtRevision(string $resourceName, RevisionInterface $revision, array $options = array()): array
+    public function findChangesAtRevision(string $resourceName, RevisionInterface $revision, array $options = array()): array
     {
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
 
-        if (!$objectAuditManager->getObjectAuditMetadataFactory()->isClassAudited($className)) {
+        if (!$objectAuditManager->getMetadataFactory()->isClassAudited($className)) {
             throw ResourceNotAuditedException::forResource($resourceName);
         }
 
         $persistManager = $objectAuditManager->getPersistManager();
 
         try {
-            $rows = $objectAuditManager->findObjectsChangedAtRevision($className, $revision, $options);
+            $rows = $objectAuditManager->findChangesAtRevision($className, $revision, $options);
         } catch (ObjectNotAuditedException $exception) {
             throw ResourceNotAuditedException::forResource($resourceName, $className);
         }
@@ -171,8 +172,8 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
                 $resourceName,
                 $row->getRevision(),
                 $persistManager,
-                $row->getRevisionData(),
-                $row->getRevisionType()
+                $row->getData(),
+                $row->getType()
             );
         }
 
@@ -182,17 +183,17 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function findResourceRevisions(string $resourceName, int $resourceId): Collection
+    public function getRevisions(string $resourceName, int $resourceId): Collection
     {
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
 
-        if (!$objectAuditManager->getObjectAuditMetadataFactory()->isClassAudited($className)) {
+        if (!$objectAuditManager->getMetadataFactory()->isClassAudited($className)) {
             throw ResourceNotAuditedException::forResource($resourceName);
         }
 
         try {
-            $revisions = $objectAuditManager->findObjectRevisions($className, $resourceId);
+            $revisions = $objectAuditManager->getRevisions($className, $resourceId);
         } catch (ObjectNotAuditedException $exception) {
             throw ResourceNotAuditedException::forResource($resourceName, $className);
         }
@@ -203,17 +204,17 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function getResourceHistory(string $resourceName, int $resourceId, array $options = array()): array
+    public function getHistory(string $resourceName, int $resourceId, array $options = array()): array
     {
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
 
-        if (!$objectAuditManager->getObjectAuditMetadataFactory()->isClassAudited($className)) {
+        if (!$objectAuditManager->getMetadataFactory()->isClassAudited($className)) {
             throw ResourceNotAuditedException::forResource($resourceName);
         }
 
         try {
-            $revisions = $objectAuditManager->getObjectHistory($className, $resourceId);
+            $revisions = $objectAuditManager->getHistory($className, $resourceId);
         } catch (ObjectNotAuditedException $exception) {
             throw ResourceNotAuditedException::forResource($resourceName, $className);
         } catch (ObjectAuditNotFoundException $exception) {
@@ -226,17 +227,17 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function getInitializeResourceRevision(string $resourceName, int $resourceId)
+    public function getInitRevision(string $resourceName, int $resourceId)
     {
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
 
-        if (!$objectAuditManager->getObjectAuditMetadataFactory()->isClassAudited($className)) {
+        if (!$objectAuditManager->getMetadataFactory()->isClassAudited($className)) {
             throw ResourceNotAuditedException::forResource($resourceName);
         }
 
         try {
-            $revision = $objectAuditManager->getInitializeObjectRevision($className, $resourceId);
+            $revision = $objectAuditManager->getInitRevision($className, $resourceId);
         } catch (ObjectAuditNotFoundException $exception) {
             throw ResourceAuditNotFoundException::forObjectNotFoundException($exception, $resourceName);
         } catch (ObjectNotAuditedException $exception) {
@@ -249,17 +250,17 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function getCurrentResourceRevision(string $resourceName, int $resourceId)
+    public function getRevision(string $resourceName, int $resourceId)
     {
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
 
-        if (!$objectAuditManager->getObjectAuditMetadataFactory()->isClassAudited($className)) {
+        if (!$objectAuditManager->getMetadataFactory()->isClassAudited($className)) {
             throw ResourceNotAuditedException::forResource($resourceName);
         }
 
         try {
-            $revision = $objectAuditManager->getCurrentObjectRevision($className, $resourceId);
+            $revision = $objectAuditManager->getRevision($className, $resourceId);
         } catch (ObjectAuditNotFoundException $exception) {
             throw ResourceAuditNotFoundException::forObjectNotFoundException($exception, $resourceName);
         } catch (ObjectNotAuditedException $exception) {
@@ -272,44 +273,44 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function saveAuditResource(ResourceAudit $resourceAudit)
+    public function saveAudit(ResourceAudit $resourceAudit)
     {
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceAudit->getResourceName());
 
-        return $objectAuditManager->saveObjectAudit($resourceAudit);
+        return $objectAuditManager->saveAudit($resourceAudit);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function diffResourceRevisions(string $resourceName, int $resourceId, RevisionInterface $oldRevision, RevisionInterface $newRevision): array
+    public function diffRevisions(string $resourceName, int $resourceId, RevisionInterface $oldRevision, RevisionInterface $newRevision): array
     {
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
 
-        if (!$objectAuditManager->getObjectAuditMetadataFactory()->isClassAudited($className)) {
+        if (!$objectAuditManager->getMetadataFactory()->isClassAudited($className)) {
             throw ResourceNotAuditedException::forResource($resourceName);
         }
 
-        return $objectAuditManager->diffObjectRevisions($className, $resourceId, $oldRevision, $newRevision);
+        return $objectAuditManager->diffRevisions($className, $resourceId, $oldRevision, $newRevision);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getResourceValues(ResourceInterface $resource): array
+    public function getValues(ResourceInterface $resource): array
     {
         $className = get_class($resource);
         $resourceName = $this->resourceRegistry->getByClass($className)->getName();
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
 
-        return $objectAuditManager->getObjectValues($resource);
+        return $objectAuditManager->getValues($resource);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getResourceAuditMetadataFactory(): ResourceAuditMetadataFactory
+    public function getMetadataFactory(): ResourceAuditMetadataFactory
     {
         return $this->resourceAuditMetadataFactory;
     }
@@ -326,7 +327,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
 
     /**
      * @param string $resourceName
-     *
+     * @throws NotDefinedException
      * @return ObjectAuditManagerInterface
      */
     private function getResourceObjectAuditManager(string $resourceName): ObjectAuditManagerInterface

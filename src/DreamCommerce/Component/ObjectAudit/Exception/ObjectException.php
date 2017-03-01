@@ -34,6 +34,9 @@ use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 
 class ObjectException extends AuditException
 {
+    const CODE_SINGLE_INSUFFICIENT_IDENTIFIER = 1;
+    const CODE_INCOMPLETE_IDENTIFIERS = 2;
+
     /**
      * @var string
      */
@@ -66,30 +69,6 @@ class ObjectException extends AuditException
     }
 
     /**
-     * @param string $className
-     *
-     * @return $this
-     */
-    public function setClassName(string $className)
-    {
-        $this->className = $className;
-
-        return $this;
-    }
-
-    /**
-     * @param mixed $id
-     *
-     * @return $this
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /**
      * @return RevisionInterface|null
      */
     public function getRevision()
@@ -98,14 +77,26 @@ class ObjectException extends AuditException
     }
 
     /**
-     * @param RevisionInterface $revision
-     *
-     * @return $this
+     * @param mixed $objectIds
+     * @return ObjectException
      */
-    public function setRevision(RevisionInterface $revision)
+    public static function forSingleInsufficientIdentifier($objectIds): ObjectException
     {
-        $this->revision = $revision;
+        $exception = new static('The class is defined by more identifiers than 1', static::CODE_SINGLE_INSUFFICIENT_IDENTIFIER);
+        $exception->id = $objectIds;
 
-        return $this;
+        return $exception;
+    }
+
+    /**
+     * @param mixed $objectIds
+     * @return ObjectException
+     */
+    public static function forIncompleteIdentifiers($objectIds): ObjectException
+    {
+        $exception = new static('List of field identifiers is incomplete', static::CODE_INCOMPLETE_IDENTIFIERS);
+        $exception->id = $objectIds;
+
+        return $exception;
     }
 }

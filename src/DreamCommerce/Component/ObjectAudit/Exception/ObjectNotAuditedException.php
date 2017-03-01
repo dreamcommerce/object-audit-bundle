@@ -32,7 +32,7 @@ namespace DreamCommerce\Component\ObjectAudit\Exception;
 
 class ObjectNotAuditedException extends ObjectException
 {
-    const CODE_OBJECT_IS_NOT_AUDITED = 30;
+    const CODE_CLASS_IS_NOT_AUDITED = 30;
 
     /**
      * @param string $className
@@ -41,13 +41,8 @@ class ObjectNotAuditedException extends ObjectException
      */
     public static function forClass(string $className): ObjectNotAuditedException
     {
-        $message = sprintf(
-            "Class '$className' is not audited.",
-            $className
-        );
-
-        $exception = new self($message, self::CODE_OBJECT_IS_NOT_AUDITED);
-        $exception->setClassName($className);
+        $exception = new self('Class is not audited', self::CODE_CLASS_IS_NOT_AUDITED);
+        $exception->className = $className;
 
         return $exception;
     }

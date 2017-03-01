@@ -30,6 +30,7 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Model;
 
+use DateTime;
 use DreamCommerce\Component\Common\Factory\DateTimeFactory;
 
 class Revision implements RevisionInterface
@@ -40,10 +41,13 @@ class Revision implements RevisionInterface
     protected $id;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      */
     protected $createdAt;
 
+    /**
+     * @param DateTimeFactory $factory
+     */
     public function __construct(DateTimeFactory $factory)
     {
         $this->createdAt = $factory->createNew();

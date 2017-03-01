@@ -88,12 +88,12 @@ class ResourceDiffCommand extends BaseCommand
         $revisionManager = $container->get('dream_commerce_object_audit.revision_manager');
         /** @var ResourceAuditManagerInterface $resourceAuditManager */
         $resourceAuditManager = $container->get('dream_commerce_object_audit.resource_manager');
-        $revisionRepository = $revisionManager->getRevisionRepository();
+        $revisionRepository = $revisionManager->getRepository();
 
         /** @var RevisionInterface $oldRevision */
         $oldRevision = null;
         if (empty($oldRevisionId)) {
-            $oldRevision = $resourceAuditManager->getInitializeResourceRevision($resourceName, $resourceId);
+            $oldRevision = $resourceAuditManager->getInitRevision($resourceName, $resourceId);
         } else {
             $oldRevision = $revisionRepository->find($oldRevisionId);
             if ($oldRevision === null) {
@@ -104,7 +104,7 @@ class ResourceDiffCommand extends BaseCommand
         /** @var RevisionInterface $newRevision */
         $newRevision = null;
         if (empty($newRevisionId)) {
-            $newRevision = $resourceAuditManager->getCurrentResourceRevision($resourceName, $resourceId);
+            $newRevision = $resourceAuditManager->getRevision($resourceName, $resourceId);
         } else {
             $newRevision = $revisionRepository->find($newRevisionId);
             if ($newRevision === null) {
@@ -130,7 +130,7 @@ class ResourceDiffCommand extends BaseCommand
         $dumper->dump($cloner->cloneVar($oldRevision));
         $dumper->dump($cloner->cloneVar($newRevision));
 
-        $diffRows = $resourceAuditManager->diffResourceRevisions($resourceName, $resourceId, $oldRevision, $newRevision);
+        $diffRows = $resourceAuditManager->diffRevisions($resourceName, $resourceId, $oldRevision, $newRevision);
 
         if (empty($diffRows)) {
             return $this->printMessageBox($output, 'Nothing to compare, same resource data');

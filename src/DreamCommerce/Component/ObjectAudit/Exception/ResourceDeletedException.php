@@ -46,18 +46,11 @@ class ResourceDeletedException extends ResourceException
      */
     public static function forResourceAtSpecificRevision(string $resourceName, string $className, $id, RevisionInterface $revision): ResourceDeletedException
     {
-        $message = sprintf(
-            'Resource "%s" entity id "%s" has been removed at revision %s',
-            $className,
-            is_array($id) ? implode(', ', $id) : $id,
-            $revision->getId()
-        );
-
-        $exception = new self($message, self::CODE_RESOURCE_HAS_BEEN_REMOVED_AT_SPECIFIC_REVISION);
-        $exception->setResourceName($resourceName)
-            ->setClassName($className)
-            ->setId($id)
-            ->setRevision($revision);
+        $exception = new self('The resource has been removed', self::CODE_RESOURCE_HAS_BEEN_REMOVED_AT_SPECIFIC_REVISION);
+        $exception->resourceName = $resourceName;
+        $exception->className = $className;
+        $exception->id = $id;
+        $exception->revision = $revision;
 
         return $exception;
     }

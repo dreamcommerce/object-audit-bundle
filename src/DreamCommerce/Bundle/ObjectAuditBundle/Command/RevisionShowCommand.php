@@ -66,7 +66,7 @@ class RevisionShowCommand extends BaseCommand
         $revisionRepository = $this->getContainer()->get('dream_commerce.repository.revision');
 
         if (empty($revisionId)) {
-            $revision = $revisionRepository->findCurrentRevision();
+            $revision = $revisionRepository->findCurrent();
         } else {
             $revision = $revisionRepository->find($revisionId);
         }

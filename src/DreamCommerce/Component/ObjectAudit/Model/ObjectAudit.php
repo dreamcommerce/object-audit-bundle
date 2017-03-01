@@ -31,7 +31,6 @@
 namespace DreamCommerce\Component\ObjectAudit\Model;
 
 use Doctrine\Common\Persistence\ObjectManager;
-use InvalidArgumentException;
 use Webmozart\Assert\Assert;
 
 class ObjectAudit
@@ -64,12 +63,12 @@ class ObjectAudit
     /**
      * @var array
      */
-    private $revisionData = array();
+    private $data = array();
 
     /**
      * @var string
      */
-    private $revisionType;
+    private $type;
 
     /**
      * @param object            $object
@@ -77,23 +76,23 @@ class ObjectAudit
      * @param array             $identifiers
      * @param RevisionInterface $revision
      * @param ObjectManager     $persistManager
-     * @param array             $revisionData
-     * @param string            $revisionType
+     * @param array             $data
+     * @param string            $type
      */
     public function __construct($object, string $className = null, array $identifiers, RevisionInterface $revision,
-                                ObjectManager $persistManager, array $revisionData, string $revisionType)
+                                ObjectManager $persistManager, array $data, string $type)
     {
         Assert::object($object);
-        Assert::oneOf($revisionType, array(RevisionInterface::ACTION_INSERT, RevisionInterface::ACTION_UPDATE, RevisionInterface::ACTION_DELETE));
+        Assert::oneOf($type, array(RevisionInterface::ACTION_INSERT, RevisionInterface::ACTION_UPDATE, RevisionInterface::ACTION_DELETE));
 
-        $this->revisionData = $revisionData;
-        $this->revisionType = $revisionType;
+        $this->data = $data;
+        $this->type = $type;
 
         if ($className === null) {
             $className = get_class($object);
-        } elseif (!($object instanceof $className)) {
-            throw new InvalidArgumentException();
         }
+
+        Assert::isInstanceOf($object, $className);
 
         $this->identifiers = $identifiers;
         $this->object = $object;
@@ -145,19 +144,19 @@ class ObjectAudit
     /**
      * @return array
      */
-    public function getRevisionData(): array
+    public function getData(): array
     {
-        return $this->revisionData;
+        return $this->data;
     }
 
     /**
-     * @param array $revisionData
+     * @param array $data
      *
      * @return $this
      */
-    public function setRevisionData(array $revisionData)
+    public function setData(array $data)
     {
-        $this->revisionData = $revisionData;
+        $this->data = $data;
 
         return $this;
     }
@@ -165,8 +164,8 @@ class ObjectAudit
     /**
      * @return string
      */
-    public function getRevisionType(): string
+    public function getType(): string
     {
-        return $this->revisionType;
+        return $this->type;
     }
 }

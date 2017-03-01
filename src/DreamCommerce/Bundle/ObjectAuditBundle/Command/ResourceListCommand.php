@@ -56,7 +56,7 @@ class ResourceListCommand extends BaseCommand
     {
         /** @var ResourceAuditManagerInterface $resourceAuditManager */
         $resourceAuditManager = $this->getContainer()->get('dream_commerce_object_audit.resource_manager');
-        $resourceMetadataFactory = $resourceAuditManager->getResourceAuditMetadataFactory();
+        $resourceMetadataFactory = $resourceAuditManager->getMetadataFactory();
 
         /** @var RegistryInterface $resourceRegistry */
         $resourceRegistry = $this->getContainer()->get('sylius.resource_registry');

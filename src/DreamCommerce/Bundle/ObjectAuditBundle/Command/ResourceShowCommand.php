@@ -81,7 +81,7 @@ class ResourceShowCommand extends BaseCommand
         $revisionRepository = $this->getContainer()->get('dream_commerce.repository.revision');
 
         if (empty($revisionId)) {
-            $revision = $resourceAuditManager->getCurrentResourceRevision($resourceName, $resourceId);
+            $revision = $resourceAuditManager->getRevision($resourceName, $resourceId);
         } else {
             $revision = $revisionRepository->find($revisionId);
         }
@@ -94,7 +94,7 @@ class ResourceShowCommand extends BaseCommand
             }
             $this->printMessageBox($output, $message);
         } else {
-            $auditEntity = $resourceAuditManager->findResourceByRevision($resourceName, $resourceId, $revision);
+            $auditEntity = $resourceAuditManager->find($resourceName, $resourceId, $revision);
 
             $message = 'The revision ID #'.$revision->getId().' for resource '.$resourceName.' ID #'.$resourceId.' was created at '.$revision->getCreatedAt()->format('Y-m-d H:i:s');
             $this->printMessageBox($output, $message, 'info');

@@ -92,7 +92,7 @@ class RelationTest extends BaseTest
 
         $revision = $this->getRevision(2);
         /** @var ObjectAudit[] $objects */
-        $objects = $this->objectAuditManager->findAllObjectsChangedAtRevision($revision);
+        $objects = $this->objectAuditManager->findAllChangesAtRevision($revision);
 
         $this->assertEquals(2, count($objects));
         $changedOwner = $objects[0]->getObject();
@@ -106,8 +106,8 @@ class RelationTest extends BaseTest
         $this->assertContainsOnly(ObjectAudit::class, $objects);
         $this->assertInstanceOf(OwnerEntity::class, $changedOwner);
         $this->assertInstanceOf(OwnedEntity1::class, $changedOwned);
-        $this->assertEquals(RevisionInterface::ACTION_DELETE, $objects[0]->getRevisionType());
-        $this->assertEquals(RevisionInterface::ACTION_DELETE, $objects[1]->getRevisionType());
+        $this->assertEquals(RevisionInterface::ACTION_DELETE, $objects[0]->getType());
+        $this->assertEquals(RevisionInterface::ACTION_DELETE, $objects[1]->getType());
         $this->assertEquals(1, $changedOwner->getId());
         $this->assertEquals(1, $changedOwned->getId());
         //uninit proxy messes up ids, it is fine
@@ -151,7 +151,7 @@ class RelationTest extends BaseTest
         $this->persistManager->flush(); //3
 
         $revision = $this->getRevision(3);
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($owner1), $owner1->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($owner1), $owner1->getId(), $revision);
 
         $this->assertCount(1, $audited->getOwned1());
     }
@@ -194,25 +194,25 @@ class RelationTest extends BaseTest
         $this->persistManager->flush(); //#6
 
         $revision = $this->getRevision(1);
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($master), $master->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($master), $master->getId(), $revision);
         $this->assertEquals('master#1', $audited->getTitle());
         $this->assertEquals(null, $audited->getAudited());
         $this->assertEquals(null, $audited->getNotAudited());
 
         $revision = $this->getRevision(2);
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($master), $master->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($master), $master->getId(), $revision);
         $this->assertEquals('master#1', $audited->getTitle());
         $this->assertEquals(null, $audited->getAudited());
         $this->assertEquals('notaudited', $audited->getNotAudited()->getTitle());
 
         $revision = $this->getRevision(3);
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($master), $master->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($master), $master->getId(), $revision);
         $this->assertEquals('master#1', $audited->getTitle());
         $this->assertEquals('audited', $audited->getAudited()->getTitle());
         $this->assertEquals('notaudited', $audited->getNotAudited()->getTitle());
 
         $revision = $this->getRevision(4);
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($master), $master->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($master), $master->getId(), $revision);
         $this->assertEquals('master#1', $audited->getTitle());
         $this->assertEquals('changed#4', $audited->getAudited()->getTitle());
         $this->assertEquals('notaudited', $audited->getNotAudited()->getTitle());
@@ -221,7 +221,7 @@ class RelationTest extends BaseTest
         $configuration->setLoadAuditedObjects(false);
         $this->objectAuditFactory->clearAuditCache();
 
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($master), $master->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($master), $master->getId(), $revision);
         $this->assertEquals(null, $audited->getAudited());
         $this->assertEquals('notaudited', $audited->getNotAudited()->getTitle());
 
@@ -229,20 +229,20 @@ class RelationTest extends BaseTest
         $configuration->setLoadNativeObjects(false);
         $this->objectAuditFactory->clearAuditCache();
 
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($master), $master->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($master), $master->getId(), $revision);
         $this->assertEquals('changed#4', $audited->getAudited()->getTitle());
         $this->assertEquals(null, $audited->getNotAudited());
 
         $configuration->setLoadNativeObjects(true);
 
         $revision = $this->getRevision(5);
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($master), $master->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($master), $master->getId(), $revision);
         $this->assertEquals('changed#5', $audited->getTitle());
         $this->assertEquals('changed#4', $audited->getAudited()->getTitle());
         $this->assertEquals('notaudited', $audited->getNotAudited()->getTitle());
 
         $revision = $this->getRevision(6);
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($master), $master->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($master), $master->getId(), $revision);
         $this->assertEquals('changed#5', $audited->getTitle());
         $this->assertEquals(null, $audited->getAudited());
         $this->assertEquals('notaudited', $audited->getNotAudited()->getTitle());
@@ -274,7 +274,7 @@ class RelationTest extends BaseTest
         $revision = $this->getRevision(1);
 
         //checking that getOwned3() returns an empty collection
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($owner), $owner->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($owner), $owner->getId(), $revision);
         $this->assertInstanceOf(Collection::class, $audited->getOwned3());
         $this->assertCount(0, $audited->getOwned3());
     }
@@ -291,7 +291,7 @@ class RelationTest extends BaseTest
         $this->persistManager->persist($owner);
         $this->persistManager->flush();
 
-        $this->assertCount(1, $this->objectAuditManager->findObjectRevisions(get_class($owner), $owner->getId()));
+        $this->assertCount(1, $this->objectAuditManager->getRevisions(get_class($owner), $owner->getId()));
 
         //create un-managed entity
         $owned21 = new OwnedEntity2();
@@ -302,14 +302,14 @@ class RelationTest extends BaseTest
         $this->persistManager->flush();
 
         //should not add a revision
-        $this->assertCount(1, $this->objectAuditManager->findObjectRevisions(get_class($owner), $owner->getId()));
+        $this->assertCount(1, $this->objectAuditManager->getRevisions(get_class($owner), $owner->getId()));
 
         $owner->setTitle('changed#2');
 
         $this->persistManager->flush();
 
         //should add a revision
-        $this->assertCount(2, $this->objectAuditManager->findObjectRevisions(get_class($owner), $owner->getId()));
+        $this->assertCount(2, $this->objectAuditManager->getRevisions(get_class($owner), $owner->getId()));
 
         $owned11 = new OwnedEntity1();
         $owned11->setTitle('created#3');
@@ -320,9 +320,9 @@ class RelationTest extends BaseTest
         $this->persistManager->flush();
 
         //should not add a revision for owner
-        $this->assertCount(2, $this->objectAuditManager->findObjectRevisions(get_class($owner), $owner->getId()));
+        $this->assertCount(2, $this->objectAuditManager->getRevisions(get_class($owner), $owner->getId()));
         //should add a revision for owned
-        $this->assertCount(1, $this->objectAuditManager->findObjectRevisions(get_class($owned11), $owned11->getId()));
+        $this->assertCount(1, $this->objectAuditManager->getRevisions(get_class($owned11), $owned11->getId()));
 
         //should not mess foreign keys
         $rows = $this->persistManager->getConnection()->fetchAll('SELECT strange_owned_id_name FROM OwnedEntity1');
@@ -358,7 +358,7 @@ class RelationTest extends BaseTest
 
         //checking third revision
         $revision = $this->getRevision(3);
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($owner), $owner->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($owner), $owner->getId(), $revision);
         $this->assertInstanceOf(Collection::class, $audited->getOwned2());
         $this->assertEquals('changed#2', $audited->getTitle());
         $this->assertCount(1, $audited->getOwned1());
@@ -370,7 +370,7 @@ class RelationTest extends BaseTest
 
         //checking forth revision
         $revision = $this->getRevision(4);
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($owner), $owner->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($owner), $owner->getId(), $revision);
         $this->assertEquals('changed#2', $audited->getTitle());
         $this->assertCount(2, $audited->getOwned1());
         $this->assertCount(1, $audited->getOwned2());
@@ -386,7 +386,7 @@ class RelationTest extends BaseTest
         $configuration->setLoadAuditedCollections(false);
         $this->objectAuditFactory->clearAuditCache();
 
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($owner), $owner->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($owner), $owner->getId(), $revision);
         $this->assertCount(0, $audited->getOwned1());
         $this->assertCount(1, $audited->getOwned2());
 
@@ -394,7 +394,7 @@ class RelationTest extends BaseTest
         $configuration->setLoadAuditedCollections(true);
         $this->objectAuditFactory->clearAuditCache();
 
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($owner), $owner->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($owner), $owner->getId(), $revision);
         $this->assertCount(2, $audited->getOwned1());
         $this->assertCount(0, $audited->getOwned2());
 
@@ -403,7 +403,7 @@ class RelationTest extends BaseTest
         $this->objectAuditFactory->clearAuditCache();
 
         $revision = $this->getRevision(5);
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($owner), $owner->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($owner), $owner->getId(), $revision);
         $this->assertEquals('changed#5', $audited->getTitle());
         $this->assertCount(2, $audited->getOwned1());
         $this->assertCount(1, $audited->getOwned2());
@@ -415,7 +415,7 @@ class RelationTest extends BaseTest
 
         //checking sixth revision
         $revision = $this->getRevision(6);
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($owner), $owner->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($owner), $owner->getId(), $revision);
         $this->assertEquals('changed#6', $audited->getTitle());
         $this->assertCount(2, $audited->getOwned1());
         $this->assertCount(1, $audited->getOwned2());
@@ -427,7 +427,7 @@ class RelationTest extends BaseTest
 
         //checking seventh revision
         $revision = $this->getRevision(7);
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($owner), $owner->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($owner), $owner->getId(), $revision);
         $this->assertEquals('changed#7', $audited->getTitle());
         $this->assertCount(1, $audited->getOwned1());
         $this->assertCount(1, $audited->getOwned2());
@@ -436,7 +436,7 @@ class RelationTest extends BaseTest
         $o2 = $audited->getOwned2();
         $this->assertEquals('owned21', $o2[0]->getTitle());
 
-        $history = $this->objectAuditManager->getObjectHistory(get_class($owner), $owner->getId());
+        $history = $this->objectAuditManager->getHistory(get_class($owner), $owner->getId());
         $this->assertContainsOnly(ObjectAudit::class, $history);
 
         $this->assertCount(5, $history);
@@ -489,27 +489,27 @@ class RelationTest extends BaseTest
         $this->persistManager->flush(); //#6
 
         $revision = $this->getRevision(1);
-        $owner = $this->objectAuditManager->findObjectByRevision(get_class($owner1), $owner1->getId(), $revision);
+        $owner = $this->objectAuditManager->find(get_class($owner1), $owner1->getId(), $revision);
         $this->assertCount(3, $owner->getOwned1());
 
         $revision = $this->getRevision(2);
-        $owner = $this->objectAuditManager->findObjectByRevision(get_class($owner1), $owner1->getId(), $revision);
+        $owner = $this->objectAuditManager->find(get_class($owner1), $owner1->getId(), $revision);
         $this->assertCount(2, $owner->getOwned1());
 
         $revision = $this->getRevision(3);
-        $owner = $this->objectAuditManager->findObjectByRevision(get_class($owner1), $owner1->getId(), $revision);
+        $owner = $this->objectAuditManager->find(get_class($owner1), $owner1->getId(), $revision);
         $this->assertCount(2, $owner->getOwned1());
 
         $revision = $this->getRevision(4);
-        $owner = $this->objectAuditManager->findObjectByRevision(get_class($owner1), $owner1->getId(), $revision);
+        $owner = $this->objectAuditManager->find(get_class($owner1), $owner1->getId(), $revision);
         $this->assertCount(2, $owner->getOwned1());
 
         $revision = $this->getRevision(5);
-        $owner = $this->objectAuditManager->findObjectByRevision(get_class($owner1), $owner1->getId(), $revision);
+        $owner = $this->objectAuditManager->find(get_class($owner1), $owner1->getId(), $revision);
         $this->assertCount(1, $owner->getOwned1());
 
         $revision = $this->getRevision(6);
-        $owner = $this->objectAuditManager->findObjectByRevision(get_class($owner1), $owner1->getId(), $revision);
+        $owner = $this->objectAuditManager->find(get_class($owner1), $owner1->getId(), $revision);
         $this->assertCount(0, $owner->getOwned1());
     }
 
@@ -564,36 +564,36 @@ class RelationTest extends BaseTest
         $this->persistManager->flush(); //#7
 
         $revision = $this->getRevision(1);
-        $auditedEntity = $this->objectAuditManager->findObjectByRevision(get_class($owner), $ownerId1, $revision);
+        $auditedEntity = $this->objectAuditManager->find(get_class($owner), $ownerId1, $revision);
         $this->assertEquals('created#1', $auditedEntity->getTitle());
         $this->assertCount(0, $auditedEntity->getOwned1());
 
         $revision = $this->getRevision(2);
-        $auditedEntity = $this->objectAuditManager->findObjectByRevision(get_class($owner), $ownerId1, $revision);
+        $auditedEntity = $this->objectAuditManager->find(get_class($owner), $ownerId1, $revision);
         $o1 = $auditedEntity->getOwned1();
         $this->assertCount(1, $o1);
         $this->assertEquals($ownedId1, $o1[0]->getId());
 
         $revision = $this->getRevision(3);
-        $auditedEntity = $this->objectAuditManager->findObjectByRevision(get_class($owner), $ownerId1, $revision);
+        $auditedEntity = $this->objectAuditManager->find(get_class($owner), $ownerId1, $revision);
         $this->assertCount(0, $auditedEntity->getOwned1());
 
         $revision = $this->getRevision(4);
-        $auditedEntity = $this->objectAuditManager->findObjectByRevision(get_class($owner), $ownerId1, $revision);
+        $auditedEntity = $this->objectAuditManager->find(get_class($owner), $ownerId1, $revision);
         $this->assertCount(1, $auditedEntity->getOwned1());
 
         $revision = $this->getRevision(5);
-        $auditedEntity = $this->objectAuditManager->findObjectByRevision(get_class($owner), $ownerId1, $revision);
+        $auditedEntity = $this->objectAuditManager->find(get_class($owner), $ownerId1, $revision);
         $this->assertCount(0, $auditedEntity->getOwned1());
 
         $revision = $this->getRevision(6);
-        $auditedEntity = $this->objectAuditManager->findObjectByRevision(get_class($owner), $ownerId1, $revision);
+        $auditedEntity = $this->objectAuditManager->find(get_class($owner), $ownerId1, $revision);
         $o1 = $auditedEntity->getOwned1();
         $this->assertCount(1, $o1);
         $this->assertEquals($ownedId2, $o1[0]->getId());
 
         $revision = $this->getRevision(7);
-        $auditedEntity = $this->objectAuditManager->findObjectByRevision(get_class($owned), $ownedId2, $revision);
+        $auditedEntity = $this->objectAuditManager->find(get_class($owned), $ownedId2, $revision);
         $this->assertEquals(null, $auditedEntity->getOwner());
     }
 
@@ -618,13 +618,13 @@ class RelationTest extends BaseTest
 
         //checking first revision
         $revision = $this->getRevision(1);
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($owned), $owner->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($owned), $owner->getId(), $revision);
         $this->assertEquals('owned', $audited->getTitle());
         $this->assertEquals('owner', $audited->getOwner()->getTitle());
 
         //checking second revision
         $revision = $this->getRevision(2);
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($owned), $owner->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($owned), $owner->getId(), $revision);
 
         $this->assertEquals('changed#2', $audited->getTitle());
         $this->assertEquals('changed#2', $audited->getOwner()->getTitle());
@@ -651,10 +651,10 @@ class RelationTest extends BaseTest
         $this->persistManager->flush();
 
         /** @var FoodCategory $auditedFood */
-        $auditedFood = $this->objectAuditManager->findObjectByRevision(
+        $auditedFood = $this->objectAuditManager->find(
             get_class($food),
             $food->getId(),
-            $this->objectAuditManager->getCurrentObjectRevision(get_class($food), $food->getId())
+            $this->objectAuditManager->getRevision(get_class($food), $food->getId())
         );
 
         $this->assertInstanceOf(get_class($food), $auditedFood);
@@ -689,10 +689,10 @@ class RelationTest extends BaseTest
 
         $this->persistManager->flush();
 
-        $auditedPage = $this->objectAuditManager->findObjectByRevision(
+        $auditedPage = $this->objectAuditManager->find(
             get_class($page),
             $page->getId(),
-            $this->objectAuditManager->getCurrentObjectRevision(get_class($page), $page->getId())
+            $this->objectAuditManager->getRevision(get_class($page), $page->getId())
         );
 
         $this->assertNotEmpty($auditedPage->getLocalizations());
@@ -748,10 +748,10 @@ class RelationTest extends BaseTest
 
         $this->persistManager->flush(); //#3
 
-        $auditedOwner = $this->objectAuditManager->findObjectByRevision(
+        $auditedOwner = $this->objectAuditManager->find(
             get_class($owner),
             $owner->getId(),
-            $this->objectAuditManager->getCurrentObjectRevision(get_class($owner), $owner->getId())
+            $this->objectAuditManager->getRevision(get_class($owner), $owner->getId())
         );
 
         $this->assertCount(3, $auditedOwner->getOwned1());
@@ -783,7 +783,7 @@ class RelationTest extends BaseTest
         $this->persistManager->flush();
 
         $revision = $this->getRevision(1);
-        $auditedBase = $this->objectAuditManager->findObjectByRevision(get_class($base), $base->getId(), $revision);
+        $auditedBase = $this->objectAuditManager->find(get_class($base), $base->getId(), $revision);
 
         $this->assertEquals('foobar', $auditedBase->getReferencedEntity()->getFoobarField());
         $this->assertEquals('referenced', $auditedBase->getReferencedEntity()->getReferencedField());
@@ -833,7 +833,7 @@ class RelationTest extends BaseTest
         $this->persistManager->flush();
 
         $revision = $this->getRevision(1);
-        $legal2Base = $this->objectAuditManager->findObjectByRevision(get_class($legal2), $legal2->getId(), $revision);
+        $legal2Base = $this->objectAuditManager->find(get_class($legal2), $legal2->getId(), $revision);
 
         $this->assertEquals('container3', $legal2Base->getDataContainer()->getName());
     }
@@ -860,7 +860,7 @@ class RelationTest extends BaseTest
         $revision1 = $this->getRevision(1);
         $revision2 = $this->getRevision(2);
 
-        $diff = $this->objectAuditManager->diffObjectRevisions(get_class($owned), 1, $revision1, $revision2);
+        $diff = $this->objectAuditManager->diffRevisions(get_class($owned), 1, $revision1, $revision2);
 
         $this->assertSame($owner1->getTitle(), $diff['owner']['old']->getTitle());
         $this->assertSame($owner2->getTitle(), $diff['owner']['new']->getTitle());
@@ -877,14 +877,14 @@ class RelationTest extends BaseTest
         $this->persistManager->flush();
 
         $revision = $this->getRevision(1);
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($owner), $owner->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($owner), $owner->getId(), $revision);
         $this->assertInstanceOf(get_class($owner), $audited);
 
         $owner->setRelation($owned);
         $this->persistManager->flush();
 
         $revision = $this->getRevision(2);
-        $audited = $this->objectAuditManager->findObjectByRevision(get_class($owner), $owner->getId(), $revision);
+        $audited = $this->objectAuditManager->find(get_class($owner), $owner->getId(), $revision);
         $this->assertInstanceOf(get_class($owner), $audited);
     }
 }

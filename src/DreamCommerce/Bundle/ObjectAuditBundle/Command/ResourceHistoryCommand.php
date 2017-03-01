@@ -77,12 +77,12 @@ class ResourceHistoryCommand extends BaseCommand
         $cloner = new VarCloner();
         $dumper = new CliDumper();
 
-        $changedResources = $resourceAuditManager->getResourceHistory($resourceName, $resourceId);
+        $changedResources = $resourceAuditManager->getHistory($resourceName, $resourceId);
         foreach ($changedResources as $changedResource) {
             $dumper->dump($cloner->cloneVar($changedResource->getRevision()));
             $rows = array();
 
-            foreach ($changedResource->getRevisionData() as $fieldName => $fieldValue) {
+            foreach ($changedResource->getData() as $fieldName => $fieldValue) {
                 $rows[] = array($fieldName, $fieldValue);
             }
 

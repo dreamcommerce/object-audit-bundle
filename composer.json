@@ -14,7 +14,6 @@
         "doctrine/orm": "~2.4",
         "ocramius/proxy-manager": "^2.0",
         "dreamcommerce/common-bundle": "dev-master",
-        "dreamcommerce/bugtracker": "^1.1",
         "sylius/resource-bundle": "v1.0.0-beta.1@dev"
     },
     "require-dev": {
@@ -67,15 +66,5 @@
             "dev-master": "1.0-dev",
             "dev-develop": "1.1-dev"
         }
-    },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/dreamcommerce/common-bundle"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/dreamcommerce/bugtracker-bundle"
-        }
-    ]
+    }
 }

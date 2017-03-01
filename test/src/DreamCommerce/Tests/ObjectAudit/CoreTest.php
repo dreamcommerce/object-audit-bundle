@@ -107,10 +107,10 @@ class CoreTest extends BaseTest
         $this->persistManager->flush();
 
         /** @var RevisionInterface $revision */
-        $revision = $this->revisionManager->getRevisionRepository()->find(1);
+        $revision = $this->revisionManager->getRepository()->find(1);
         $this->assertInstanceOf(RevisionInterface::class, $revision);
 
-        $auditUser = $this->objectAuditManager->findObjectByRevision(get_class($user), $user->getId(), $revision);
+        $auditUser = $this->objectAuditManager->find(get_class($user), $user->getId(), $revision);
 
         $this->assertInstanceOf(get_class($user), $auditUser, "Audited User is also a User instance.");
         $this->assertEquals($user->getId(), $auditUser->getId(), "Ids of audited user and real user should be the same.");
@@ -118,7 +118,7 @@ class CoreTest extends BaseTest
         $this->assertFalse($this->persistManager->contains($auditUser), "Audited User should not be in the identity map.");
         $this->assertNotSame($user, $auditUser, "User and Audited User instances are not the same.");
 
-        $auditFox = $this->objectAuditManager->findObjectByRevision(get_class($foxy), $foxy->getId(), $revision);
+        $auditFox = $this->objectAuditManager->find(get_class($foxy), $foxy->getId(), $revision);
 
         $this->assertInstanceOf(get_class($foxy), $auditFox, "Audited SINGLE_TABLE class keeps it's class.");
         $this->assertEquals($foxy->getId(), $auditFox->getId(), "Ids of audited SINGLE_TABLE class and real SINGLE_TABLE class should be the same.");
@@ -127,7 +127,7 @@ class CoreTest extends BaseTest
         $this->assertFalse($this->persistManager->contains($auditFox), "Audited SINGLE_TABLE inheritance class should not be in the identity map.");
         $this->assertNotSame($this, $auditFox, "Audited and new entities should not be the same object for SINGLE_TABLE inheritance.");
 
-        $auditCat = $this->objectAuditManager->findObjectByRevision(get_class($cat), $cat->getId(), $revision);
+        $auditCat = $this->objectAuditManager->find(get_class($cat), $cat->getId(), $revision);
 
         $this->assertInstanceOf(get_class($cat), $auditCat, "Audited JOINED class keeps it's class.");
         $this->assertEquals($cat->getId(), $auditCat->getId(), "Ids of audited JOINED class and real JOINED class should be the same.");
@@ -146,24 +146,24 @@ class CoreTest extends BaseTest
         $this->persistManager->persist($revision);
         $this->persistManager->flush();
 
-        $this->objectAuditManager->findObjectByRevision(UserAudit::class, 1, $revision);
+        $this->objectAuditManager->find(UserAudit::class, 1, $revision);
     }
 
     public function testFindNotAudited()
     {
         $this->setExpectedException(
             'DreamCommerce\ObjectAudit\Exception\NotAuditedException',
-            "Class 'stdClass' is not audited."
+            "Class is not audited"
         );
 
         $this->expectException(ObjectNotAuditedException::class);
-        $this->expectExceptionCode(ObjectNotAuditedException::CODE_OBJECT_IS_NOT_AUDITED);
+        $this->expectExceptionCode(ObjectNotAuditedException::CODE_CLASS_IS_NOT_AUDITED);
 
         $revision = new RevisionTest();
         $this->persistManager->persist($revision);
         $this->persistManager->flush();
 
-        $this->objectAuditManager->findObjectByRevision("stdClass", 1, $revision);
+        $this->objectAuditManager->find("stdClass", 1, $revision);
     }
 
     public function testFindRevisionHistory()
@@ -179,7 +179,7 @@ class CoreTest extends BaseTest
         $this->persistManager->flush();
 
         /** @var RevisionInterface[]|Collection $revisions */
-        $revisions = $this->revisionManager->getRevisionRepository()->findAll();
+        $revisions = $this->revisionManager->getRepository()->findAll();
 
         $this->assertEquals(2, count($revisions));
         $this->assertContainsOnly(RevisionInterface::class, $revisions);
@@ -210,7 +210,7 @@ class CoreTest extends BaseTest
 
         $revision = $this->getRevision(1);
         /** @var ObjectAudit[] $objects */
-        $objects = $this->objectAuditManager->findAllObjectsChangedAtRevision($revision);
+        $objects = $this->objectAuditManager->findAllChangesAtRevision($revision);
 
         //duplicated entries means a bug with discriminators
         $this->assertEquals(6, count($objects));
@@ -222,14 +222,14 @@ class CoreTest extends BaseTest
         $this->assertContainsOnly(ObjectAudit::class, $objects);
 
         $this->assertEquals($revision, $objects[0]->getRevision());
-        $this->assertEquals(RevisionInterface::ACTION_INSERT, $objects[0]->getRevisionType());
+        $this->assertEquals(RevisionInterface::ACTION_INSERT, $objects[0]->getType());
         $this->assertEquals(ArticleAudit::class, $objects[0]->getClassName());
         $this->assertInstanceOf(ArticleAudit::class, $objects[0]->getObject());
         $this->assertEquals(1, $objects[0]->getObject()->getId());
         $this->assertEquals($this->persistManager, $objects[0]->getPersistManager());
 
         $this->assertEquals($revision, $objects[1]->getRevision());
-        $this->assertEquals(RevisionInterface::ACTION_INSERT, $objects[1]->getRevisionType());
+        $this->assertEquals(RevisionInterface::ACTION_INSERT, $objects[1]->getType());
         $this->assertEquals(Cat::class, $objects[1]->getClassName());
         $this->assertInstanceOf(Cat::class, $objects[1]->getObject());
         $this->assertEquals(1, $objects[1]->getObject()->getId());
@@ -262,7 +262,7 @@ class CoreTest extends BaseTest
 
         $revision = $this->getRevision(1);
         /** @var ArticleAudit $article */
-        $article = $this->objectAuditManager->findObjectByRevision(get_class($article), 1, $revision);
+        $article = $this->objectAuditManager->find(get_class($article), 1, $revision);
 
         $this->assertNotNull($article);
         $this->assertSame('beberlei', $article->getAuthor()->getName());
@@ -287,14 +287,14 @@ class CoreTest extends BaseTest
 
         $revision = $this->getRevision(1);
         /** @var UserAudit $user */
-        $user = $this->objectAuditManager->findObjectByRevision(get_class($user), 1, $revision);
+        $user = $this->objectAuditManager->find(get_class($user), 1, $revision);
         $this->assertNotNull($user);
         $profile = $user->getProfile();
         $this->assertNotNull($profile);
         $this->assertSame('He is an amazing contributor!', $profile->getBiography());
     }
 
-    public function testFindRevisions()
+    public function testGetRevisions()
     {
         $user = new UserAudit("beberlei");
         $foxy = new Fox('foxy', 30);
@@ -315,7 +315,7 @@ class CoreTest extends BaseTest
         $this->persistManager->flush();
 
         /** @var RevisionInterface[] $revisions */
-        $revisions = $this->objectAuditManager->findObjectRevisions(get_class($user), $user->getId());
+        $revisions = $this->objectAuditManager->getRevisions(get_class($user), $user->getId());
 
         $this->assertEquals(2, count($revisions));
         $this->assertContainsOnly(RevisionInterface::class, $revisions);
@@ -327,11 +327,11 @@ class CoreTest extends BaseTest
         $this->assertInstanceOf(DateTime::class, $revisions[1]->getCreatedAt());
 
         //SINGLE_TABLE should have separate revision history
-        $this->assertEquals(2, count($this->objectAuditManager->findObjectRevisions(get_class($foxy), $foxy->getId())));
-        $this->assertEquals(1, count($this->objectAuditManager->findObjectRevisions(get_class($rabbit), $rabbit->getId())));
+        $this->assertEquals(2, count($this->objectAuditManager->getRevisions(get_class($foxy), $foxy->getId())));
+        $this->assertEquals(1, count($this->objectAuditManager->getRevisions(get_class($rabbit), $rabbit->getId())));
         //JOINED too
-        $this->assertEquals(2, count($this->objectAuditManager->findObjectRevisions(get_class($dog), $dog->getId())));
-        $this->assertEquals(1, count($this->objectAuditManager->findObjectRevisions(get_class($cat), $cat->getId())));
+        $this->assertEquals(2, count($this->objectAuditManager->getRevisions(get_class($dog), $dog->getId())));
+        $this->assertEquals(1, count($this->objectAuditManager->getRevisions(get_class($cat), $cat->getId())));
     }
 
     public function testFindCurrentRevision()
@@ -344,14 +344,14 @@ class CoreTest extends BaseTest
         $user->setName("Rajesh");
         $this->persistManager->flush();
 
-        $revision = $this->objectAuditManager->getCurrentObjectRevision(get_class($user), $user->getId());
+        $revision = $this->objectAuditManager->getRevision(get_class($user), $user->getId());
         $this->assertInstanceOf(RevisionInterface::class, $revision);
         $this->assertEquals(2, $revision->getId());
 
         $user->setName("David");
         $this->persistManager->flush();
 
-        $revision = $this->objectAuditManager->getCurrentObjectRevision(get_class($user), $user->getId());
+        $revision = $this->objectAuditManager->getRevision(get_class($user), $user->getId());
         $this->assertInstanceOf(RevisionInterface::class, $revision);
         $this->assertEquals(3, $revision->getId());
     }
@@ -369,7 +369,7 @@ class CoreTest extends BaseTest
         $this->persistManager->persist($article);
         $this->persistManager->flush();
 
-        $revision = $this->objectAuditManager->getCurrentObjectRevision(get_class($article), $article->getId());
+        $revision = $this->objectAuditManager->getRevision(get_class($article), $article->getId());
         $this->assertInstanceOf(RevisionInterface::class, $revision);
         $this->assertEquals(2, $revision->getId());
 
@@ -377,7 +377,7 @@ class CoreTest extends BaseTest
         $this->persistManager->persist($article);
         $this->persistManager->flush();
 
-        $revision = $this->objectAuditManager->getCurrentObjectRevision(get_class($article), $article->getId());
+        $revision = $this->objectAuditManager->getRevision(get_class($article), $article->getId());
         $this->assertInstanceOf(RevisionInterface::class, $revision);
         $this->assertEquals(2, $revision->getId());
 
@@ -385,7 +385,7 @@ class CoreTest extends BaseTest
         $this->persistManager->persist($article);
         $this->persistManager->flush();
 
-        $revision = $this->objectAuditManager->getCurrentObjectRevision(get_class($article), $article->getId());
+        $revision = $this->objectAuditManager->getRevision(get_class($article), $article->getId());
         $this->assertInstanceOf(RevisionInterface::class, $revision);
         $this->assertEquals(2, $revision->getId());
     }
@@ -406,7 +406,7 @@ class CoreTest extends BaseTest
 
         $revision = $this->getRevision(2);
         /** @var ObjectAudit[] $objects */
-        $objects = $this->objectAuditManager->findAllObjectsChangedAtRevision($revision);
+        $objects = $this->objectAuditManager->findAllChangesAtRevision($revision);
 
         $this->assertEquals(1, count($objects));
         $this->assertContainsOnly(ObjectAudit::class, $objects);
@@ -414,6 +414,6 @@ class CoreTest extends BaseTest
         $this->assertNotNull($object);
         $this->assertEquals(UserAudit::class, get_class($object));
         $this->assertEquals(1, $object->getId());
-        $this->assertEquals(RevisionInterface::ACTION_DELETE, $objects[0]->getRevisionType());
+        $this->assertEquals(RevisionInterface::ACTION_DELETE, $objects[0]->getType());
     }
 }

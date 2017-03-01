@@ -44,7 +44,6 @@ use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Manager\RevisionManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Model\AuditCollection;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
-use InvalidArgumentException;
 use ProxyManager\Factory\LazyLoadingValueHolderFactory;
 use RuntimeException;
 
@@ -75,7 +74,7 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
      */
     public function createNew()
     {
-        throw new InvalidArgumentException('Create empty audit object is not supported');
+        throw new RuntimeException('Create empty audit object is not supported');
     }
 
     /**
@@ -109,9 +108,9 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
                                    ObjectAuditManagerInterface $objectAuditManager)
     {
         $configuration = $objectAuditManager->getConfiguration();
-        $objectMetadataFactory = $objectAuditManager->getObjectAuditMetadataFactory();
+        $objectMetadataFactory = $objectAuditManager->getMetadataFactory();
         /** @var ClassMetadata $revisionMetadata */
-        $revisionMetadata = $this->revisionManager->getRevisionMetadata();
+        $revisionMetadata = $this->revisionManager->getMetadata();
 
         $persistManager = $objectAuditManager->getPersistManager();
         /** @var EntityManagerInterface $persistManager */
@@ -147,7 +146,7 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
                 return $proxyFactory->createProxy(
                     $className,
                     function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use ($objectAuditManager, $revision, $identifiers, $discriminator, $className) {
-                        $wrappedObject = $objectAuditManager->findObjectByRevision($className, $identifiers, $revision);
+                        $wrappedObject = $objectAuditManager->find($className, $identifiers, $revision);
                         $initializer = null;
                     }
                 );
@@ -194,7 +193,7 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
 
                         if (!empty($identifiers)) {
                             try {
-                                $value = $objectAuditManager->findObjectByRevision(
+                                $value = $objectAuditManager->find(
                                     $targetClass->name,
                                     $identifiers,
                                     $revision,
@@ -219,7 +218,7 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
                             $fields[$foreign] = $pf[$otherEntityAssoc['fieldName']] = $data[$classMetadata->getFieldName($local)];
                         }
 
-                        $objects = $objectAuditManager->findObjectsByFieldsAndRevision(
+                        $objects = $objectAuditManager->findByFieldsAndRevision(
                             $targetClass->name,
                             $fields,
                             null,
@@ -237,7 +236,7 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
                                 $value = null;
                             }
                         } else {
-                            throw new \Exception(); // TODO
+                            throw new RuntimeException('The method returned unexpectedly too much rows');
                         }
                     }
                 } elseif (!$isAudited && $configuration->isLoadNativeObjects()) {

@@ -75,7 +75,7 @@ final class ManagerCompilerPass implements CompilerPassInterface
 
                     break;
                 default:
-                    throw new RuntimeException();
+                    throw new RuntimeException('Unsupported type of driver "' . $manager['driver'] . '"');
             }
 
             $configuration = new Definition($configurationClass);
@@ -96,10 +96,10 @@ final class ManagerCompilerPass implements CompilerPassInterface
             $managerDefinition->setArguments(array(
                 $configuration,
                 new Reference($objectManagerId),
-                new Reference($auditObjectManagerId),
                 $container->getDefinition('dream_commerce_object_audit.revision_manager'),
                 $auditFactory,
                 $metadataFactory,
+                new Reference($auditObjectManagerId),
             ));
 
             $container->setDefinition($managerId, $managerDefinition);

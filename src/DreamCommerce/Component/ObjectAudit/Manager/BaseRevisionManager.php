@@ -41,86 +41,86 @@ abstract class BaseRevisionManager implements RevisionManagerInterface
     /**
      * @var string
      */
-    protected $revisionClassName;
+    protected $className;
 
     /**
      * @var RevisionInterface|null
      */
-    protected $currentRevision;
+    protected $revision;
 
     /**
      * @var ObjectManager
      */
-    protected $auditPersistManager;
+    protected $persistManager;
 
     /**
      * @var RevisionRepositoryInterface|null
      */
-    protected $revisionRepository;
+    protected $repository;
 
     /**
      * @var FactoryInterface
      */
-    protected $revisionFactory;
+    protected $factory;
 
     /**
-     * @param string                      $revisionClassName
-     * @param ObjectManager               $auditPersistManager
-     * @param FactoryInterface            $revisionFactory
-     * @param RevisionRepositoryInterface $revisionRepository
+     * @param string                      $className
+     * @param ObjectManager               $persistManager
+     * @param FactoryInterface            $factory
+     * @param RevisionRepositoryInterface $repository
      */
-    public function __construct(string $revisionClassName,
-                                ObjectManager $auditPersistManager,
-                                FactoryInterface $revisionFactory,
-                                RevisionRepositoryInterface $revisionRepository)
+    public function __construct(string $className,
+                                ObjectManager $persistManager,
+                                FactoryInterface $factory,
+                                RevisionRepositoryInterface $repository)
     {
-        $this->auditPersistManager = $auditPersistManager;
-        $this->revisionClassName = $revisionClassName;
-        $this->revisionRepository = $revisionRepository;
-        $this->revisionFactory = $revisionFactory;
+        $this->persistManager = $persistManager;
+        $this->className = $className;
+        $this->repository = $repository;
+        $this->factory = $factory;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getCurrentRevision()
+    public function getRevision(): RevisionInterface
     {
-        if ($this->currentRevision === null) {
-            $this->currentRevision = $this->revisionFactory->createNew();
+        if ($this->revision === null) {
+            $this->revision = $this->factory->createNew();
         }
 
-        return $this->currentRevision;
+        return $this->revision;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getRevisionRepository(): RevisionRepositoryInterface
+    public function getRepository(): RevisionRepositoryInterface
     {
-        return $this->revisionRepository;
+        return $this->repository;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getRevisionMetadata(): ClassMetadata
+    public function getMetadata(): ClassMetadata
     {
-        return $this->auditPersistManager->getClassMetadata($this->revisionClassName);
+        return $this->persistManager->getClassMetadata($this->className);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getRevisionClassName(): string
+    public function getClassName(): string
     {
-        return $this->revisionClassName;
+        return $this->className;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getRevisionPersistManager(): ObjectManager
+    public function getPersistManager(): ObjectManager
     {
-        return $this->auditPersistManager;
+        return $this->persistManager;
     }
 }

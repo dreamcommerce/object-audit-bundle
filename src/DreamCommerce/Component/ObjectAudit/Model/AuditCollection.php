@@ -422,7 +422,7 @@ final class AuditCollection implements Collection
             return;
         }
 
-        $this->objects = $this->objectAuditManager->findObjectsByFieldsAndRevision(
+        $this->objects = $this->objectAuditManager->findByFieldsAndRevision(
             $this->className,
             $this->foreignKeys,
             $this->indexBy,

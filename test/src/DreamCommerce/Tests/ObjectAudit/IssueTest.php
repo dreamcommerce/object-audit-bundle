@@ -93,7 +93,7 @@ class IssueTest extends BaseTest
         $this->persistManager->flush(); //#2
 
         $revision = $this->getRevision(2);
-        $ae = $this->objectAuditManager->findObjectByRevision(Issue111Entity::class, 1, $revision);
+        $ae = $this->objectAuditManager->find(Issue111Entity::class, 1, $revision);
 
         $this->assertInstanceOf(DateTime::class, $ae->getDeletedAt());
     }
@@ -107,7 +107,7 @@ class IssueTest extends BaseTest
         $this->persistManager->flush();
 
         $revision = $this->getRevision(1);
-        $this->objectAuditManager->findObjectByRevision(get_class($e), $e->getId(), $revision);
+        $this->objectAuditManager->find(get_class($e), $e->getId(), $revision);
     }
 
     public function testIssue87()
@@ -127,20 +127,20 @@ class IssueTest extends BaseTest
         $this->persistManager->flush();
 
         $revision = $this->getRevision(1);
-        $auditedProject = $this->objectAuditManager->findObjectByRevision(get_class($project), $project->getId(), $revision);
+        $auditedProject = $this->objectAuditManager->find(get_class($project), $project->getId(), $revision);
 
         $this->assertEquals($org->getId(), $auditedProject->getOrganisation()->getId());
         $this->assertEquals('test project', $auditedProject->getTitle());
         $this->assertEquals('some property', $auditedProject->getSomeProperty());
 
-        $auditedComment = $this->objectAuditManager->findObjectByRevision(get_class($comment), $comment->getId(), $revision);
+        $auditedComment = $this->objectAuditManager->find(get_class($comment), $comment->getId(), $revision);
         $this->assertEquals('test project', $auditedComment->getProject()->getTitle());
 
         $project->setTitle('changed project title');
         $this->persistManager->flush();
 
         $revision = $this->getRevision(2);
-        $auditedComment = $this->objectAuditManager->findObjectByRevision(get_class($comment), $comment->getId(), $revision);
+        $auditedComment = $this->objectAuditManager->find(get_class($comment), $comment->getId(), $revision);
         $this->assertEquals('changed project title', $auditedComment->getProject()->getTitle());
     }
 
@@ -161,11 +161,11 @@ class IssueTest extends BaseTest
         $this->persistManager->flush(); //#1
 
         $revision = $this->getRevision(1);
-        $aAddress = $this->objectAuditManager->findObjectByRevision(get_class($address), $address->getId(), $revision);
+        $aAddress = $this->objectAuditManager->find(get_class($address), $address->getId(), $revision);
         $this->assertEquals($customer->getId(), $aAddress->getCustomer()->getId());
 
         /** @var Issue9Customer $aCustomer */
-        $aCustomer = $this->objectAuditManager->findObjectByRevision(get_class($customer), $customer->getId(), $revision);
+        $aCustomer = $this->objectAuditManager->find(get_class($customer), $customer->getId(), $revision);
 
         $this->assertNotNull($aCustomer->getPrimaryAddress());
         $this->assertEquals('NY, Red Street 6', $aCustomer->getPrimaryAddress()->getAddressText());
@@ -210,7 +210,7 @@ class IssueTest extends BaseTest
         $this->persistManager->flush();
 
         $revision = $this->getRevision(1);
-        $this->objectAuditManager->findObjectByRevision(get_class($number), $number->getId(), $revision);
+        $this->objectAuditManager->find(get_class($number), $number->getId(), $revision);
     }
 
     public function testIssue194()
@@ -224,10 +224,10 @@ class IssueTest extends BaseTest
         $this->persistManager->flush();
 
         $revision = $this->getRevision(1);
-        $auditUser = $this->objectAuditManager->findObjectByRevision(get_class($user), $user->getId(), $revision);
+        $auditUser = $this->objectAuditManager->find(get_class($user), $user->getId(), $revision);
 
         $revision = $this->getRevision(2);
-        $auditAddress = $this->objectAuditManager->findObjectByRevision(get_class($address), $address->getUser()->getId(), $revision);
+        $auditAddress = $this->objectAuditManager->find(get_class($address), $address->getUser()->getId(), $revision);
         $this->assertEquals($auditAddress->getUser(), $auditUser);
         $this->assertEquals($address->getUser(), $auditUser);
         $this->assertEquals($auditAddress->getUser(), $user);
@@ -243,8 +243,8 @@ class IssueTest extends BaseTest
 
         $persistedEntity = $this->persistManager->find(get_class($entity), $entity->getId());
 
-        $currentRevision = $this->objectAuditManager->getCurrentObjectRevision(get_class($entity), $entity->getId());
-        $currentRevisionEntity = $this->objectAuditManager->findObjectByRevision(get_class($entity), $entity->getId(), $currentRevision);
+        $currentRevision = $this->objectAuditManager->getRevision(get_class($entity), $entity->getId());
+        $currentRevisionEntity = $this->objectAuditManager->find(get_class($entity), $entity->getId(), $currentRevision);
 
         $this->assertEquals(
             $persistedEntity,
@@ -269,11 +269,11 @@ class IssueTest extends BaseTest
         $this->persistManager->flush();
 
         $revision = $this->getRevision(1);
-        $car1 = $this->objectAuditManager->findObjectByRevision(get_class($car), $car->getId(), $revision);
+        $car1 = $this->objectAuditManager->find(get_class($car), $car->getId(), $revision);
         $this->assertNull($car1->getOwner());
 
         $revision = $this->getRevision(2);
-        $car2 = $this->objectAuditManager->findObjectByRevision(get_class($car), $car->getId(), $revision);
+        $car2 = $this->objectAuditManager->find(get_class($car), $car->getId(), $revision);
         $this->assertEquals($car2->getOwner()->getId(), $owner->getId());
     }
 }

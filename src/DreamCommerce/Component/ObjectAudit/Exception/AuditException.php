@@ -30,8 +30,11 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Exception;
 
+use DreamCommerce\Component\Common\Exception\ContextInterface;
+use DreamCommerce\Component\Common\Exception\ContextTrait;
 use Exception;
 
-class AuditException extends Exception
+class AuditException extends Exception implements ContextInterface
 {
+    use ContextTrait;
 }

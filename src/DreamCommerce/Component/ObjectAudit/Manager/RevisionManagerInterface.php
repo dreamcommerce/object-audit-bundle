@@ -40,30 +40,30 @@ interface RevisionManagerInterface
     /**
      * @return string
      */
-    public function getRevisionClassName(): string;
+    public function getClassName(): string;
 
     /**
      * @return RevisionRepositoryInterface
      */
-    public function getRevisionRepository(): RevisionRepositoryInterface;
+    public function getRepository(): RevisionRepositoryInterface;
 
     /**
      * @return ClassMetadata
      */
-    public function getRevisionMetadata(): ClassMetadata;
+    public function getMetadata(): ClassMetadata;
 
     /**
      * @return ObjectManager
      */
-    public function getRevisionPersistManager(): ObjectManager;
+    public function getPersistManager(): ObjectManager;
 
     /**
-     * @return RevisionInterface|null
+     * @return RevisionInterface
      */
-    public function getCurrentRevision();
+    public function getRevision(): RevisionInterface;
 
     /**
      * Save & clear old revision pointer.
      */
-    public function saveCurrentRevision();
+    public function save();
 }

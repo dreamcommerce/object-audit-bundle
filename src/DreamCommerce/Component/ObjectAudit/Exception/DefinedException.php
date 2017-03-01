@@ -30,53 +30,25 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Exception;
 
-class CollectionException extends AuditException
+use DreamCommerce\Component\Common\Exception\DefinedException as BaseDefinedException;
+
+class DefinedException extends BaseDefinedException
 {
-    const CODE_COLLECTION_IS_READ_ONLY = 40;
-    const CODE_NOT_DEFINED_OFFSET = 41;
+    const CODE_OBJECT_AUDIT_MANAGER_NAME = 20;
 
     /**
      * @var string
      */
-    private $className;
+    private $objectAuditManagerName;
 
     /**
-     * @var int
+     * @param string $objectAuditManagerName
+     * @return DefinedException
      */
-    private $offset;
-
-    /**
-     * @return string
-     */
-    public function getClassName(): string
+    public static function forObjectAuditManager(string $objectAuditManagerName): DefinedException
     {
-        return $this->className;
-    }
-
-    /**
-     * @param string $className
-     *
-     * @return CollectionException
-     */
-    public static function readOnly(string $className): CollectionException
-    {
-        $exception = new self('The collection is read-only', self::CODE_COLLECTION_IS_READ_ONLY);
-        $exception->className = $className;
-
-        return $exception;
-    }
-
-    /**
-     * @param string $className
-     * @param int    $offset
-     *
-     * @return CollectionException
-     */
-    public static function forNotDefinedOffset(string $className, int $offset): CollectionException
-    {
-        $exception = new self('The offset is not defined', self::CODE_NOT_DEFINED_OFFSET);
-        $exception->className = $className;
-        $exception->offset = $offset;
+        $exception = new static('The object audit manager already exists under this name', static::CODE_OBJECT_AUDIT_MANAGER_NAME);
+        $exception->objectAuditManagerName = $objectAuditManagerName;
 
         return $exception;
     }

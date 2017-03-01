@@ -55,7 +55,7 @@ interface ResourceAuditManagerInterface
      *
      * @return ResourceInterface
      */
-    public function findResourceByRevision(string $resourceName, int $resourceId, RevisionInterface $revision, array $options = array());
+    public function find(string $resourceName, int $resourceId, RevisionInterface $revision, array $options = array());
 
     /**
      * @param string            $resourceName
@@ -65,7 +65,7 @@ interface ResourceAuditManagerInterface
      *
      * @return array
      */
-    public function findResourcesByFieldsAndRevision(string $resourceName, array $fields, RevisionInterface $revision, array $options = array()): array;
+    public function findByFieldsAndRevision(string $resourceName, array $fields, RevisionInterface $revision, array $options = array()): array;
 
     /**
      * @param string            $resourceName
@@ -76,7 +76,7 @@ interface ResourceAuditManagerInterface
      *
      * @return ResourceAudit[]
      */
-    public function findResourcesChangedAtRevision(string $resourceName, RevisionInterface $revision, array $options = array()): array;
+    public function findChangesAtRevision(string $resourceName, RevisionInterface $revision, array $options = array()): array;
 
     /**
      * @param RevisionInterface $revision
@@ -84,7 +84,7 @@ interface ResourceAuditManagerInterface
      *
      * @return ResourceAudit[]
      */
-    public function findAllResourcesChangedAtRevision(RevisionInterface $revision, array $options = array()): array;
+    public function findAllChangesAtRevision(RevisionInterface $revision, array $options = array()): array;
 
     /**
      * Find all revisions that were made of resource with given id.
@@ -96,7 +96,7 @@ interface ResourceAuditManagerInterface
      *
      * @return Collection|RevisionInterface[]
      */
-    public function findResourceRevisions(string $resourceName, int $resourceId): Collection;
+    public function getRevisions(string $resourceName, int $resourceId): Collection;
 
     /**
      * @param string $resourceName
@@ -108,7 +108,7 @@ interface ResourceAuditManagerInterface
      *
      * @return ResourceAudit[]
      */
-    public function getResourceHistory(string $resourceName, int $resourceId, array $options = array()): array;
+    public function getHistory(string $resourceName, int $resourceId, array $options = array()): array;
 
     /**
      * Gets the initialize revision of the resource with given ID.
@@ -121,7 +121,7 @@ interface ResourceAuditManagerInterface
      *
      * @return RevisionInterface|null
      */
-    public function getInitializeResourceRevision(string $resourceName, int $resourceId);
+    public function getInitRevision(string $resourceName, int $resourceId);
 
     /**
      * Gets the current revision of the resource with given ID.
@@ -134,7 +134,7 @@ interface ResourceAuditManagerInterface
      *
      * @return RevisionInterface|null
      */
-    public function getCurrentResourceRevision(string $resourceName, int $resourceId);
+    public function getRevision(string $resourceName, int $resourceId);
 
     /**
      * @param ResourceAudit $resourceAudit
@@ -143,7 +143,7 @@ interface ResourceAuditManagerInterface
      *
      * @return $this
      */
-    public function saveAuditResource(ResourceAudit $resourceAudit);
+    public function saveAudit(ResourceAudit $resourceAudit);
 
     /**
      * Get an array with the differences of between two specific revisions of
@@ -158,7 +158,7 @@ interface ResourceAuditManagerInterface
      *
      * @return array
      */
-    public function diffResourceRevisions(string $resourceName, int $resourceId, RevisionInterface $oldRevision, RevisionInterface $newRevision): array;
+    public function diffRevisions(string $resourceName, int $resourceId, RevisionInterface $oldRevision, RevisionInterface $newRevision): array;
 
     /**
      * Get the values for a specific entity as an associative array.
@@ -167,10 +167,10 @@ interface ResourceAuditManagerInterface
      *
      * @return array
      */
-    public function getResourceValues(ResourceInterface $resource): array;
+    public function getValues(ResourceInterface $resource): array;
 
     /**
      * @return ResourceAuditMetadataFactory
      */
-    public function getResourceAuditMetadataFactory(): ResourceAuditMetadataFactory;
+    public function getMetadataFactory(): ResourceAuditMetadataFactory;
 }

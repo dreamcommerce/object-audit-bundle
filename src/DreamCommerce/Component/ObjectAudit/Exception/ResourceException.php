@@ -44,16 +44,4 @@ class ResourceException extends ObjectException
     {
         return $this->resourceName;
     }
-
-    /**
-     * @param string $resourceName
-     *
-     * @return $this
-     */
-    public function setResourceName(string $resourceName)
-    {
-        $this->resourceName = $resourceName;
-
-        return $this;
-    }
 }

@@ -119,7 +119,7 @@ final class ResourceAuditMetadataFactory
             /** @var ObjectManager $persistManager */
             $persistManager = $this->container->get($serviceId);
             $objectAuditManager = $this->objectAuditRegistry->getByPersistManager($persistManager);
-            $objectAuditMetadataFactory = $objectAuditManager->getObjectAuditMetadataFactory();
+            $objectAuditMetadataFactory = $objectAuditManager->getMetadataFactory();
             if ($objectAuditMetadataFactory->isClassAudited($className)) {
                 $this->resourceAuditMetadatas[] = $resourceMetadata->getName();
             }

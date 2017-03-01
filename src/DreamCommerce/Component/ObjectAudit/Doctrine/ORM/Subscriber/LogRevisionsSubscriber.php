@@ -83,16 +83,13 @@ class LogRevisionsSubscriber implements EventSubscriber
         if (count($this->objects) > 0) {
             $entityManager = $eventArgs->getEntityManager();
             $objectAuditManager = $this->objectAuditRegistry->getByPersistManager($entityManager);
-            if ($objectAuditManager === null) {
-                throw new \Exception(); // TODO
-            }
 
             foreach ($this->objects as $objectAudit) {
                 $uow = $entityManager->getUnitOfWork();
                 $className = $objectAudit->getClassName();
 
                 $revisionData = array_merge(
-                    $objectAudit->getRevisionData(),
+                    $objectAudit->getData(),
                     $objectAudit->getIdentifiers()
                 );
 
@@ -114,8 +111,8 @@ class LogRevisionsSubscriber implements EventSubscriber
                     );
                 }
 
-                $objectAudit->setRevisionData($revisionData);
-                $objectAuditManager->saveObjectAudit($objectAudit);
+                $objectAudit->setData($revisionData);
+                $objectAuditManager->saveAudit($objectAudit);
             }
 
             $this->objects = array();
@@ -131,16 +128,12 @@ class LogRevisionsSubscriber implements EventSubscriber
     {
         $entityManager = $eventArgs->getEntityManager();
         $objectAuditManager = $this->objectAuditRegistry->getByPersistManager($entityManager);
-        if ($objectAuditManager === null) {
-            throw new \Exception(); // TODO
-        }
-
-        $objectMetadataFactory = $objectAuditManager->getObjectAuditMetadataFactory();
+        $objectMetadataFactory = $objectAuditManager->getMetadataFactory();
         $uow = $entityManager->getUnitOfWork();
         $configuration = $objectAuditManager->getConfiguration();
         $globalIgnoredProperties = $configuration->getGlobalIgnoreProperties();
         $revisionManager = $objectAuditManager->getRevisionManager();
-        $currentRevision = $revisionManager->getCurrentRevision();
+        $currentRevision = $revisionManager->getRevision();
         $processedEntities = array();
 
         foreach ($uow->getScheduledEntityDeletions() as $entity) {
@@ -230,7 +223,7 @@ class LogRevisionsSubscriber implements EventSubscriber
         }
 
         if (count($this->objects) > 0) {
-            $revisionManager->saveCurrentRevision();
+            $revisionManager->save();
         }
     }
 

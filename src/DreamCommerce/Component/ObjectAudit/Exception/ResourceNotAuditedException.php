@@ -42,14 +42,9 @@ class ResourceNotAuditedException extends ResourceException
      */
     public static function forResource(string $resourceName, string $className = null): ResourceNotAuditedException
     {
-        $message = sprintf(
-            "Resource '$resourceName' is not audited.",
-            $className
-        );
-
-        $exception = new self($message, self::CODE_RESOURCE_IS_NOT_AUDITED);
-        $exception->setClassName($className)
-            ->setResourceName($resourceName);
+        $exception = new self('The resource is not audited', self::CODE_RESOURCE_IS_NOT_AUDITED);
+        $exception->className = $className;
+        $exception->resourceName = $resourceName;
 
         return $exception;
     }

@@ -72,17 +72,17 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
     /**
      * @param BaseAuditConfiguration      $configuration
      * @param ObjectManager               $persistManager
-     * @param ObjectManager               $auditPersistManager
      * @param RevisionManagerInterface    $revisionManager
      * @param ObjectAuditFactoryInterface $objectAuditFactory
      * @param ObjectAuditMetadataFactory  $objectAuditMetadataFactory
+     * @param ObjectManager               $auditPersistManager
      */
     public function __construct(BaseAuditConfiguration $configuration,
                                 ObjectManager $persistManager,
-                                ObjectManager $auditPersistManager,
                                 RevisionManagerInterface $revisionManager,
                                 ObjectAuditFactoryInterface $objectAuditFactory,
-                                ObjectAuditMetadataFactory $objectAuditMetadataFactory
+                                ObjectAuditMetadataFactory $objectAuditMetadataFactory,
+                                ObjectManager $auditPersistManager = null
     ) {
         $this->configuration = $configuration;
         $this->persistManager = $persistManager;
@@ -95,17 +95,17 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function diffObjectRevisions(string $className, $objectId, RevisionInterface $oldRevision, RevisionInterface $newRevision): array
+    public function diffRevisions(string $className, $objectId, RevisionInterface $oldRevision, RevisionInterface $newRevision): array
     {
         if (!$this->objectAuditMetadataFactory->isClassAudited($className)) {
             throw ObjectNotAuditedException::forClass($className);
         }
 
-        $oldObject = $this->findObjectByRevision($className, $objectId, $oldRevision);
-        $newObject = $this->findObjectByRevision($className, $objectId, $newRevision);
+        $oldObject = $this->find($className, $objectId, $oldRevision);
+        $newObject = $this->find($className, $objectId, $newRevision);
 
-        $oldData = $this->getObjectValues($oldObject);
-        $newData = $this->getObjectValues($newObject);
+        $oldData = $this->getValues($oldObject);
+        $newData = $this->getValues($newObject);
 
         $diff = array();
         $keys = array_keys($oldData) + array_keys($newData);
@@ -128,13 +128,13 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function findAllObjectsChangedAtRevision(RevisionInterface $revision, array $options = array()): array
+    public function findAllChangesAtRevision(RevisionInterface $revision, array $options = array()): array
     {
         $result = array();
         foreach ($this->objectAuditMetadataFactory->getAllClassNames() as $auditClass) {
             $result = array_merge(
                 $result,
-                $this->findObjectsChangedAtRevision($auditClass, $revision, $options)
+                $this->findChangesAtRevision($auditClass, $revision, $options)
             );
         }
 
@@ -176,7 +176,7 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function getObjectAuditMetadataFactory(): ObjectAuditMetadataFactory
+    public function getMetadataFactory(): ObjectAuditMetadataFactory
     {
         return $this->objectAuditMetadataFactory;
     }

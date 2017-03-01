@@ -47,18 +47,11 @@ class ResourceAuditNotFoundException extends ResourceException
      */
     public static function forResourceAtSpecificRevision(string $resourceName, string $className, int $id, RevisionInterface $revision): ResourceAuditNotFoundException
     {
-        $message = sprintf(
-            "No revision of resource '%s' (%s) was found at revision %s or before. The entity did not exist at the specified revision yet.",
-            $resourceName,
-            $id,
-            $revision->getId()
-        );
-
-        $exception = new self($message, self::CODE_RESOURCE_AUDIT_NOT_EXIST_AT_SPECIFIC_REVISION);
-        $exception->setResourceName($resourceName)
-            ->setClassName($className)
-            ->setId($id)
-            ->setRevision($revision);
+        $exception = new self('The resource did not exist at the specified revision', self::CODE_RESOURCE_AUDIT_NOT_EXIST_AT_SPECIFIC_REVISION);
+        $exception->resourceName = $resourceName;
+        $exception->className = $className;
+        $exception->id = $id;
+        $exception->revision = $revision;
 
         return $exception;
     }
@@ -72,17 +65,10 @@ class ResourceAuditNotFoundException extends ResourceException
      */
     public static function forResourceIdentifier(string $resourceName, string $className, int $id): ResourceAuditNotFoundException
     {
-        $message = sprintf(
-            "Resource '%s' (%s) does not exist for identifier (%s)",
-            $resourceName,
-            $className,
-            $id
-        );
-
-        $exception = new self($message, self::CODE_RESOURCE_AUDIT_NOT_EXIST_FOR_IDENTIFIER);
-        $exception->setResourceName($resourceName)
-            ->setClassName($className)
-            ->setId($id);
+        $exception = new self('The resource does not exist for specified identifiers', self::CODE_RESOURCE_AUDIT_NOT_EXIST_FOR_IDENTIFIER);
+        $exception->resourceName = $resourceName;
+        $exception->className = $className;
+        $exception->id = $id;
 
         return $exception;
     }

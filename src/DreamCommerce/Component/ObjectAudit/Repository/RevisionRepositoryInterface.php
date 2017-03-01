@@ -38,5 +38,5 @@ interface RevisionRepositoryInterface extends RepositoryInterface
     /**
      * @return RevisionInterface|null
      */
-    public function findCurrentRevision();
+    public function findCurrent();
 }

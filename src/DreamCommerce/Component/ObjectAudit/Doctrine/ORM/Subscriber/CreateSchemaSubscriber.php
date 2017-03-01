@@ -78,11 +78,8 @@ class CreateSchemaSubscriber implements EventSubscriber
     {
         /** @var EntityManagerInterface $objectAuditManager */
         $objectAuditManager = $this->objectAuditRegistry->getByName($this->objectManagerName);
-        if ($objectAuditManager === null) {
-            throw new \Exception(); // TODO
-        }
         if (!($objectAuditManager instanceof ORMAuditManager)) {
-            throw new \Exception(); // TODO
+            throw new RuntimeException('Unable generate audit tables for unsupported type of object audit manager "' . get_class($objectAuditManager) . '"');
         }
 
         /** @var ORMAuditConfiguration $configuration */
@@ -91,7 +88,7 @@ class CreateSchemaSubscriber implements EventSubscriber
         $auditPersistManager = $objectAuditManager->getAuditPersistManager();
 
         $classMetadata = $eventArgs->getClassMetadata();
-        if (!$this->isAudited($objectAuditManager->getObjectAuditMetadataFactory(), $classMetadata)) {
+        if (!$this->isAudited($objectAuditManager->getMetadataFactory(), $classMetadata)) {
             return;
         }
 
@@ -100,7 +97,7 @@ class CreateSchemaSubscriber implements EventSubscriber
         }
 
         $auditTableName = $objectAuditManager->getAuditTableNameForClass($classMetadata->name);
-        $revisionClassMetadata = $objectAuditManager->getRevisionManager()->getRevisionMetadata();
+        $revisionClassMetadata = $objectAuditManager->getRevisionManager()->getMetadata();
 
         $schemaManager = $auditPersistManager->getConnection()->getSchemaManager();
         if ($schemaManager->tablesExist($auditTableName)) {

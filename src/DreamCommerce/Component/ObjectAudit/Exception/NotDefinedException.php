@@ -30,53 +30,44 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Exception;
 
-class CollectionException extends AuditException
+use \DreamCommerce\Component\Common\Exception\NotDefinedException as BaseNotDefinedException;
+use Doctrine\Common\Persistence\ObjectManager;
+
+class NotDefinedException extends BaseNotDefinedException
 {
-    const CODE_COLLECTION_IS_READ_ONLY = 40;
-    const CODE_NOT_DEFINED_OFFSET = 41;
+    const CODE_OBJECT_AUDIT_MANAGER_NAME = 20;
+    const CODE_PERSIST_MANAGER = 21;
 
     /**
      * @var string
      */
-    private $className;
+    private $objectAuditManagerName;
 
     /**
-     * @var int
+     * @var ObjectManager
      */
-    private $offset;
+    private $persistManager;
 
     /**
-     * @return string
+     * @param string $objectAuditManagerName
+     * @return NotDefinedException
      */
-    public function getClassName(): string
+    public static function forObjectAuditManager(string $objectAuditManagerName): NotDefinedException
     {
-        return $this->className;
-    }
-
-    /**
-     * @param string $className
-     *
-     * @return CollectionException
-     */
-    public static function readOnly(string $className): CollectionException
-    {
-        $exception = new self('The collection is read-only', self::CODE_COLLECTION_IS_READ_ONLY);
-        $exception->className = $className;
+        $exception = new static('The object audit manager defined by name does not exist', static::CODE_OBJECT_AUDIT_MANAGER_NAME);
+        $exception->objectAuditManagerName = $objectAuditManagerName;
 
         return $exception;
     }
 
     /**
-     * @param string $className
-     * @param int    $offset
-     *
-     * @return CollectionException
+     * @param ObjectManager $persistManager
+     * @return NotDefinedException
      */
-    public static function forNotDefinedOffset(string $className, int $offset): CollectionException
+    public static function forPersistManager(ObjectManager $persistManager): NotDefinedException
     {
-        $exception = new self('The offset is not defined', self::CODE_NOT_DEFINED_OFFSET);
-        $exception->className = $className;
-        $exception->offset = $offset;
+        $exception = new static('The object audit manager defined by persist manager does not exist', static::CODE_PERSIST_MANAGER);
+        $exception->persistManager = $persistManager;
 
         return $exception;
     }

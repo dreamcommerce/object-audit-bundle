@@ -31,6 +31,8 @@
 namespace DreamCommerce\Component\ObjectAudit;
 
 use Doctrine\Common\Persistence\ObjectManager;
+use DreamCommerce\Component\ObjectAudit\Exception\DefinedException;
+use DreamCommerce\Component\ObjectAudit\Exception\NotDefinedException;
 use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 use SplObjectStorage;
 
@@ -47,8 +49,9 @@ final class ObjectAuditRegistry
     private $persistManagers;
 
     /**
-     * @param string                      $name
+     * @param string $name
      * @param ObjectAuditManagerInterface $objectAuditManager
+     * @throws DefinedException
      */
     public function registerObjectAuditManager(string $name, ObjectAuditManagerInterface $objectAuditManager)
     {
@@ -57,10 +60,7 @@ final class ObjectAuditRegistry
         }
         $persistManager = $objectAuditManager->getPersistManager();
         if (isset($this->objectAuditManagers[$name])) {
-            throw new \InvalidArgumentException(); // TODO
-        }
-        if (isset($this->persistManagers[$persistManager])) {
-            throw new \InvalidArgumentException(); // TODO
+            throw DefinedException::forObjectAuditManager($name);
         }
 
         $this->objectAuditManagers[$name] = $objectAuditManager;
@@ -69,13 +69,13 @@ final class ObjectAuditRegistry
 
     /**
      * @param string $name
-     *
-     * @return ObjectAuditManagerInterface|null
+     * @throws NotDefinedException
+     * @return ObjectAuditManagerInterface
      */
-    public function getByName(string $name)
+    public function getByName(string $name): ObjectAuditManagerInterface
     {
         if (!isset($this->objectAuditManagers[$name])) {
-            return null;
+            throw NotDefinedException::forObjectAuditManager($name);
         }
 
         return $this->objectAuditManagers[$name];
@@ -83,13 +83,13 @@ final class ObjectAuditRegistry
 
     /**
      * @param ObjectManager $persistManager
-     *
-     * @return null|ObjectAuditManagerInterface
+     * @throws NotDefinedException
+     * @return ObjectAuditManagerInterface
      */
-    public function getByPersistManager(ObjectManager $persistManager)
+    public function getByPersistManager(ObjectManager $persistManager): ObjectAuditManagerInterface
     {
         if (!isset($this->persistManagers[$persistManager])) {
-            return null;
+            throw NotDefinedException::forPersistManager($persistManager);
         }
 
         return $this->persistManagers[$persistManager];

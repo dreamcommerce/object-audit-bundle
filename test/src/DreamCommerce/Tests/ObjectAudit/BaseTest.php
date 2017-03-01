@@ -418,10 +418,10 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $objectAuditManager = new ORMAuditManager(
             $configuration,
             $persistManager,
-            $auditPersistManager,
             $revisionManager,
             $objectAuditFactory,
-            $objectAuditMetadataFactory
+            $objectAuditMetadataFactory,
+            $auditPersistManager
         );
 
         $objectAuditRegistry->registerObjectAuditManager('default', $objectAuditManager);

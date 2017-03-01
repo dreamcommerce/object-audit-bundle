@@ -38,24 +38,17 @@ class ObjectAuditDeletedException extends ObjectException
 
     /**
      * @param string $className
-     * @param $id
+     * @param mixed $id
      * @param RevisionInterface $revision
      *
      * @return ObjectAuditDeletedException
      */
     public static function forObjectAtSpecificRevision(string $className, $id, RevisionInterface $revision): ObjectAuditDeletedException
     {
-        $message = sprintf(
-            'Class "%s" entity id "%s" has been removed at revision %s',
-            $className,
-            is_array($id) ? implode(', ', $id) : $id,
-            $revision->getId()
-        );
-
-        $exception = new self($message, self::CODE_OBJECT_HAS_BEEN_REMOVED_AT_SPECIFIC_REVISION);
-        $exception->setClassName($className)
-            ->setId($id)
-            ->setRevision($revision);
+        $exception = new self('The object has been removed', self::CODE_OBJECT_HAS_BEEN_REMOVED_AT_SPECIFIC_REVISION);
+        $exception->className = $className;
+        $exception->id = $id;
+        $exception->revision = $revision;
 
         return $exception;
     }

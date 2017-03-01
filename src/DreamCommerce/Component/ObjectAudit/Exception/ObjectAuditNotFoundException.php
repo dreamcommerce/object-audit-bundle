@@ -46,17 +46,10 @@ class ObjectAuditNotFoundException extends ObjectException
      */
     public static function forObjectAtSpecificRevision(string $className, $id, RevisionInterface $revision): ObjectAuditNotFoundException
     {
-        $message = sprintf(
-            "No revision of class '%s' (%s) was found at revision %s or before. The object did not exist at the specified revision yet.",
-            $className,
-            is_array($id) ? implode(', ', $id) : $id,
-            $revision->getId()
-        );
-
-        $exception = new self($message, self::CODE_OBJECT_AUDIT_NOT_EXIST_AT_SPECIFIC_REVISION);
-        $exception->setClassName($className)
-            ->setId($id)
-            ->setRevision($revision);
+        $exception = new self('The object did not exist at the specified revision', self::CODE_OBJECT_AUDIT_NOT_EXIST_AT_SPECIFIC_REVISION);
+        $exception->className = $className;
+        $exception->id = $id;
+        $exception->revision = $revision;
 
         return $exception;
     }
@@ -69,15 +62,9 @@ class ObjectAuditNotFoundException extends ObjectException
      */
     public static function forObjectIdentifiers(string $className, $id): ObjectAuditNotFoundException
     {
-        $message = sprintf(
-            "Class '%s' does not exist for identifiers (%s)",
-            $className,
-            is_array($id) ? implode(', ', $id) : $id
-        );
-
-        $exception = new self($message, self::CODE_OBJECT_AUDIT_NOT_EXIST_FOR_IDENTIFIERS);
-        $exception->setClassName($className)
-            ->setId($id);
+        $exception = new self('The object does not exist for specified identifiers', self::CODE_OBJECT_AUDIT_NOT_EXIST_FOR_IDENTIFIERS);
+        $exception->className = $className;
+        $exception->id = $id;
 
         return $exception;
     }

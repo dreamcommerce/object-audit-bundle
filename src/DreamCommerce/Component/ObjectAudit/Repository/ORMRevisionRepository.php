@@ -37,7 +37,7 @@ class ORMRevisionRepository extends EntityRepository implements RevisionReposito
     /**
      * {@inheritdoc}
      */
-    public function findCurrentRevision()
+    public function findCurrent()
     {
         $classMetadata = $this->getClassMetadata();
         $qb = $this->createQueryBuilder('r');

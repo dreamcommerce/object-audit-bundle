@@ -72,7 +72,7 @@ class ResourceRevisionsCommand extends BaseCommand
 
         $output->writeln('');
 
-        $revisions = $resourceAuditManager->findResourceRevisions($resourceName, $resourceId);
+        $revisions = $resourceAuditManager->getRevisions($resourceName, $resourceId);
         $rows = array();
 
         foreach ($revisions as $revision) {

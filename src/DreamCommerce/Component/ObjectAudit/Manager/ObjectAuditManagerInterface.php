@@ -58,7 +58,7 @@ interface ObjectAuditManagerInterface
      *
      * @return object
      */
-    public function findObjectByRevision(string $className, $objectIds, RevisionInterface $revision, array $options = array());
+    public function find(string $className, $objectIds, RevisionInterface $revision, array $options = array());
 
     /**
      * @param string            $className
@@ -71,7 +71,7 @@ interface ObjectAuditManagerInterface
      *
      * @return array
      */
-    public function findObjectsByFieldsAndRevision(string $className, array $fields, string $indexBy = null, RevisionInterface $revision, array $options = array()): array;
+    public function findByFieldsAndRevision(string $className, array $fields, string $indexBy = null, RevisionInterface $revision, array $options = array()): array;
 
     /**
      * @param RevisionInterface $revision
@@ -79,7 +79,7 @@ interface ObjectAuditManagerInterface
      *
      * @return ObjectAudit[]
      */
-    public function findAllObjectsChangedAtRevision(RevisionInterface $revision, array $options = array()): array;
+    public function findAllChangesAtRevision(RevisionInterface $revision, array $options = array()): array;
 
     /**
      * @param string            $className
@@ -90,7 +90,7 @@ interface ObjectAuditManagerInterface
      *
      * @return ObjectAudit[]
      */
-    public function findObjectsChangedAtRevision(string $className, RevisionInterface $revision, array $options = array()): array;
+    public function findChangesAtRevision(string $className, RevisionInterface $revision, array $options = array()): array;
 
     /**
      * Find all revisions that were made of object class with given id.
@@ -102,7 +102,7 @@ interface ObjectAuditManagerInterface
      *
      * @return Collection|RevisionInterface[]
      */
-    public function findObjectRevisions(string $className, $objectIds): Collection;
+    public function getRevisions(string $className, $objectIds): Collection;
 
     /**
      * @param string $className
@@ -114,7 +114,7 @@ interface ObjectAuditManagerInterface
      * @throws ObjectAuditNotFoundException
      * @throws ObjectNotAuditedException
      */
-    public function getObjectHistory(string $className, $objectIds, array $options = array()): array;
+    public function getHistory(string $className, $objectIds, array $options = array()): array;
 
     /**
      * Gets the initialize revision of the object with given ID.
@@ -126,7 +126,7 @@ interface ObjectAuditManagerInterface
      *
      * @return RevisionInterface|null
      */
-    public function getInitializeObjectRevision(string $className, $objectIds);
+    public function getInitRevision(string $className, $objectIds);
 
     /**
      * Gets the current revision of the object with given ID.
@@ -139,7 +139,7 @@ interface ObjectAuditManagerInterface
      *
      * @return RevisionInterface|null
      */
-    public function getCurrentObjectRevision(string $className, $objectIds);
+    public function getRevision(string $className, $objectIds);
 
     /**
      * @param ObjectAudit $objectAudit
@@ -148,7 +148,7 @@ interface ObjectAuditManagerInterface
      *
      * @return $this
      */
-    public function saveObjectAudit(ObjectAudit $objectAudit);
+    public function saveAudit(ObjectAudit $objectAudit);
 
     /**
      * Get an array with the differences of between two specific revisions of
@@ -163,7 +163,7 @@ interface ObjectAuditManagerInterface
      *
      * @return array
      */
-    public function diffObjectRevisions(string $className, $objectIds, RevisionInterface $oldRevision, RevisionInterface $newRevision): array;
+    public function diffRevisions(string $className, $objectIds, RevisionInterface $oldRevision, RevisionInterface $newRevision): array;
 
     /**
      * Get the values for a specific object as an associative array.
@@ -172,7 +172,7 @@ interface ObjectAuditManagerInterface
      *
      * @return array
      */
-    public function getObjectValues($object): array;
+    public function getValues($object): array;
 
     /**
      * @return BaseAuditConfiguration
@@ -197,5 +197,5 @@ interface ObjectAuditManagerInterface
     /**
      * @return ObjectAuditMetadataFactory
      */
-    public function getObjectAuditMetadataFactory(): ObjectAuditMetadataFactory;
+    public function getMetadataFactory(): ObjectAuditMetadataFactory;
 }

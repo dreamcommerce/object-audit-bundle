@@ -46,6 +46,7 @@ use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use DreamCommerce\Component\ObjectAudit\Configuration\ORMAuditConfiguration;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectAuditDeletedException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectAuditNotFoundException;
+use DreamCommerce\Component\ObjectAudit\Exception\ObjectException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
 use DreamCommerce\Component\ObjectAudit\Factory\ObjectAuditFactoryInterface;
 use DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadataFactory;
@@ -96,17 +97,17 @@ class ORMAuditManager extends BaseObjectAuditManager
      */
     public function __construct(ORMAuditConfiguration $configuration,
                                 EntityManagerInterface $persistManager,
-                                EntityManagerInterface $auditPersistManager,
                                 RevisionManagerInterface $revisionManager,
                                 ObjectAuditFactoryInterface $objectAuditFactory,
-                                ObjectAuditMetadataFactory $objectAuditMetadataFactory
+                                ObjectAuditMetadataFactory $objectAuditMetadataFactory,
+                                EntityManagerInterface $auditPersistManager = null
     ) {
         parent::__construct(
-            $configuration, $persistManager, $auditPersistManager,
-            $revisionManager, $objectAuditFactory, $objectAuditMetadataFactory
+            $configuration, $persistManager, $revisionManager,
+            $objectAuditFactory, $objectAuditMetadataFactory, $auditPersistManager
         );
 
-        $this->revisionMetadata = $this->revisionManager->getRevisionMetadata();
+        $this->revisionMetadata = $this->revisionManager->getMetadata();
         $this->auditQuoteStrategy = $this->auditPersistManager->getConfiguration()->getQuoteStrategy();
         $this->auditConnection = $this->auditPersistManager->getConnection();
         $this->auditPlatform = $this->auditConnection->getDatabasePlatform();
@@ -115,7 +116,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     /**
      * {@inheritdoc}
      */
-    public function findObjectByRevision(string $className, $objectIds, RevisionInterface $revision, array $options = array())
+    public function find(string $className, $ids, RevisionInterface $revision, array $options = array())
     {
         $className = ClassUtils::getRealClass($className);
 
@@ -133,18 +134,18 @@ class ORMAuditManager extends BaseObjectAuditManager
         $queryBuilder->from($tableName, 'e');
         $queryBuilder->setMaxResults(1);
 
-        if (!is_array($objectIds)) {
+        if (!is_array($ids)) {
             if (count($classMetadata->identifier) > 1) {
-                throw new \Exception(); // TODO
+                throw ObjectException::forSingleInsufficientIdentifier($ids);
             }
             $entityIdentifiers = $classMetadata->getIdentifierColumnNames();
-            $objectIds = array($entityIdentifiers[0] => $objectIds);
+            $ids = array($entityIdentifiers[0] => $ids);
         }
 
         $revisionColumns = $this->getAuditRevisionColumns();
         foreach ($revisionColumns as $revisionColumn) {
-            if (isset($objectIds[$revisionColumn])) {
-                unset($objectIds[$revisionColumn]);
+            if (isset($ids[$revisionColumn])) {
+                unset($ids[$revisionColumn]);
             }
         }
 
@@ -153,13 +154,9 @@ class ORMAuditManager extends BaseObjectAuditManager
         $fieldRevisionTypeName = $configuration->getRevisionTypeFieldName();
         $queryBuilder->addSelect('e.'.$fieldRevisionTypeName);
 
-        if (count($classMetadata->identifier) !== count($objectIds)) {
-            throw new \Exception(); // TODO
-        } else {
-            $entityIdentifiers = $classMetadata->getIdentifierColumnNames();
-            if (!empty(array_diff($entityIdentifiers, array_keys($objectIds)))) {
-                throw new \Exception(); // TODO
-            }
+        $entityIdentifiers = $classMetadata->getIdentifierColumnNames();
+        if (!empty(array_diff($entityIdentifiers, array_keys($ids)))) {
+            throw ObjectException::forIncompleteIdentifiers($ids);
         }
 
         foreach ($revisionColumns as $revisionColumn) {
@@ -257,18 +254,18 @@ class ORMAuditManager extends BaseObjectAuditManager
             unset($revisionIds[$fieldName]);
         }
 
-        $queryBuilder->setParameters(array_merge($revisionIds, $objectIds));
+        $queryBuilder->setParameters(array_merge($revisionIds, $ids));
         $row = $queryBuilder->execute()->fetch(\PDO::FETCH_ASSOC);
 
         if (!$row) {
-            throw ObjectAuditNotFoundException::forObjectAtSpecificRevision($classMetadata->name, $objectIds, $revision);
+            throw ObjectAuditNotFoundException::forObjectAtSpecificRevision($classMetadata->name, $ids, $revision);
         }
 
         $revisionType = Type::getType($configuration->getRevisionTypeFieldType());
         $revisionTypeValue = $revisionType->convertToPHPValue($row[$fieldRevisionTypeName], $this->auditPlatform);
 
         if ($options['threatDeletionsAsExceptions'] && $revisionTypeValue == RevisionInterface::ACTION_DELETE) {
-            throw ObjectAuditDeletedException::forObjectAtSpecificRevision($classMetadata->name, $objectIds, $revision);
+            throw ObjectAuditDeletedException::forObjectAtSpecificRevision($classMetadata->name, $ids, $revision);
         }
 
         unset($row[$fieldRevisionTypeName]);
@@ -279,7 +276,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     /**
      * {@inheritdoc}
      */
-    public function findObjectsByFieldsAndRevision(string $className, array $fields, string $indexBy = null, RevisionInterface $revision, array $options = array()): array
+    public function findByFieldsAndRevision(string $className, array $fields, string $indexBy = null, RevisionInterface $revision, array $options = array()): array
     {
         $className = ClassUtils::getRealClass($className);
 
@@ -383,7 +380,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             $proxy = $proxyFactory->createProxy(
                 $proxyClassName,
                 function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use ($className, $identifiers, $revision, $options) {
-                    $wrappedObject = $this->findObjectByRevision($className, $identifiers, $revision, $options);
+                    $wrappedObject = $this->find($className, $identifiers, $revision, $options);
                     $initializer = null;
                 }
             );
@@ -401,7 +398,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     /**
      * {@inheritdoc}
      */
-    public function findObjectsChangedAtRevision(string $className, RevisionInterface $revision, array $options = array()): array
+    public function findChangesAtRevision(string $className, RevisionInterface $revision, array $options = array()): array
     {
         $className = ClassUtils::getRealClass($className);
 
@@ -535,7 +532,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     /**
      * {@inheritdoc}
      */
-    public function findObjectRevisions(string $className, $objectIds): Collection
+    public function getRevisions(string $className, $ids): Collection
     {
         $className = ClassUtils::getRealClass($className);
 
@@ -551,9 +548,9 @@ class ORMAuditManager extends BaseObjectAuditManager
         $classMetadata = $persistManager->getClassMetadata($className);
         $entityTableName = $this->getAuditTableNameForClass($className);
 
-        if (!is_array($objectIds)) {
+        if (!is_array($ids)) {
             $entityIdentifiers = $classMetadata->getIdentifierColumnNames();
-            $objectIds = array($entityIdentifiers[0] => $objectIds);
+            $ids = array($entityIdentifiers[0] => $ids);
         }
 
         $queryBuilder = $this->auditConnection->createQueryBuilder()
@@ -580,9 +577,9 @@ class ORMAuditManager extends BaseObjectAuditManager
         $queryBuilder->innerJoin('r', $entityTableName, 'e', implode(' AND ', $conditions));
 
         $rsm = new ResultSetMappingBuilder($this->auditPersistManager);
-        $rsm->addRootEntityFromClassMetadata($this->revisionManager->getRevisionClassName(), 'r');
+        $rsm->addRootEntityFromClassMetadata($this->revisionManager->getClassName(), 'r');
         $query = $this->auditPersistManager->createNativeQuery($queryBuilder->getSQL(), $rsm);
-        $query->setParameters($objectIds);
+        $query->setParameters($ids);
 
         $result = $query->getResult();
 
@@ -592,7 +589,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     /**
      * {@inheritdoc}
      */
-    public function getObjectHistory(string $className, $objectIds, array $options = array()): array
+    public function getHistory(string $className, $ids, array $options = array()): array
     {
         $className = ClassUtils::getRealClass($className);
 
@@ -627,12 +624,12 @@ class ORMAuditManager extends BaseObjectAuditManager
             $queryBuilder->orderBy($revisionIdentifierName, 'DESC');
         }
 
-        if (!is_array($objectIds)) {
+        if (!is_array($ids)) {
             $entityIdentifiers = $classMetadata->getIdentifierColumnNames();
-            $objectIds = array($entityIdentifiers[0] => $objectIds);
+            $ids = array($entityIdentifiers[0] => $ids);
         }
 
-        $queryBuilder->setParameters($objectIds);
+        $queryBuilder->setParameters($ids);
         $entityColumns = $classMetadata->getIdentifierColumnNames();
         foreach ($entityColumns as $entityColumn) {
             $queryBuilder->andWhere($entityColumn.' = :'.$entityColumn);
@@ -676,7 +673,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             }
 
             /** @var RevisionInterface $revision */
-            $revision = $this->revisionManager->getRevisionRepository()->find($revisionIdentifiers);
+            $revision = $this->revisionManager->getRepository()->find($revisionIdentifiers);
             $entity = $this->objectAuditFactory->createNewAudit($className, $columnMap, $row, $revision, $this);
 
             $identifiers = array();
@@ -701,27 +698,27 @@ class ORMAuditManager extends BaseObjectAuditManager
     /**
      * {@inheritdoc}
      */
-    public function getInitializeObjectRevision(string $className, $objectIds)
+    public function getInitRevision(string $className, $ids)
     {
-        return $this->getObjectRevision($className, $objectIds);
+        return $this->getObjectRevision($className, $ids);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getCurrentObjectRevision(string $className, $objectIds)
+    public function getRevision(string $className, $ids)
     {
-        return $this->getObjectRevision($className, $objectIds, 'DESC');
+        return $this->getObjectRevision($className, $ids, 'DESC');
     }
 
     /**
      * {@inheritdoc}
      */
-    public function saveObjectAudit(ObjectAudit $objectAudit)
+    public function saveAudit(ObjectAudit $objectAudit)
     {
         $object = $objectAudit->getObject();
         $className = $objectAudit->getClassName();
-        $entityData = $objectAudit->getRevisionData();
+        $entityData = $objectAudit->getData();
         $revision = $objectAudit->getRevision();
         $identifiers = $objectAudit->getIdentifiers();
 
@@ -732,7 +729,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         /** @var ORMAuditConfiguration $configuration */
         $configuration = $this->configuration;
 
-        $params = array($objectAudit->getRevisionType());
+        $params = array($objectAudit->getType());
         $types = array($configuration->getRevisionTypeFieldType());
         $fields = array();
 
@@ -800,14 +797,14 @@ class ORMAuditManager extends BaseObjectAuditManager
             $rootClassName = $classMetadata->rootEntityName;
             $rootClassMetadata = $persistManager->getClassMetadata($rootClassName);
 
-            $this->saveObjectAudit(new ObjectAudit(
+            $this->saveAudit(new ObjectAudit(
                 $object,
                 $rootClassName,
                 $rootClassMetadata->getIdentifierValues($object),
                 $revision,
                 $persistManager,
                 $entityData,
-                $objectAudit->getRevisionType()
+                $objectAudit->getType()
             ));
         }
 
@@ -835,7 +832,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     /**
      * {@inheritdoc}
      */
-    public function getObjectValues($object): array
+    public function getValues($object): array
     {
         Assert::object($object);
         $objectClass = get_class($object);
@@ -861,7 +858,7 @@ class ORMAuditManager extends BaseObjectAuditManager
 
     /**
      * @param string $className
-     * @param mixed  $objectIds
+     * @param mixed  $ids
      * @param string $sort
      *
      * @throws ObjectNotAuditedException
@@ -869,7 +866,7 @@ class ORMAuditManager extends BaseObjectAuditManager
      *
      * @return null|object
      */
-    protected function getObjectRevision(string $className, $objectIds, $sort = 'ASC')
+    protected function getObjectRevision(string $className, $ids, $sort = 'ASC')
     {
         $className = ClassUtils::getRealClass($className);
 
@@ -884,9 +881,9 @@ class ORMAuditManager extends BaseObjectAuditManager
         $classMetadata = $persistManager->getClassMetadata($className);
         $entityTableName = $this->getAuditTableNameForClass($className);
 
-        if (!is_array($objectIds)) {
+        if (!is_array($ids)) {
             $entityIdentifiers = $classMetadata->getIdentifierColumnNames();
-            $objectIds = array($entityIdentifiers[0] => $objectIds);
+            $ids = array($entityIdentifiers[0] => $ids);
         }
 
         $queryBuilder = $this->auditConnection->createQueryBuilder()
@@ -906,11 +903,11 @@ class ORMAuditManager extends BaseObjectAuditManager
             $queryBuilder->orderBy($revisionIdName, $sort);
         }
 
-        $queryBuilder->setParameters($objectIds);
+        $queryBuilder->setParameters($ids);
         $revisionIds = $queryBuilder->execute()->fetch(\PDO::FETCH_ASSOC);
 
         if ($revisionIds === false) {
-            throw ObjectAuditNotFoundException::forObjectIdentifiers($className, $objectIds);
+            throw ObjectAuditNotFoundException::forObjectIdentifiers($className, $ids);
         }
 
         foreach ($revisionIds as $fieldName => $fieldValue) {
@@ -919,7 +916,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             unset($revisionIds[$fieldName]);
         }
 
-        return $this->revisionManager->getRevisionRepository()->find($revisionIds);
+        return $this->revisionManager->getRepository()->find($revisionIds);
     }
 
     /**
