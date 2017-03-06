@@ -31,6 +31,7 @@
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Metadata;
 
 use Doctrine\Common\Persistence\ObjectManager;
+use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Metadata\ResourceAuditMetadata;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditRegistry;
 use Sylius\Component\Resource\Metadata\RegistryInterface;
@@ -49,9 +50,14 @@ final class ResourceAuditMetadataFactory
     private $objectAuditRegistry;
 
     /**
+     * @var ObjectAuditManagerInterface[]
+     */
+    private $auditResources = array();
+
+    /**
      * @var ResourceAuditMetadata[]
      */
-    private $resourceAuditMetadatas = array();
+    private $resourceMetadatas = array();
 
     /**
      * @var RegistryInterface
@@ -65,36 +71,51 @@ final class ResourceAuditMetadataFactory
 
     /**
      * @param ObjectAuditRegistry $objectAuditRegistry
+     * @param RegistryInterface $resourceRegistry
      * @param ContainerInterface  $container
      */
-    public function __construct(ObjectAuditRegistry $objectAuditRegistry, ContainerInterface $container)
+    public function __construct(ObjectAuditRegistry $objectAuditRegistry,
+                                RegistryInterface $resourceRegistry,
+                                ContainerInterface $container)
     {
         $this->objectAuditRegistry = $objectAuditRegistry;
         $this->container = $container;
-    }
-
-    /**
-     * @param string $class
-     *
-     * @return bool
-     */
-    public function isAudited($class)
-    {
-        $this->load();
-
-        return array_key_exists($class, $this->resourceAuditMetadatas);
+        $this->resourceRegistry = $resourceRegistry;
     }
 
     /**
      * @param string $resourceName
      *
-     * @return ResourceAuditMetadata
+     * @return bool
+     */
+    public function isAudited($resourceName)
+    {
+        $this->load();
+
+        return array_key_exists($resourceName, $this->auditResources);
+    }
+
+    /**
+     * @param string $resourceName
+     *
+     * @return ResourceAuditMetadata|null
      */
     public function getMetadataFor(string $resourceName)
     {
         $this->load();
+        if (!isset($this->auditResources[$resourceName])) {
+            return null;
+        }
 
-        return $this->resourceAuditMetadatas[$resourceName];
+        if (!isset($this->resourceMetadatas[$resourceName])) {
+            $objectAuditManager = $this->auditResources[$resourceName];
+            $metadataFactory = $objectAuditManager->getMetadataFactory();
+            $className = $this->resourceRegistry->get($resourceName)->getClass('model');
+            $objectMetadata = $metadataFactory->getMetadataForClass($className);
+            $this->resourceMetadatas[$resourceName] = new ResourceAuditMetadata($resourceName, $objectMetadata);
+        }
+
+        return $this->resourceMetadatas[$resourceName];
     }
 
     /**
@@ -104,7 +125,7 @@ final class ResourceAuditMetadataFactory
     {
         $this->load();
 
-        return array_keys($this->resourceAuditMetadatas);
+        return array_keys($this->auditResources);
     }
 
     private function load()
@@ -121,7 +142,8 @@ final class ResourceAuditMetadataFactory
             $objectAuditManager = $this->objectAuditRegistry->getByPersistManager($persistManager);
             $objectAuditMetadataFactory = $objectAuditManager->getMetadataFactory();
             if ($objectAuditMetadataFactory->isClassAudited($className)) {
-                $this->resourceAuditMetadatas[] = $resourceMetadata->getName();
+                $alias = $resourceMetadata->getAlias();
+                $this->auditResources[$alias] = $objectAuditManager;
             }
         }
 

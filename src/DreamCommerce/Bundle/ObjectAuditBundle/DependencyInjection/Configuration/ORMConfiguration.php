@@ -30,7 +30,7 @@
 
 namespace DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Configuration;
 
-use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt8Type;
+use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt16Type;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -62,7 +62,7 @@ final class ORMConfiguration implements ConfigurationInterface
                 ->scalarNode('revision_id_field_prefix')->defaultValue('revision_')->end()
                 ->scalarNode('revision_id_field_suffix')->defaultValue('')->end()
                 ->scalarNode('revision_type_field_name')->defaultValue('revision_type')->end()
-                ->scalarNode('revision_type_field_type')->defaultValue(RevisionUInt8Type::TYPE_NAME)->end()
+                ->scalarNode('revision_type_field_type')->defaultValue(RevisionUInt16Type::TYPE_NAME)->end()
             ->end();
     }
 }

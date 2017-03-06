@@ -40,10 +40,15 @@ use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
  */
 class RevisionTest implements RevisionInterface
 {
-    /** @ORM\Id @ORM\Column(type="integer") @ORM\GeneratedValue **/
+    /**
+     * @ORM\Id @ORM\Column(type="integer")
+     * @ORM\GeneratedValue
+     */
     private $id;
 
-    /** @ORM\Column(type="datetime") **/
+    /**
+     * @ORM\Column(type="datetime")
+     */
     private $createdAt;
 
     public function __construct()

@@ -38,6 +38,7 @@ use Sylius\Bundle\ResourceBundle\DependencyInjection\Extension\AbstractResourceE
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Webmozart\Assert\Assert;
 
 final class DreamCommerceObjectAuditExtension extends AbstractResourceExtension
 {
@@ -73,10 +74,27 @@ final class DreamCommerceObjectAuditExtension extends AbstractResourceExtension
             if (isset($config['configuration'][$configPartName])) {
                 $managerConfig = array_merge($config['configuration'][$configPartName], $managerConfig);
             }
+            if (!isset($managerConfig['audit_object_manager'])) {
+                $managerConfig['audit_object_manager'] = $managerConfig['object_manager'];
+            }
+
             $managerConfig = $this->processConfiguration($partialConfiguration, array($managerConfig));
             $config['managers'][$name] = $managerConfig;
         }
 
+        $defaultManager = $config['default_manager'];
+        if (count($config['managers']) > 0) {
+            if (!empty($defaultManager)) {
+                if (!isset($config['managers'][$defaultManager])) {
+                    throw new RuntimeException('Audit manager "' . $defaultManager . '" does not exist');
+                }
+            } else {
+                reset($config['managers']);
+                $defaultManager = key($config['managers']);
+            }
+        }
+
+        $container->setParameter($this->getAlias().'.default_manager', $defaultManager);
         $container->setParameter($this->getAlias().'.managers', $config['managers']);
     }
 

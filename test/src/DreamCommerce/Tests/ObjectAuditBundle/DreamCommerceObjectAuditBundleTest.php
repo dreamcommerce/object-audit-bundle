@@ -30,29 +30,105 @@
 
 namespace DreamCommerce\Tests\ObjectAuditBundle;
 
+use DateTime;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\DreamCommerceObjectAuditExtension;
+use DreamCommerce\Component\Common\Factory\DateTimeFactory;
+use DreamCommerce\Component\ObjectAudit\Manager\ResourceAuditManagerInterface;
+use DreamCommerce\Component\ObjectAudit\Manager\RevisionManagerInterface;
+use DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadata;
+use DreamCommerce\Component\ObjectAudit\Metadata\ResourceAuditMetadata;
+use DreamCommerce\Component\ObjectAudit\Model\Revision;
+use DreamCommerce\Fixtures\ObjectAuditBundle\Entity\AuditResource;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class DreamCommerceObjectAuditBundleTest extends WebTestCase
 {
-    /**
-     * @test
-     */
-    public function its_services_are_intitializable()
+    public function testInitServices()
     {
         /** @var ContainerInterface $container */
         $container = self::createClient()->getContainer();
-
-        $services = $container->getServiceIds();
-
-        $services = array_filter($services, function ($serviceId) {
-            return false !== strpos($serviceId, 'dream_commerce_object_audit');
-        });
-
-        $this->assertTrue(count($services) > 0);
+        $services = array(
+            DreamCommerceObjectAuditExtension::ALIAS . '.orm.factory',
+            DreamCommerceObjectAuditExtension::ALIAS . '.registry',
+            DreamCommerceObjectAuditExtension::ALIAS . '.resource_manager',
+            DreamCommerceObjectAuditExtension::ALIAS . '.resource_metadata_factory',
+            DreamCommerceObjectAuditExtension::ALIAS . '.revision_manager'
+        );
 
         foreach ($services as $id) {
             $container->get($id);
         }
+    }
+
+    public function testJmsSerializer()
+    {
+        /** @var ContainerInterface $container */
+        $container = self::createClient()->getContainer();
+
+        $this->assertTrue($container->has('jms_serializer'));
+        /** @var SerializerInterface $serializer */
+        $serializer = $container->get('jms_serializer');
+
+        $dateStr = '2015-08-07T23:59:57+0000';
+        $dateTime = new DateTime($dateStr);
+        /** @var DateTimeFactory $dateFactory */
+        $dateFactory = $this->createMock(DateTimeFactory::class);
+        $dateFactory
+            ->method('createNew')
+            ->willReturn($dateTime);
+
+        $revision = new Revision($dateFactory);
+
+        $actual = $serializer->serialize($revision, 'json');
+        $expected = json_encode(
+            array(
+                'created_at' => $dateStr
+            )
+        );
+
+        $this->assertEquals($expected, $actual);
+
+
+        /** @var RevisionManagerInterface $revisionManager */
+        $revisionManager = $container->get(DreamCommerceObjectAuditExtension::ALIAS . '.revision_manager');
+        $persistManager = $revisionManager->getPersistManager();
+        $persistManager->persist($revision);
+        $persistManager->flush();
+
+        $actual = $serializer->serialize($revision, 'json');
+
+        $expected = json_encode(
+            array(
+                'id' => $revision->getId(),
+                'created_at' => $dateStr
+            )
+        );
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testResourceAuditManager()
+    {
+        /** @var ContainerInterface $container */
+        $container = self::createClient()->getContainer();
+        /** @var ResourceAuditManagerInterface $resourceManager */
+        $resourceManager = $container->get(DreamCommerceObjectAuditExtension::ALIAS . '.resource_manager');
+        $resourceMetadataFactory = $resourceManager->getMetadataFactory();
+
+        $this->assertEquals(array('dream_commerce.test_audit'), $resourceMetadataFactory->getAllResourceNames());
+        $this->assertTrue($resourceMetadataFactory->isAudited('dream_commerce.test_audit'));
+        $this->assertFalse($resourceMetadataFactory->isAudited('dream_commerce.test_not_audit'));
+
+        $this->assertNull($resourceMetadataFactory->getMetadataFor('dream_commerce.test_not_audit'));
+        $resourceMetadata = $resourceMetadataFactory->getMetadataFor('dream_commerce.test_audit');
+        $this->assertInstanceOf(ResourceAuditMetadata::class, $resourceMetadata);
+        $this->assertEquals('dream_commerce.test_audit', $resourceMetadata->resourceName);
+        $this->assertInstanceOf(ObjectAuditMetadata::class, $resourceMetadata->objectAuditMetadata);
+        $objectAuditMetadata = $resourceMetadata->objectAuditMetadata;
+        $this->assertInstanceOf(ClassMetadata::class, $objectAuditMetadata->classMetadata);
+        $this->assertEquals(AuditResource::class, $objectAuditMetadata->classMetadata->getName());
     }
 }

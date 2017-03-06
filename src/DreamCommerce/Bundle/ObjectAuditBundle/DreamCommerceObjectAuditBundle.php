@@ -42,6 +42,7 @@ use Sylius\Bundle\ResourceBundle\AbstractResourceBundle;
 use Sylius\Bundle\ResourceBundle\SyliusResourceBundle;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class DreamCommerceObjectAuditBundle extends AbstractResourceBundle
 {
@@ -50,22 +51,25 @@ class DreamCommerceObjectAuditBundle extends AbstractResourceBundle
         parent::boot();
 
         /** @var Registry $registry */
-        $registry = $this->container->get('doctrine');
-        /** @var Connection $connection */
-        foreach ($registry->getConnections() as $connection) {
-            $platform = $connection->getDatabasePlatform();
+        $registry = $this->container->get('doctrine', ContainerInterface::NULL_ON_INVALID_REFERENCE);
 
-            $types = array(
-                RevisionEnumType::TYPE_NAME => RevisionEnumType::class,
-                RevisionUInt8Type::TYPE_NAME => RevisionUInt8Type::class,
-                RevisionUInt16Type::TYPE_NAME => RevisionUInt16Type::class,
-                RevisionUInt32Type::TYPE_UINT32 => RevisionUInt32Type::class,
-            );
+        if ($registry !== null) {
+            /** @var Connection $connection */
+            foreach ($registry->getConnections() as $connection) {
+                $platform = $connection->getDatabasePlatform();
 
-            foreach ($types as $type => $className) {
-                if (!Type::hasType($type)) {
-                    Type::addType($type, $className);
-                    $platform->registerDoctrineTypeMapping($type, $type);
+                $types = array(
+                    RevisionEnumType::TYPE_NAME => RevisionEnumType::class,
+                    RevisionUInt8Type::TYPE_NAME => RevisionUInt8Type::class,
+                    RevisionUInt16Type::TYPE_NAME => RevisionUInt16Type::class,
+                    RevisionUInt32Type::TYPE_UINT32 => RevisionUInt32Type::class,
+                );
+
+                foreach ($types as $type => $className) {
+                    if (!Type::hasType($type)) {
+                        Type::addType($type, $className);
+                        $platform->registerDoctrineTypeMapping($type, $type);
+                    }
                 }
             }
         }

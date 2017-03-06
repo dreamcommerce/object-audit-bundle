@@ -2,6 +2,7 @@ imports:
     - { resource: "parameters.yml" }
     - { resource: "resources.yml" }
     - { resource: "audit.yml" }
+    - { resource: "@DreamCommerceObjectAuditBundle/Resources/config/app/config.yml" }
 
 framework:
     assets: false
@@ -37,10 +38,18 @@ doctrine:
                 path: "%audit_database_path%"
                 charset: UTF8
     orm:
+        default_entity_manager: foo
         entity_managers:
-            default:
+            foo:
                 connection: default
                 mappings:
                     DreamCommerceFixturesObjectAuditBundle: ~
-            audit:
+            foo_audit:
+                connection: audit
+
+            bar:
+                connection: default
+                mappings:
+                    DreamCommerceFixturesObjectAuditBundle: ~
+            bar_audit:
                 connection: audit

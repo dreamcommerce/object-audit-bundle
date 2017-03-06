@@ -30,7 +30,7 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Configuration;
 
-use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt8Type;
+use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt16Type;
 
 class ORMAuditConfiguration extends BaseAuditConfiguration
 {
@@ -62,7 +62,7 @@ class ORMAuditConfiguration extends BaseAuditConfiguration
     /**
      * @var string
      */
-    private $revisionTypeFieldType = RevisionUInt8Type::TYPE_NAME;
+    private $revisionTypeFieldType = RevisionUInt16Type::TYPE_NAME;
 
     /**
      * @return string

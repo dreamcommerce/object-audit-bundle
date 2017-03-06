@@ -18,3 +18,4 @@
 /test/app/logs
 /test/app/config/parameters.yml
 /test/app/db_*.sql
+/test/app/db.sql

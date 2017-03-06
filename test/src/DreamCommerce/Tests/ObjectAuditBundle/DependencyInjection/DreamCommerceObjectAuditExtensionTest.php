@@ -31,32 +31,115 @@
 namespace DreamCommerce\Tests\ObjectAuditBundle\DependencyInjection;
 
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\DreamCommerceObjectAuditExtension;
+use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Model\Revision;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 
 class DreamCommerceObjectAuditExtensionTest extends AbstractExtensionTestCase
 {
-    /**
-     * @test
-     */
-    public function it_registers_services_and_parameters_for_resources()
+    public function testEmptyConfig()
     {
-        $this->setParameter('kernel.bundles', array());
-        $this->load(array(
-            'resources' => array(
-                'revision' => array(
-                    'classes' => array(
-                        'model' => Revision::class,
-                    )
-                ),
-            )
-        ));
+        $this->load();
+
+        $services = array(
+            DreamCommerceObjectAuditExtension::ALIAS . '.manager',
+            DreamCommerceObjectAuditExtension::ALIAS . '.configuration',
+            DreamCommerceObjectAuditExtension::ALIAS . '.default_manager',
+            DreamCommerceObjectAuditExtension::ALIAS . '.default_configuration'
+        );
+
+        foreach ($services as $id) {
+            $this->assertContainerBuilderNotHasService($id);
+        }
+
+        $this->assertContainerBuilderHasParameter(DreamCommerceObjectAuditExtension::ALIAS . '.managers', array());
+        $this->assertContainerBuilderHasParameter(DreamCommerceObjectAuditExtension::ALIAS . '.default_manager');
 
         $this->assertContainerBuilderHasService('dream_commerce.factory.revision');
         $this->assertContainerBuilderHasService('dream_commerce.repository.revision');
         $this->assertContainerBuilderHasService('dream_commerce.manager.revision');
         $this->assertContainerBuilderHasParameter('dream_commerce.model.revision.class', Revision::class);
-        $this->assertContainerBuilderHasParameter(DreamCommerceObjectAuditExtension::ALIAS . '.managers');
+    }
+
+    public function testSingleObjectAuditManager()
+    {
+        $managers = array(
+            'baz' => array(
+                'driver' => ObjectAuditManagerInterface::DRIVER_ORM,
+                'object_manager' => 'foo',
+                'audit_object_manager' => 'foo_audit'
+            )
+        );
+
+        $this->load(array(
+            'managers' => $managers
+        ));
+
+        $this->assertObjectAuditManagersParameter($managers);
+        $this->assertContainerBuilderHasParameter(DreamCommerceObjectAuditExtension::ALIAS . '.default_manager', 'baz');
+    }
+
+    public function testOnlyObjectManager()
+    {
+        $managers = array(
+            'baz' => array(
+                'object_manager' => 'foo'
+            )
+        );
+
+        $this->load(array(
+            'managers' => $managers
+        ));
+
+        $this->assertObjectAuditManagersParameter($managers);
+        $this->assertContainerBuilderHasParameter(DreamCommerceObjectAuditExtension::ALIAS . '.default_manager', 'baz');
+    }
+
+    public function testMultipleObjectAuditManagers()
+    {
+        $managers = array(
+            'baz' => array(
+                'driver' => ObjectAuditManagerInterface::DRIVER_ORM,
+                'object_manager' => 'foo',
+                'audit_object_manager' => 'foo_audit'
+            ),
+            'bar' => array(
+                'driver' => ObjectAuditManagerInterface::DRIVER_ORM,
+                'object_manager' => 'bar',
+                'audit_object_manager' => 'bar_audit'
+            )
+        );
+
+        $this->load(array(
+            'managers' => $managers
+        ));
+
+        $this->assertObjectAuditManagersParameter($managers);
+        $this->assertContainerBuilderHasParameter(DreamCommerceObjectAuditExtension::ALIAS . '.default_manager', 'baz');
+    }
+
+    public function testDefaultObjectAuditManager()
+    {
+        $managers = array(
+            'baz' => array(
+                'driver' => ObjectAuditManagerInterface::DRIVER_ORM,
+                'object_manager' => 'foo',
+                'audit_object_manager' => 'foo_audit'
+            ),
+            'bar' => array(
+                'driver' => ObjectAuditManagerInterface::DRIVER_ORM,
+                'object_manager' => 'bar',
+                'audit_object_manager' => 'bar_audit'
+            )
+        );
+
+        $this->load(array(
+            'default_manager' => 'bar',
+            'managers' => $managers
+        ));
+
+        $this->assertObjectAuditManagersParameter($managers);
+        $this->assertContainerBuilderHasParameter(DreamCommerceObjectAuditExtension::ALIAS . '.default_manager', 'bar');
     }
 
     /**
@@ -67,5 +150,31 @@ class DreamCommerceObjectAuditExtensionTest extends AbstractExtensionTestCase
         return array(
             new DreamCommerceObjectAuditExtension(),
         );
+    }
+
+    protected function assertObjectAuditManagersParameter(array $managers)
+    {
+        foreach ($managers as $k => $v) {
+            if (!isset($managers[$k]['audit_object_manager'])) {
+                $managers[$k]['audit_object_manager'] = $managers[$k]['object_manager'];
+            }
+            if (!isset($managers[$k]['driver'])) {
+                $managers[$k]['driver'] = ObjectAuditManagerInterface::DRIVER_ORM;
+            }
+            if (!isset($managers[$k]['ignore_properties'])) {
+                $managers[$k]['ignore_properties'] = array();
+            }
+
+            if ($managers[$k]['driver'] === ObjectAuditManagerInterface::DRIVER_ORM) {
+                $managers[$k]['table_prefix'] = '';
+                $managers[$k]['table_suffix'] = '_audit';
+                $managers[$k]['revision_id_field_prefix'] = 'revision_';
+                $managers[$k]['revision_id_field_suffix'] = '';
+                $managers[$k]['revision_type_field_name'] = 'revision_type';
+                $managers[$k]['revision_type_field_type'] = 'enumRevisionUInt16Type';
+            }
+        }
+
+        $this->assertContainerBuilderHasParameter(DreamCommerceObjectAuditExtension::ALIAS . '.managers', $managers);
     }
 }

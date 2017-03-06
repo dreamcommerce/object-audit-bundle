@@ -30,20 +30,25 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Metadata;
 
-use Doctrine\ORM\Mapping\ClassMetadata;
-
-class ResourceAuditMetadata extends ObjectAuditMetadata
+class ResourceAuditMetadata
 {
+    /**
+     * @var string
+     */
     public $resourceName;
 
     /**
-     * @param string        $resourceName
-     * @param ClassMetadata $classMetadata
+     * @var ObjectAuditMetadata
      */
-    public function __construct(string $resourceName, ClassMetadata $classMetadata)
+    public $objectAuditMetadata;
+
+    /**
+     * @param string $resourceName
+     * @param ObjectAuditMetadata $objectAuditMetadata
+     */
+    public function __construct(string $resourceName, ObjectAuditMetadata $objectAuditMetadata)
     {
         $this->resourceName = $resourceName;
-
-        parent::__construct($classMetadata);
+        $this->objectAuditMetadata = $objectAuditMetadata;
     }
 }

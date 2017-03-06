@@ -36,6 +36,7 @@ use Doctrine\Common\Persistence\Mapping\Driver\DefaultFileLocator;
 use Doctrine\Common\Persistence\Mapping\Driver\FileDriver;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
+use Doctrine\Common\Persistence\Mapping\Driver\SymfonyFileLocator;
 use Doctrine\ORM\Mapping\Driver\XmlDriver;
 use Doctrine\ORM\Mapping\Driver\YamlDriver;
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\DreamCommerceObjectAuditExtension;
@@ -64,12 +65,13 @@ final class ManagerCompilerPass implements CompilerPassInterface
         foreach ($container->getParameter(DreamCommerceObjectAuditExtension::ALIAS.'.managers') as $name => $manager) {
             $managerId = DreamCommerceObjectAuditExtension::ALIAS.'.'. $name .'_manager';
             $configurationId = DreamCommerceObjectAuditExtension::ALIAS.'.' . $name . '_configuration';
+            $metadataFactoryId = DreamCommerceObjectAuditExtension::ALIAS.'.' . $name . '_metadata_factory';
 
             switch ($manager['driver']) {
                 case ObjectAuditManagerInterface::DRIVER_ORM:
-                    $configurationClass = $container->getParameter('dream_commerce_object_audit.orm.configuration.class');
-                    $managerClass = $container->getParameter('dream_commerce_object_audit.orm.manager.class');
-                    $auditFactory = $container->getDefinition('dream_commerce_object_audit.orm.factory');
+                    $configurationClass = $container->getParameter(DreamCommerceObjectAuditExtension::ALIAS . '.orm.configuration.class');
+                    $managerClass = $container->getParameter(DreamCommerceObjectAuditExtension::ALIAS . '.orm.manager.class');
+                    $auditFactory = $container->getDefinition(DreamCommerceObjectAuditExtension::ALIAS . '.orm.factory');
                     $objectManagerId = 'doctrine.orm.' . $manager['object_manager'] . '_entity_manager';
                     $auditObjectManagerId = 'doctrine.orm.' . $manager['audit_object_manager'] . '_entity_manager';
 
@@ -85,24 +87,26 @@ final class ManagerCompilerPass implements CompilerPassInterface
             $driver = $objectManager->getConfiguration()->getMetadataDriverImpl();
             $auditDriver = $this->getAuditDriver($driver);
 
-            $metadataFactoryClass = $container->getParameter('dream_commerce_object_audit.metadata_factory.class');
+            $metadataFactoryClass = $container->getParameter(DreamCommerceObjectAuditExtension::ALIAS . '.metadata_factory.class');
             $metadataFactory = new Definition($metadataFactoryClass);
             $metadataFactory->setArguments(array(
                 new Reference($objectManagerId),
                 $auditDriver,
             ));
 
-            $managerDefinition = new Definition($managerClass);
-            $managerDefinition->setArguments(array(
+            $container->setDefinition($metadataFactoryId, $metadataFactory);
+
+            $manager = new Definition($managerClass);
+            $manager->setArguments(array(
                 $configuration,
                 new Reference($objectManagerId),
-                $container->getDefinition('dream_commerce_object_audit.revision_manager'),
+                $container->getDefinition(DreamCommerceObjectAuditExtension::ALIAS . '.revision_manager'),
                 $auditFactory,
                 $metadataFactory,
                 new Reference($auditObjectManagerId),
             ));
 
-            $container->setDefinition($managerId, $managerDefinition);
+            $container->setDefinition($managerId, $manager);
 
             $definition->addMethodCall(
                 'registerObjectAuditManager',
@@ -111,6 +115,13 @@ final class ManagerCompilerPass implements CompilerPassInterface
                     new Reference($managerId),
                 )
             );
+        }
+
+        $defaultManager = $container->getParameter(DreamCommerceObjectAuditExtension::ALIAS.'.default_manager');
+        if (!empty($defaultManager)) {
+            $container->setAlias(DreamCommerceObjectAuditExtension::ALIAS . '.manager', DreamCommerceObjectAuditExtension::ALIAS . '.' . $defaultManager . '_manager');
+            $container->setAlias(DreamCommerceObjectAuditExtension::ALIAS . '.configuration', DreamCommerceObjectAuditExtension::ALIAS . '.' . $defaultManager . '_configuration');
+            $container->setAlias(DreamCommerceObjectAuditExtension::ALIAS . '.metadata_factory', DreamCommerceObjectAuditExtension::ALIAS . '.' . $defaultManager . '_metadata_factory');
         }
     }
 
@@ -133,9 +144,16 @@ final class ManagerCompilerPass implements CompilerPassInterface
             $auditDriver = new Definition(AuditAnnotationDriver::class);
             $auditDriver->addArgument($annotationReader);
         } elseif ($driver instanceof FileDriver) {
-            $locator = new Definition(DefaultFileLocator::class);
-            $locator->addArgument((array)$driver->getLocator()->getPaths());
-            $locator->addArgument($driver->getLocator()->getFileExtension());
+            /** @var SymfonyFileLocator $locator */
+            $locator = $driver->getLocator();
+            $auditLocator = new Definition(SymfonyFileLocator::class);
+            $paths = (array)$locator->getPaths();
+            if ($locator instanceof SymfonyFileLocator) {
+                $paths = $locator->getNamespacePrefixes();
+            }
+
+            $auditLocator->addArgument($paths);
+            $auditLocator->addArgument($locator->getFileExtension());
 
             if ($driver instanceof XmlDriver) {
                 $auditDriver = new Definition(AuditXmlDriver::class);
@@ -145,7 +163,7 @@ final class ManagerCompilerPass implements CompilerPassInterface
 
             $auditDriver->addMethodCall(
                 'setLocator',
-                array($locator)
+                array($auditLocator)
             );
         }
 

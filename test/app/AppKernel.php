@@ -49,6 +49,7 @@ class AppKernel extends Kernel
             new Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
             new Symfony\Bundle\TwigBundle\TwigBundle(),
             new winzou\Bundle\StateMachineBundle\winzouStateMachineBundle(),
+            new DreamCommerce\Bundle\CommonBundle\DreamCommerceCommonBundle(),
             new DreamCommerce\Bundle\ObjectAuditBundle\DreamCommerceObjectAuditBundle(),
             new DreamCommerce\Fixtures\ObjectAuditBundle\DreamCommerceFixturesObjectAuditBundle(),
         );
