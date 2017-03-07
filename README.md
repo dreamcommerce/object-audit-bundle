@@ -40,13 +40,38 @@ You can configure the audited tables.
 #####app/config/config.yml
 ```yml
 dream_commerce_object_audit:
-    object_manager: default
-    table_prefix: ''
-    table_suffix: _audit
-    revision_id_field_prefix: revision_
-    revision_id_field_suffix: ''
-    revision_type_field_name: revision_type
-    revision_type_field_type: enumRevisionUInt8Type
+    resources:
+        classes:
+            model: DreamCommerce\Component\ObjectAudit\Model\Revision
+         
+    configuration:
+        base:
+            ignored_properties:
+                - globalIgnoreMe
+        orm:
+            table_prefix: ''
+            table_suffix: _audit
+            revision_id_field_prefix: revision_
+            revision_id_field_suffix: ''
+            revision_type_field_name: revision_type
+            revision_type_field_type: enumRevisionUInt8Type
+            
+    default_manager: foo
+    managers:
+        foo:
+            object_manager: foo
+            driver: orm
+            table_prefix: ''
+            table_suffix: _audit
+            revision_id_field_prefix: revision_
+            revision_id_field_suffix: ''
+            revision_type_field_name: revision_type
+            revision_type_field_type: enumRevisionUInt8Type
+            ignored_properties:
+                - globalIgnoreMe
+        bar:
+            object_manager: bar
+            ...
 ```
 
 ###Creating new tables
