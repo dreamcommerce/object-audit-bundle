@@ -84,7 +84,7 @@ final class ObjectAuditMetadataFactory implements AuditMetadataFactoryInterface
     {
         $this->load();
 
-        if(!isset($this->objectAuditMetadatas[$class])) {
+        if (!isset($this->objectAuditMetadatas[$class])) {
             return null;
         }
 
