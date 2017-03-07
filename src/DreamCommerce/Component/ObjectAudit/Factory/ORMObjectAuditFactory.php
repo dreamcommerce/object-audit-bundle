@@ -177,7 +177,7 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
 
             /** @var ClassMetadata $targetClass */
             $targetClass = $persistManager->getClassMetadata($assoc['targetEntity']);
-            $isAudited = $objectMetadataFactory->isClassAudited($assoc['targetEntity']);
+            $isAudited = $objectMetadataFactory->isAudited($assoc['targetEntity']);
 
             if ($assoc['type'] & ClassMetadata::TO_ONE) {
                 $value = null;

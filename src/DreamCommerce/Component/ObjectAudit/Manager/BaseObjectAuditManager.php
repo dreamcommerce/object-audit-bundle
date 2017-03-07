@@ -97,7 +97,7 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
      */
     public function diffRevisions(string $className, $objectId, RevisionInterface $oldRevision, RevisionInterface $newRevision): array
     {
-        if (!$this->objectAuditMetadataFactory->isClassAudited($className)) {
+        if (!$this->objectAuditMetadataFactory->isAudited($className)) {
             throw ObjectNotAuditedException::forClass($className);
         }
 
@@ -131,7 +131,7 @@ abstract class BaseObjectAuditManager implements ObjectAuditManagerInterface
     public function findAllChangesAtRevision(RevisionInterface $revision, array $options = array()): array
     {
         $result = array();
-        foreach ($this->objectAuditMetadataFactory->getAllClassNames() as $auditClass) {
+        foreach ($this->objectAuditMetadataFactory->getAllNames() as $auditClass) {
             $result = array_merge(
                 $result,
                 $this->findChangesAtRevision($auditClass, $revision, $options)

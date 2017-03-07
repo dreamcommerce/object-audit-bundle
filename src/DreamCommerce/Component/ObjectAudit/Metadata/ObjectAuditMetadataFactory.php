@@ -36,7 +36,7 @@ use DreamCommerce\Component\ObjectAudit\Metadata\Driver\DriverInterface;
 /**
  * @author David Badura <d.a.badura@gmail.com>
  */
-final class ObjectAuditMetadataFactory
+final class ObjectAuditMetadataFactory implements AuditMetadataFactoryInterface
 {
     /**
      * @var ObjectManager
@@ -68,11 +68,9 @@ final class ObjectAuditMetadataFactory
     }
 
     /**
-     * @param string $class
-     *
-     * @return bool
+     * {@inheritdoc}
      */
-    public function isClassAudited(string $class)
+    public function isAudited(string $class): bool
     {
         $this->load();
 
@@ -80,21 +78,23 @@ final class ObjectAuditMetadataFactory
     }
 
     /**
-     * @param string $class
-     *
-     * @return ObjectAuditMetadata
+     * {@inheritdoc}
      */
-    public function getMetadataForClass(string $class)
+    public function getMetadataFor(string $class)
     {
         $this->load();
+
+        if(!isset($this->objectAuditMetadatas[$class])) {
+            return null;
+        }
 
         return $this->objectAuditMetadatas[$class];
     }
 
     /**
-     * @return string[]
+     * {@inheritdoc}
      */
-    public function getAllClassNames()
+    public function getAllNames(): array
     {
         $this->load();
 

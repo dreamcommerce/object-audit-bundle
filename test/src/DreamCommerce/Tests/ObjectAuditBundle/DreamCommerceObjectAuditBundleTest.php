@@ -31,15 +31,10 @@
 namespace DreamCommerce\Tests\ObjectAuditBundle;
 
 use DateTime;
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\DreamCommerceObjectAuditExtension;
 use DreamCommerce\Component\Common\Factory\DateTimeFactory;
-use DreamCommerce\Component\ObjectAudit\Manager\ResourceAuditManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Manager\RevisionManagerInterface;
-use DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadata;
-use DreamCommerce\Component\ObjectAudit\Metadata\ResourceAuditMetadata;
 use DreamCommerce\Component\ObjectAudit\Model\Revision;
-use DreamCommerce\Fixtures\ObjectAuditBundle\Entity\AuditResource;
 use JMS\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -108,27 +103,5 @@ class DreamCommerceObjectAuditBundleTest extends WebTestCase
         );
 
         $this->assertEquals($expected, $actual);
-    }
-
-    public function testResourceAuditManager()
-    {
-        /** @var ContainerInterface $container */
-        $container = self::createClient()->getContainer();
-        /** @var ResourceAuditManagerInterface $resourceManager */
-        $resourceManager = $container->get(DreamCommerceObjectAuditExtension::ALIAS . '.resource_manager');
-        $resourceMetadataFactory = $resourceManager->getMetadataFactory();
-
-        $this->assertEquals(array('dream_commerce.test_audit'), $resourceMetadataFactory->getAllResourceNames());
-        $this->assertTrue($resourceMetadataFactory->isAudited('dream_commerce.test_audit'));
-        $this->assertFalse($resourceMetadataFactory->isAudited('dream_commerce.test_not_audit'));
-
-        $this->assertNull($resourceMetadataFactory->getMetadataFor('dream_commerce.test_not_audit'));
-        $resourceMetadata = $resourceMetadataFactory->getMetadataFor('dream_commerce.test_audit');
-        $this->assertInstanceOf(ResourceAuditMetadata::class, $resourceMetadata);
-        $this->assertEquals('dream_commerce.test_audit', $resourceMetadata->resourceName);
-        $this->assertInstanceOf(ObjectAuditMetadata::class, $resourceMetadata->objectAuditMetadata);
-        $objectAuditMetadata = $resourceMetadata->objectAuditMetadata;
-        $this->assertInstanceOf(ClassMetadata::class, $objectAuditMetadata->classMetadata);
-        $this->assertEquals(AuditResource::class, $objectAuditMetadata->classMetadata->getName());
     }
 }

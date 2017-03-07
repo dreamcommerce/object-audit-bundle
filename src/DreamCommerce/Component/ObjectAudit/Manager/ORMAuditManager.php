@@ -120,7 +120,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     {
         $className = ClassUtils::getRealClass($className);
 
-        if (!$this->objectAuditMetadataFactory->isClassAudited($className)) {
+        if (!$this->objectAuditMetadataFactory->isAudited($className)) {
             throw ObjectNotAuditedException::forClass($className);
         }
 
@@ -280,7 +280,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     {
         $className = ClassUtils::getRealClass($className);
 
-        if (!$this->objectAuditMetadataFactory->isClassAudited($className)) {
+        if (!$this->objectAuditMetadataFactory->isAudited($className)) {
             throw ObjectNotAuditedException::forClass($className);
         }
 
@@ -402,7 +402,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     {
         $className = ClassUtils::getRealClass($className);
 
-        if (!$this->objectAuditMetadataFactory->isClassAudited($className)) {
+        if (!$this->objectAuditMetadataFactory->isAudited($className)) {
             throw ObjectNotAuditedException::forClass($className);
         }
 
@@ -536,7 +536,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     {
         $className = ClassUtils::getRealClass($className);
 
-        if (!$this->objectAuditMetadataFactory->isClassAudited($className)) {
+        if (!$this->objectAuditMetadataFactory->isAudited($className)) {
             throw ObjectNotAuditedException::forClass($className);
         }
 
@@ -593,7 +593,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     {
         $className = ClassUtils::getRealClass($className);
 
-        if (!$this->objectAuditMetadataFactory->isClassAudited($className)) {
+        if (!$this->objectAuditMetadataFactory->isAudited($className)) {
             throw ObjectNotAuditedException::forClass($className);
         }
 
@@ -870,7 +870,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     {
         $className = ClassUtils::getRealClass($className);
 
-        if (!$this->objectAuditMetadataFactory->isClassAudited($className)) {
+        if (!$this->objectAuditMetadataFactory->isAudited($className)) {
             throw ObjectNotAuditedException::forClass($className);
         }
 

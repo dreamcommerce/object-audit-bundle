@@ -153,7 +153,7 @@ class CreateSchemaSubscriber implements EventSubscriber
             return false;
         }
 
-        if (!$objectAuditMetadataFactory->isClassAudited($className)) {
+        if (!$objectAuditMetadataFactory->isAudited($className)) {
             $audited = false;
             if ($classMetadata->isInheritanceTypeJoined() && $classMetadata->rootEntityName == $classMetadata->name) {
                 foreach ($classMetadata->subClasses as $subClass) {
@@ -161,7 +161,7 @@ class CreateSchemaSubscriber implements EventSubscriber
                         continue;
                     }
 
-                    if ($objectAuditMetadataFactory->isClassAudited($subClass)) {
+                    if ($objectAuditMetadataFactory->isAudited($subClass)) {
                         $audited = true;
                     }
                 }

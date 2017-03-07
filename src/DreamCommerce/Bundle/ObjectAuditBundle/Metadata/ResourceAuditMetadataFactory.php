@@ -32,12 +32,13 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle\Metadata;
 
 use Doctrine\Common\Persistence\ObjectManager;
 use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
+use DreamCommerce\Component\ObjectAudit\Metadata\AuditMetadataFactoryInterface;
 use DreamCommerce\Component\ObjectAudit\Metadata\ResourceAuditMetadata;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditRegistry;
 use Sylius\Component\Resource\Metadata\RegistryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-final class ResourceAuditMetadataFactory
+final class ResourceAuditMetadataFactory implements AuditMetadataFactoryInterface
 {
     /**
      * @var ContainerInterface
@@ -84,44 +85,40 @@ final class ResourceAuditMetadataFactory
     }
 
     /**
-     * @param string $resourceName
-     *
-     * @return bool
+     * {@inheritdoc}
      */
-    public function isAudited($resourceName)
+    public function isAudited(string $name): bool
     {
         $this->load();
 
-        return array_key_exists($resourceName, $this->auditResources);
+        return array_key_exists($name, $this->auditResources);
     }
 
     /**
-     * @param string $resourceName
-     *
-     * @return ResourceAuditMetadata|null
+     * {@inheritdoc}
      */
-    public function getMetadataFor(string $resourceName)
+    public function getMetadataFor(string $name)
     {
         $this->load();
-        if (!isset($this->auditResources[$resourceName])) {
+        if (!isset($this->auditResources[$name])) {
             return null;
         }
 
-        if (!isset($this->resourceMetadatas[$resourceName])) {
-            $objectAuditManager = $this->auditResources[$resourceName];
+        if (!isset($this->resourceMetadatas[$name])) {
+            $objectAuditManager = $this->auditResources[$name];
             $metadataFactory = $objectAuditManager->getMetadataFactory();
-            $className = $this->resourceRegistry->get($resourceName)->getClass('model');
-            $objectMetadata = $metadataFactory->getMetadataForClass($className);
-            $this->resourceMetadatas[$resourceName] = new ResourceAuditMetadata($resourceName, $objectMetadata);
+            $className = $this->resourceRegistry->get($name)->getClass('model');
+            $objectMetadata = $metadataFactory->getMetadataFor($className);
+            $this->resourceMetadatas[$name] = new ResourceAuditMetadata($name, $objectMetadata);
         }
 
-        return $this->resourceMetadatas[$resourceName];
+        return $this->resourceMetadatas[$name];
     }
 
     /**
-     * @return string[]
+     * {@inheritdoc}
      */
-    public function getAllResourceNames()
+    public function getAllNames(): array
     {
         $this->load();
 
@@ -141,7 +138,7 @@ final class ResourceAuditMetadataFactory
             $persistManager = $this->container->get($serviceId);
             $objectAuditManager = $this->objectAuditRegistry->getByPersistManager($persistManager);
             $objectAuditMetadataFactory = $objectAuditManager->getMetadataFactory();
-            if ($objectAuditMetadataFactory->isClassAudited($className)) {
+            if ($objectAuditMetadataFactory->isAudited($className)) {
                 $alias = $resourceMetadata->getAlias();
                 $this->auditResources[$alias] = $objectAuditManager;
             }

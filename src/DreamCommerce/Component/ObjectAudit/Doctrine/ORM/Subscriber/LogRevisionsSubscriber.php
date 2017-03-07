@@ -138,7 +138,7 @@ class LogRevisionsSubscriber implements EventSubscriber
 
         foreach ($uow->getScheduledEntityDeletions() as $entity) {
             $className = ClassUtils::getRealClass(get_class($entity));
-            if (!$objectMetadataFactory->isClassAudited($className)) {
+            if (!$objectMetadataFactory->isAudited($className)) {
                 continue;
             }
 
@@ -163,7 +163,7 @@ class LogRevisionsSubscriber implements EventSubscriber
 
         foreach ($uow->getScheduledEntityInsertions() as $entity) {
             $className = ClassUtils::getRealClass(get_class($entity));
-            if (!$objectMetadataFactory->isClassAudited($className)) {
+            if (!$objectMetadataFactory->isAudited($className)) {
                 continue;
             }
             $entityManager = $eventArgs->getEntityManager();
@@ -182,7 +182,7 @@ class LogRevisionsSubscriber implements EventSubscriber
 
         foreach ($uow->getScheduledEntityUpdates() as $entity) {
             $className = ClassUtils::getRealClass(get_class($entity));
-            if (!$objectMetadataFactory->isClassAudited($className)) {
+            if (!$objectMetadataFactory->isAudited($className)) {
                 continue;
             }
 
@@ -196,7 +196,7 @@ class LogRevisionsSubscriber implements EventSubscriber
                 }
             }
 
-            $objectAuditMetadata = $objectMetadataFactory->getMetadataForClass($className);
+            $objectAuditMetadata = $objectMetadataFactory->getMetadataFor($className);
             foreach ($objectAuditMetadata->ignoredProperties as $property) {
                 if (isset($changeset[$property])) {
                     unset($changeset[$property]);

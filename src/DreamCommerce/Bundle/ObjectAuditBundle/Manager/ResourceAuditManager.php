@@ -96,7 +96,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
 
-        if (!$objectAuditManager->getMetadataFactory()->isClassAudited($className)) {
+        if (!$objectAuditManager->getMetadataFactory()->isAudited($className)) {
             throw ResourceNotAuditedException::forResource($resourceName);
         }
 
@@ -118,7 +118,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     {
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
-        if (!$objectAuditManager->getMetadataFactory()->isClassAudited($className)) {
+        if (!$objectAuditManager->getMetadataFactory()->isAudited($className)) {
             throw ResourceNotAuditedException::forResource($resourceName);
         }
 
@@ -149,7 +149,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
 
-        if (!$objectAuditManager->getMetadataFactory()->isClassAudited($className)) {
+        if (!$objectAuditManager->getMetadataFactory()->isAudited($className)) {
             throw ResourceNotAuditedException::forResource($resourceName);
         }
 
@@ -188,7 +188,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
 
-        if (!$objectAuditManager->getMetadataFactory()->isClassAudited($className)) {
+        if (!$objectAuditManager->getMetadataFactory()->isAudited($className)) {
             throw ResourceNotAuditedException::forResource($resourceName);
         }
 
@@ -209,7 +209,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
 
-        if (!$objectAuditManager->getMetadataFactory()->isClassAudited($className)) {
+        if (!$objectAuditManager->getMetadataFactory()->isAudited($className)) {
             throw ResourceNotAuditedException::forResource($resourceName);
         }
 
@@ -232,7 +232,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
 
-        if (!$objectAuditManager->getMetadataFactory()->isClassAudited($className)) {
+        if (!$objectAuditManager->getMetadataFactory()->isAudited($className)) {
             throw ResourceNotAuditedException::forResource($resourceName);
         }
 
@@ -255,7 +255,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
 
-        if (!$objectAuditManager->getMetadataFactory()->isClassAudited($className)) {
+        if (!$objectAuditManager->getMetadataFactory()->isAudited($className)) {
             throw ResourceNotAuditedException::forResource($resourceName);
         }
 
@@ -288,7 +288,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
 
-        if (!$objectAuditManager->getMetadataFactory()->isClassAudited($className)) {
+        if (!$objectAuditManager->getMetadataFactory()->isAudited($className)) {
             throw ResourceNotAuditedException::forResource($resourceName);
         }
 
