@@ -41,8 +41,9 @@ You can configure the audited tables.
 ```yml
 dream_commerce_object_audit:
     resources:
-        classes:
-            model: DreamCommerce\Component\ObjectAudit\Model\Revision
+        revision:
+            classes:
+                model: DreamCommerce\Component\ObjectAudit\Model\Revision
          
     configuration:
         base:
