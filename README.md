@@ -47,6 +47,7 @@ dream_commerce_object_audit:
          
     configuration:
         base:
+            audit_object_manager: foo_audit
             ignored_properties:
                 - globalIgnoreMe
         orm:
@@ -61,6 +62,7 @@ dream_commerce_object_audit:
     managers:
         foo:
             object_manager: foo
+            audit_object_manager: foo_audit
             driver: orm
             table_prefix: ''
             table_suffix: _audit
@@ -72,6 +74,7 @@ dream_commerce_object_audit:
                 - globalIgnoreMe
         bar:
             object_manager: bar
+            audit_object_manager: bar_audit
             ...
 ```
 
