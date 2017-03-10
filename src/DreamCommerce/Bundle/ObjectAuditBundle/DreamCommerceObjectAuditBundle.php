@@ -35,9 +35,9 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Compiler\ManagerCompilerPass;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionEnumType;
-use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt16Type;
-use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt32Type;
-use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt8Type;
+use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionIntegerType;
+use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionSmallIntType;
+use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionTinyIntType;
 use Sylius\Bundle\ResourceBundle\AbstractResourceBundle;
 use Sylius\Bundle\ResourceBundle\SyliusResourceBundle;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
@@ -54,15 +54,17 @@ class DreamCommerceObjectAuditBundle extends AbstractResourceBundle
         $registry = $this->container->get('doctrine', ContainerInterface::NULL_ON_INVALID_REFERENCE);
 
         if ($registry !== null) {
+            $defaultType = 'dc_revision_action';
+
             /** @var Connection $connection */
             foreach ($registry->getConnections() as $connection) {
                 $platform = $connection->getDatabasePlatform();
 
                 $types = array(
                     RevisionEnumType::TYPE_NAME => RevisionEnumType::class,
-                    RevisionUInt8Type::TYPE_NAME => RevisionUInt8Type::class,
-                    RevisionUInt16Type::TYPE_NAME => RevisionUInt16Type::class,
-                    RevisionUInt32Type::TYPE_UINT32 => RevisionUInt32Type::class,
+                    RevisionTinyIntType::TYPE_NAME => RevisionTinyIntType::class,
+                    RevisionSmallIntType::TYPE_NAME => RevisionSmallIntType::class,
+                    RevisionIntegerType::TYPE_UINT32 => RevisionIntegerType::class,
                 );
 
                 foreach ($types as $type => $className) {
@@ -70,6 +72,11 @@ class DreamCommerceObjectAuditBundle extends AbstractResourceBundle
                         Type::addType($type, $className);
                         $platform->registerDoctrineTypeMapping($type, $type);
                     }
+                }
+
+                if (!Type::hasType($defaultType)) {
+                    Type::addType($defaultType, RevisionSmallIntType::class);
+                    $platform->registerDoctrineTypeMapping($defaultType, $defaultType);
                 }
             }
         }

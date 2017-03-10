@@ -242,8 +242,8 @@ class DreamCommerceObjectAuditExtensionTest extends AbstractExtensionTestCase
                     'table_suffix' => '_audit',
                     'revision_id_field_prefix' => 'revision_',
                     'revision_id_field_suffix' => '',
-                    'revision_type_field_name' => 'revision_type',
-                    'revision_type_field_type' => 'enumRevisionUInt16Type'
+                    'revision_action_field_name' => 'revision_action',
+                    'revision_action_field_type' => 'dc_revision_action'
                 );
             }
             $managers[$k]['options'] = array_merge($options, $partialOptions, $managers[$k]['options']);

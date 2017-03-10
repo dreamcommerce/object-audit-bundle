@@ -33,14 +33,14 @@ namespace DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types;
 use DreamCommerce\Component\Common\Doctrine\DBAL\Types\MapEnumType;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 
-final class RevisionUInt8Type extends MapEnumType
+final class RevisionSmallIntType extends MapEnumType
 {
-    const TYPE_NAME = 'enumRevisionUInt8Type';
+    const TYPE_NAME = 'dc_revision_action_smallint';
 
     /**
      * @var string
      */
-    protected $enumType = self::TYPE_UINT8;
+    protected $enumType = self::TYPE_UINT16;
 
     /**
      * @var string

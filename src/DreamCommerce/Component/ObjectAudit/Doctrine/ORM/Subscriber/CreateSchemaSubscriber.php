@@ -107,8 +107,8 @@ class CreateSchemaSubscriber implements EventSubscriber
         $entityTable = $eventArgs->getClassTable();
 
         $auditTable = new Table($auditTableName);
-        $revisionType = $configuration->getRevisionTypeFieldType();
-        $auditTable->addColumn($configuration->getRevisionTypeFieldName(), $revisionType);
+        $revisionAction = $configuration->getRevisionActionFieldType();
+        $auditTable->addColumn($configuration->getRevisionActionFieldName(), $revisionAction);
 
         foreach ($entityTable->getColumns() as $column) {
             /* @var Column $column */

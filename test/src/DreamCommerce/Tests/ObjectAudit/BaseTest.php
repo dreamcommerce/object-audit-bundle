@@ -43,9 +43,9 @@ use Doctrine\ORM\Tools\ResolveTargetEntityListener;
 use Doctrine\ORM\Tools\SchemaTool;
 use DreamCommerce\Component\ObjectAudit\Configuration\ORMAuditConfiguration;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionEnumType;
-use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt16Type;
-use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt32Type;
-use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt8Type;
+use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionIntegerType;
+use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionSmallIntType;
+use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionTinyIntType;
 use DreamCommerce\Component\ObjectAudit\Doctrine\ORM\Subscriber\CreateSchemaSubscriber;
 use DreamCommerce\Component\ObjectAudit\Doctrine\ORM\Subscriber\LogRevisionsSubscriber;
 use DreamCommerce\Component\ObjectAudit\Factory\ORMObjectAuditFactory;
@@ -442,9 +442,9 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
         $types = array(
             RevisionEnumType::TYPE_NAME => RevisionEnumType::class,
-            RevisionUInt8Type::TYPE_NAME => RevisionUInt8Type::class,
-            RevisionUInt16Type::TYPE_NAME => RevisionUInt16Type::class,
-            RevisionUInt32Type::TYPE_NAME => RevisionUInt32Type::class,
+            RevisionTinyIntType::TYPE_NAME => RevisionTinyIntType::class,
+            RevisionSmallIntType::TYPE_NAME => RevisionSmallIntType::class,
+            RevisionIntegerType::TYPE_NAME => RevisionIntegerType::class,
         );
 
         foreach ($types as $type => $className) {
@@ -452,6 +452,12 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
                 Type::addType($type, $className);
                 $platform->registerDoctrineTypeMapping($type, $type);
             }
+        }
+
+        $defaultType = 'dc_revision_action';
+        if (!Type::hasType($defaultType)) {
+            Type::addType($defaultType, RevisionSmallIntType::class);
+            $platform->registerDoctrineTypeMapping($defaultType, $defaultType);
         }
 
         return $this->objectAuditManager = $objectAuditManager;
@@ -465,7 +471,6 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
         $auditConfig = new ORMAuditConfiguration();
         $auditConfig->setIgnoreProperties(array('globalIgnoreMe'));
-        $auditConfig->setRevisionTypeFieldType(RevisionUInt16Type::TYPE_NAME);
 
         return $this->auditConfiguration = $auditConfig;
     }

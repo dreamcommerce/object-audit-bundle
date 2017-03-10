@@ -7,6 +7,6 @@
         <id name="id" type="integer">
             <generator strategy="AUTO" />
         </id>
-        <field name="createdAt" type="utcDateTimeType" column="created_at" nullable="false" />
+        <field name="createdAt" type="dc_utc_datetime" column="created_at" nullable="false" />
     </mapped-superclass>
 </doctrine-mapping>

@@ -151,7 +151,7 @@ class ORMAuditManager extends BaseObjectAuditManager
 
         /** @var ORMAuditConfiguration $configuration */
         $configuration = $this->configuration;
-        $fieldRevisionTypeName = $configuration->getRevisionTypeFieldName();
+        $fieldRevisionTypeName = $configuration->getRevisionActionFieldName();
         $queryBuilder->addSelect('e.'.$fieldRevisionTypeName);
 
         $entityIdentifiers = $classMetadata->getIdentifierColumnNames();
@@ -261,7 +261,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             throw ObjectAuditNotFoundException::forObjectAtSpecificRevision($classMetadata->name, $ids, $revision);
         }
 
-        $revisionType = Type::getType($configuration->getRevisionTypeFieldType());
+        $revisionType = Type::getType($configuration->getRevisionActionFieldType());
         $revisionTypeValue = $revisionType->convertToPHPValue($row[$fieldRevisionTypeName], $this->auditPlatform);
 
         if ($options['threatDeletionsAsExceptions'] && $revisionTypeValue == RevisionInterface::ACTION_DELETE) {
@@ -332,10 +332,10 @@ class ORMAuditManager extends BaseObjectAuditManager
         );
         $queryBuilder->andWhere(sprintf('NOT EXISTS(%s)', $deletedRevisionQB->getSQL()));
 
-        $type = Type::getType($configuration->getRevisionTypeFieldType());
+        $type = Type::getType($configuration->getRevisionActionFieldType());
         $queryBuilder->andWhere(sprintf(
             '%s <> %s',
-            $configuration->getRevisionTypeFieldName(),
+            $configuration->getRevisionActionFieldName(),
             $queryBuilder->createPositionalParameter(
                 $type->convertToDatabaseValue(RevisionInterface::ACTION_DELETE, $this->auditPlatform)
             )
@@ -422,7 +422,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         $columnMap = array();
 
         $queryBuilder = $this->auditConnection->createQueryBuilder()
-            ->select('e.'.$configuration->getRevisionTypeFieldName())
+            ->select('e.'.$configuration->getRevisionActionFieldName())
             ->from($tableName, 'e');
 
         foreach ($revisionIds as $fieldName => $fieldValue) {
@@ -485,8 +485,8 @@ class ORMAuditManager extends BaseObjectAuditManager
         $queryBuilder->setParameters($bindValues);
         $revisionsData = $queryBuilder->execute()->fetchAll();
 
-        $revisionFieldType = $configuration->getRevisionTypeFieldType();
-        $revisionFieldName = $configuration->getRevisionTypeFieldName();
+        $revisionFieldType = $configuration->getRevisionActionFieldType();
+        $revisionFieldName = $configuration->getRevisionActionFieldName();
         $revisionType = null;
         if (Type::hasType($revisionFieldType)) {
             $revisionType = Type::getType($revisionFieldType);
@@ -606,8 +606,8 @@ class ORMAuditManager extends BaseObjectAuditManager
         /** @var ClassMetadata $classMetadata */
         $classMetadata = $persistManager->getClassMetadata($className);
         $revisionIdentifierNames = $this->revisionMetadata->getIdentifierColumnNames();
-        $revisionFieldType = $configuration->getRevisionTypeFieldType();
-        $revisionFieldName = $configuration->getRevisionTypeFieldName();
+        $revisionFieldType = $configuration->getRevisionActionFieldType();
+        $revisionFieldName = $configuration->getRevisionActionFieldName();
         $revisionType = null;
 
         if (Type::hasType($revisionFieldType)) {
@@ -730,7 +730,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         $configuration = $this->configuration;
 
         $params = array($objectAudit->getType());
-        $types = array($configuration->getRevisionTypeFieldType());
+        $types = array($configuration->getRevisionActionFieldType());
         $fields = array();
 
         foreach ($this->revisionMetadata->getIdentifierValues($revision) as $identifier) {
@@ -1014,10 +1014,10 @@ class ORMAuditManager extends BaseObjectAuditManager
             ));
         }
 
-        $type = Type::getType($configuration->getRevisionTypeFieldType());
+        $type = Type::getType($configuration->getRevisionActionFieldType());
         $queryBuilder->andWhere(sprintf(
             'sd.%s = %s',
-            $configuration->getRevisionTypeFieldName(),
+            $configuration->getRevisionActionFieldName(),
             $parentQueryBuilder->createPositionalParameter(
                 $type->convertToDatabaseValue(RevisionInterface::ACTION_DELETE, $this->auditPlatform)
             )
@@ -1045,7 +1045,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             $auditTableName = $this->getAuditTableNameForClass($classMetadata->name);
             /** @var ORMAuditConfiguration $configuration */
             $configuration = $this->configuration;
-            $params = array($configuration->getRevisionTypeFieldName());
+            $params = array($configuration->getRevisionActionFieldName());
 
             foreach ($this->revisionMetadata->getIdentifierFieldNames() as $identifier) {
                 $params[] = $this->getRevisionColumnName($identifier);

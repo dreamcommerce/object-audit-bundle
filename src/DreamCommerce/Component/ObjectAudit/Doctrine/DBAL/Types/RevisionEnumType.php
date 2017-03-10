@@ -35,7 +35,7 @@ use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 
 final class RevisionEnumType extends EnumType
 {
-    const TYPE_NAME = 'enumRevisionType';
+    const TYPE_NAME = 'dc_revision_action_enum';
 
     /**
      * @var string

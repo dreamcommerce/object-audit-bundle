@@ -30,8 +30,6 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Configuration;
 
-use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionUInt16Type;
-
 class ORMAuditConfiguration extends BaseAuditConfiguration
 {
     /**
@@ -57,12 +55,12 @@ class ORMAuditConfiguration extends BaseAuditConfiguration
     /**
      * @var string
      */
-    private $revisionTypeFieldName = 'revision_type';
+    private $revisionActionFieldName = 'revision_type';
 
     /**
      * @var string
      */
-    private $revisionTypeFieldType = RevisionUInt16Type::TYPE_NAME;
+    private $revisionActionFieldType = 'dc_revision_action';
 
     /**
      * @return string
@@ -147,19 +145,19 @@ class ORMAuditConfiguration extends BaseAuditConfiguration
     /**
      * @return string
      */
-    public function getRevisionTypeFieldName(): string
+    public function getRevisionActionFieldName(): string
     {
-        return $this->revisionTypeFieldName;
+        return $this->revisionActionFieldName;
     }
 
     /**
-     * @param string $revisionTypeFieldName
+     * @param string $revisionActionFieldName
      *
      * @return $this
      */
-    public function setRevisionTypeFieldName(string $revisionTypeFieldName)
+    public function setRevisionActionFieldName(string $revisionActionFieldName)
     {
-        $this->revisionTypeFieldName = $revisionTypeFieldName;
+        $this->revisionActionFieldName = $revisionActionFieldName;
 
         return $this;
     }
@@ -167,19 +165,19 @@ class ORMAuditConfiguration extends BaseAuditConfiguration
     /**
      * @return string
      */
-    public function getRevisionTypeFieldType(): string
+    public function getRevisionActionFieldType(): string
     {
-        return $this->revisionTypeFieldType;
+        return $this->revisionActionFieldType;
     }
 
     /**
-     * @param string $revisionTypeFieldType
+     * @param string $revisionActionFieldType
      *
      * @return $this
      */
-    public function setRevisionTypeFieldType(string $revisionTypeFieldType)
+    public function setRevisionActionFieldType(string $revisionActionFieldType)
     {
-        $this->revisionTypeFieldType = $revisionTypeFieldType;
+        $this->revisionActionFieldType = $revisionActionFieldType;
 
         return $this;
     }

@@ -58,8 +58,8 @@ dream_commerce_object_audit:
             table_suffix: _audit
             revision_id_field_prefix: revision_
             revision_id_field_suffix: ''
-            revision_type_field_name: revision_type
-            revision_type_field_type: enumRevisionUInt8Type
+            revision_action_field_name: revision_action
+            revision_action_field_type: dc_revision_action
             
     default_manager: foo
     managers:
@@ -72,8 +72,8 @@ dream_commerce_object_audit:
                 table_suffix: _audit
                 revision_id_field_prefix: revision_
                 revision_id_field_suffix: ''
-                revision_type_field_name: revision_type
-                revision_type_field_type: enumRevisionUInt8Type
+                revision_action_field_name: revision_action
+                revision_action_field_type: dc_revision_action
                 load_audited_collections: true
                 load_audited_objects: false
                 load_native_collections: true
