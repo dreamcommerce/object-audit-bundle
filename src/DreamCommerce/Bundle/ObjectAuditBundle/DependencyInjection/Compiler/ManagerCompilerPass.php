@@ -62,26 +62,27 @@ final class ManagerCompilerPass implements CompilerPassInterface
             DreamCommerceObjectAuditExtension::ALIAS.'.registry'
         );
 
-        foreach ($container->getParameter(DreamCommerceObjectAuditExtension::ALIAS.'.managers') as $name => $manager) {
+        foreach ($container->getParameter(DreamCommerceObjectAuditExtension::ALIAS.'.managers') as $name => $managerConfig) {
             $managerId = DreamCommerceObjectAuditExtension::ALIAS.'.'. $name .'_manager';
             $configurationId = DreamCommerceObjectAuditExtension::ALIAS.'.' . $name . '_configuration';
             $metadataFactoryId = DreamCommerceObjectAuditExtension::ALIAS.'.' . $name . '_metadata_factory';
 
-            switch ($manager['driver']) {
+            switch ($managerConfig['driver']) {
                 case ObjectAuditManagerInterface::DRIVER_ORM:
                     $configurationClass = $container->getParameter(DreamCommerceObjectAuditExtension::ALIAS . '.orm.configuration.class');
                     $managerClass = $container->getParameter(DreamCommerceObjectAuditExtension::ALIAS . '.orm.manager.class');
                     $auditFactory = $container->getDefinition(DreamCommerceObjectAuditExtension::ALIAS . '.orm.factory');
-                    $objectManagerId = 'doctrine.orm.' . $manager['object_manager'] . '_entity_manager';
-                    $auditObjectManagerId = 'doctrine.orm.' . $manager['audit_object_manager'] . '_entity_manager';
+                    $objectManagerId = 'doctrine.orm.' . $managerConfig['object_manager'] . '_entity_manager';
+                    $auditObjectManagerId = 'doctrine.orm.' . $managerConfig['audit_object_manager'] . '_entity_manager';
 
                     break;
                 default:
-                    throw new RuntimeException('Unsupported type of driver "' . $manager['driver'] . '"');
+                    throw new RuntimeException('Unsupported type of driver "' . $managerConfig['driver'] . '"');
             }
 
             $configuration = new Definition($configurationClass);
             $container->setDefinition($configurationId, $configuration);
+            $configuration->setArguments(array($managerConfig['options']));
 
             $objectManager = $container->get($objectManagerId);
             $driver = $objectManager->getConfiguration()->getMetadataDriverImpl();

@@ -142,6 +142,68 @@ class DreamCommerceObjectAuditExtensionTest extends AbstractExtensionTestCase
         $this->assertContainerBuilderHasParameter(DreamCommerceObjectAuditExtension::ALIAS . '.default_manager', 'bar');
     }
 
+    public function testManagerOptions()
+    {
+        $managers = array(
+            'baz' => array(
+                'object_manager' => 'foo',
+                'options' => array(
+                    'ignore_properties' => array(
+                        'test1'
+                    ),
+                    'load_audited_collections' => false,
+                    'load_audited_objects' => false,
+                    'load_native_collections' => false,
+                    'load_native_objects' => false,
+                    'table_prefix' => 'audit_',
+                    'table_suffix' => '',
+                )
+            )
+        );
+
+        $this->load(array(
+            'managers' => $managers
+        ));
+
+        $this->assertObjectAuditManagersParameter($managers);
+    }
+
+    public function testGlobalOptions()
+    {
+        $globalBaseOptions = array(
+            'load_native_collections' => false,
+            'load_native_objects' => false
+        );
+
+        $globalOrmOptions = array(
+            'table_prefix' => 'audit_',
+            'table_suffix' => '',
+        );
+
+        $managerOptions = array(
+            'table_suffix' => '__audited'
+        );
+
+        $managers = array(
+            'baz' => array(
+                'object_manager' => 'foo',
+                'options' => $managerOptions
+            )
+        );
+
+        $this->load(array(
+            'configuration' => array(
+                'base' => $globalBaseOptions,
+                'orm' => $globalOrmOptions
+            ),
+            'managers' => $managers
+        ));
+
+        $managers['baz']['options'] = array_merge($globalBaseOptions, $globalOrmOptions, $managers['baz']['options']);
+
+        $this->assertObjectAuditManagersParameter($managers);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -161,20 +223,31 @@ class DreamCommerceObjectAuditExtensionTest extends AbstractExtensionTestCase
             if (!isset($managers[$k]['driver'])) {
                 $managers[$k]['driver'] = ObjectAuditManagerInterface::DRIVER_ORM;
             }
-            if (!isset($managers[$k]['ignore_properties'])) {
-                $managers[$k]['ignore_properties'] = array();
+            if(!isset($managers[$k]['options'])) {
+                $managers[$k]['options'] = array();
             }
+
+            $options = array(
+                'ignore_properties' => array(),
+                'load_audited_collections' => true,
+                'load_audited_objects' => true,
+                'load_native_collections' => true,
+                'load_native_objects' => true
+            );
+            $partialOptions = array();
 
             if ($managers[$k]['driver'] === ObjectAuditManagerInterface::DRIVER_ORM) {
-                $managers[$k]['table_prefix'] = '';
-                $managers[$k]['table_suffix'] = '_audit';
-                $managers[$k]['revision_id_field_prefix'] = 'revision_';
-                $managers[$k]['revision_id_field_suffix'] = '';
-                $managers[$k]['revision_type_field_name'] = 'revision_type';
-                $managers[$k]['revision_type_field_type'] = 'enumRevisionUInt16Type';
+                $partialOptions = array(
+                    'table_prefix' => '',
+                    'table_suffix' => '_audit',
+                    'revision_id_field_prefix' => 'revision_',
+                    'revision_id_field_suffix' => '',
+                    'revision_type_field_name' => 'revision_type',
+                    'revision_type_field_type' => 'enumRevisionUInt16Type'
+                );
             }
+            $managers[$k]['options'] = array_merge($options, $partialOptions, $managers[$k]['options']);
         }
-
         $this->assertContainerBuilderHasParameter(DreamCommerceObjectAuditExtension::ALIAS . '.managers', $managers);
     }
 }

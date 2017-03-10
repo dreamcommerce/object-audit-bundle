@@ -61,25 +61,34 @@ final class DreamCommerceObjectAuditExtension extends AbstractResourceExtension
         $this->mapFormValidationGroupsParameters($config, $container);
         $loader->load('services.xml');
 
+        $globalBaseOptions = array();
+        if (isset($config['configuration']['base'])) {
+            $globalBaseOptions = $config['configuration']['base'];
+        }
+
         foreach ($config['managers'] as $name => $managerConfig) {
+            if(empty($managerConfig['audit_object_manager'])) {
+                $config['managers'][$name]['audit_object_manager'] = $managerConfig['object_manager'];
+            }
+
+            $globalPartialOptions = array();
+            if (isset($config['configuration'][$managerConfig['driver']])) {
+                $globalPartialOptions = $config['configuration'][$managerConfig['driver']];
+            }
+
+            $partialConfiguration = null;
+
             switch ($managerConfig['driver']) {
                 case ObjectAuditManagerInterface::DRIVER_ORM:
                     $partialConfiguration = new ORMConfiguration();
-                    $configPartName = 'orm';
                     break;
                 default:
                     throw new RuntimeException('Unsupported type of driver "'.$managerConfig['driver'].'"');
             }
 
-            if (isset($config['configuration'][$configPartName])) {
-                $managerConfig = array_merge($config['configuration'][$configPartName], $managerConfig);
-            }
-            if (!isset($managerConfig['audit_object_manager'])) {
-                $managerConfig['audit_object_manager'] = $managerConfig['object_manager'];
-            }
-
-            $managerConfig = $this->processConfiguration($partialConfiguration, array($managerConfig));
-            $config['managers'][$name] = $managerConfig;
+            $partialOptions = $partialOptions = array_merge($globalBaseOptions, $globalPartialOptions, $managerConfig['options']);
+            $partialOptions = $this->processConfiguration($partialConfiguration, array($partialOptions));
+            $config['managers'][$name]['options'] = $partialOptions;
         }
 
         $defaultManager = $config['default_manager'];

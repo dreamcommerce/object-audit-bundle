@@ -50,27 +50,18 @@ final class BaseConfiguration implements ConfigurationInterface
     }
     public function injectPartialNode(ArrayNodeDefinition $node)
     {
-        $supportedDrivers = array(
-            ObjectAuditManagerInterface::DRIVER_ORM
-        );
-
         $node
             ->fixXmlConfig('ignore_property')
             ->addDefaultsIfNotSet()
             ->children()
-                ->scalarNode('driver')
-                    ->defaultValue(ObjectAuditManagerInterface::DRIVER_ORM)
-                    ->validate()
-                        ->ifNotInArray($supportedDrivers)
-                        ->thenInvalid('The driver %s is not supported. Please choose one of '.json_encode($supportedDrivers))
-                    ->end()
-                ->end()
-                ->scalarNode('object_manager')->defaultValue('default')->end()
-                ->scalarNode('audit_object_manager')->defaultValue('default')->end()
                 ->arrayNode('ignore_properties')
                     ->treatNullLike(array())
                     ->prototype('scalar')->end()
                 ->end()
+                ->booleanNode('load_audited_collections')->defaultTrue()->end()
+                ->booleanNode('load_audited_objects')->defaultTrue()->end()
+                ->booleanNode('load_native_collections')->defaultTrue()->end()
+                ->booleanNode('load_native_objects')->defaultTrue()->end()
             ->end();
     }
 }

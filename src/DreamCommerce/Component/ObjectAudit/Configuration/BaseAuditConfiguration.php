@@ -30,19 +30,17 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Configuration;
 
-use DreamCommerce\Component\ObjectAudit\Metadata\Driver\DriverInterface;
+use DreamCommerce\Component\Common\Model\ArrayableInterface;
+use DreamCommerce\Component\Common\Model\ArrayableTrait;
 
-class BaseAuditConfiguration
+class BaseAuditConfiguration implements ArrayableInterface
 {
-    /**
-     * @var DriverInterface
-     */
-    protected $objectMetadataDriver;
+    use ArrayableTrait;
 
     /**
      * @var array
      */
-    protected $globalIgnoreProperties = array();
+    protected $ignoreProperties = array();
 
     /**
      * Decides if audited ToMany collections are loaded.
@@ -73,30 +71,19 @@ class BaseAuditConfiguration
     protected $loadNativeObjects = true;
 
     /**
-     * @param DriverInterface $driver
-     *
-     * @return $this
+     * @param array $options
      */
-    public function setObjectMetadataDriver(DriverInterface $driver)
+    public function __construct(array $options = array())
     {
-        $this->objectMetadataDriver = $driver;
-
-        return $this;
-    }
-    /**
-     * @return DriverInterface
-     */
-    public function getObjectMetadataDriver(): DriverInterface
-    {
-        return $this->objectMetadataDriver;
+        $this->fromArray($options);
     }
 
     /**
      * @return array
      */
-    public function getGlobalIgnoreProperties(): array
+    public function getIgnoreProperties(): array
     {
-        return $this->globalIgnoreProperties;
+        return $this->ignoreProperties;
     }
 
     /**
@@ -104,9 +91,9 @@ class BaseAuditConfiguration
      *
      * @return $this
      */
-    public function setGlobalIgnoreProperties(array $properties)
+    public function setIgnoreProperties(array $properties)
     {
-        $this->globalIgnoreProperties = $properties;
+        $this->ignoreProperties = $properties;
 
         return $this;
     }

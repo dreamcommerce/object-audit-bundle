@@ -12,7 +12,7 @@ Simply run assuming you have installed composer.phar or composer binary:
 $ composer require dreamcommerce/object-audit-bundle
 ```
 
-## Installation (In Symfony Application)
+## Installation (In Symfony 3 Application)
 
 ###Enable the bundle
 
@@ -47,9 +47,12 @@ dream_commerce_object_audit:
          
     configuration:
         base:
-            audit_object_manager: foo_audit
             ignored_properties:
                 - globalIgnoreMe
+            load_audited_collections: true
+            load_audited_objects: true
+            load_native_collections: true
+            load_native_objects: true
         orm:
             table_prefix: ''
             table_suffix: _audit
@@ -64,18 +67,24 @@ dream_commerce_object_audit:
             object_manager: foo
             audit_object_manager: foo_audit
             driver: orm
-            table_prefix: ''
-            table_suffix: _audit
-            revision_id_field_prefix: revision_
-            revision_id_field_suffix: ''
-            revision_type_field_name: revision_type
-            revision_type_field_type: enumRevisionUInt8Type
-            ignored_properties:
-                - globalIgnoreMe
+            options:
+                table_prefix: ''
+                table_suffix: _audit
+                revision_id_field_prefix: revision_
+                revision_id_field_suffix: ''
+                revision_type_field_name: revision_type
+                revision_type_field_type: enumRevisionUInt8Type
+                load_audited_collections: true
+                load_audited_objects: false
+                load_native_collections: true
+                load_native_objects: false
+                ignored_properties:
+                    - globalIgnoreMe2
         bar:
             object_manager: bar
             audit_object_manager: bar_audit
-            ...
+        baz:
+            object_manager: baz      
 ```
 
 ###Creating new tables
@@ -83,7 +92,7 @@ dream_commerce_object_audit:
 Call the command below to see the new tables in the update schema queue.
 
 ```bash
-./app/console doctrine:schema:update --dump-sql 
+./bin/console doctrine:schema:update --dump-sql 
 ```
 
 ## Usage

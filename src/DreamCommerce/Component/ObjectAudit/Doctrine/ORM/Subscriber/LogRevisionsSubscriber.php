@@ -131,7 +131,7 @@ class LogRevisionsSubscriber implements EventSubscriber
         $objectMetadataFactory = $objectAuditManager->getMetadataFactory();
         $uow = $entityManager->getUnitOfWork();
         $configuration = $objectAuditManager->getConfiguration();
-        $globalIgnoredProperties = $configuration->getGlobalIgnoreProperties();
+        $globalIgnoredProperties = $configuration->getIgnoreProperties();
         $revisionManager = $objectAuditManager->getRevisionManager();
         $currentRevision = $revisionManager->getRevision();
         $processedEntities = array();

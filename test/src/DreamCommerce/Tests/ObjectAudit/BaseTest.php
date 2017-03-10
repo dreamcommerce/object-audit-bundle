@@ -464,8 +464,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         }
 
         $auditConfig = new ORMAuditConfiguration();
-        $auditConfig->setGlobalIgnoreProperties(array('globalIgnoreMe'));
-        $auditConfig->setObjectMetadataDriver($this->getObjectAuditMetadataDriver());
+        $auditConfig->setIgnoreProperties(array('globalIgnoreMe'));
         $auditConfig->setRevisionTypeFieldType(RevisionUInt16Type::TYPE_NAME);
 
         return $this->auditConfiguration = $auditConfig;

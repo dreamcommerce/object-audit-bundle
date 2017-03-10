@@ -87,11 +87,18 @@ class ManagerCompilerPassTest extends AbstractCompilerPassTestCase
 
     public function testSingleObjectAuditManager()
     {
+        $options = array(
+            'ignore_properties' => array(
+                'globalIgnoreProperty'
+            ),
+            'table_prefix' => 'audit_'
+        );
         $managers = array(
             'baz' => array(
                 'driver' => ObjectAuditManagerInterface::DRIVER_ORM,
                 'object_manager' => 'foo',
-                'audit_object_manager' => 'foo_audit'
+                'audit_object_manager' => 'foo_audit',
+                'options' => $options
             )
         );
 
@@ -109,6 +116,8 @@ class ManagerCompilerPassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasAlias(DreamCommerceObjectAuditExtension::ALIAS . '.metadata_factory', DreamCommerceObjectAuditExtension::ALIAS . '.baz_metadata_factory');
 
         $configuration = $this->container->getDefinition(DreamCommerceObjectAuditExtension::ALIAS . '.baz_configuration');
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(DreamCommerceObjectAuditExtension::ALIAS . '.baz_configuration', 0, $options);
+
         $objectManager = new Reference('doctrine.orm.foo_entity_manager');
         $auditObjectManager = new Reference('doctrine.orm.foo_audit_entity_manager');
         $metadataFactory = $this->container->getDefinition(DreamCommerceObjectAuditExtension::ALIAS . '.baz_metadata_factory');
@@ -129,12 +138,14 @@ class ManagerCompilerPassTest extends AbstractCompilerPassTestCase
             'baz' => array(
                 'driver' => ObjectAuditManagerInterface::DRIVER_ORM,
                 'object_manager' => 'foo',
-                'audit_object_manager' => 'foo_audit'
+                'audit_object_manager' => 'foo_audit',
+                'options' => array()
             ),
             'bar' => array(
                 'driver' => ObjectAuditManagerInterface::DRIVER_ORM,
                 'object_manager' => 'bar',
-                'audit_object_manager' => 'bar_audit'
+                'audit_object_manager' => 'bar_audit',
+                'options' => array()
             )
         );
 
@@ -165,19 +176,23 @@ class ManagerCompilerPassTest extends AbstractCompilerPassTestCase
         $managers = array(
             'xml' => array(
                 'driver' => ObjectAuditManagerInterface::DRIVER_ORM,
-                'object_manager' => 'xml'
+                'object_manager' => 'xml',
+                'options' => array()
             ),
             'yaml' => array(
                 'driver' => ObjectAuditManagerInterface::DRIVER_ORM,
-                'object_manager' => 'yaml'
+                'object_manager' => 'yaml',
+                'options' => array()
             ),
             'annotation' => array(
                 'driver' => ObjectAuditManagerInterface::DRIVER_ORM,
-                'object_manager' => 'annotation'
+                'object_manager' => 'annotation',
+                'options' => array()
             ),
             'chain' => array(
                 'driver' => ObjectAuditManagerInterface::DRIVER_ORM,
-                'object_manager' => 'chain'
+                'object_manager' => 'chain',
+                'options' => array()
             )
         );
 
