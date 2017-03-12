@@ -1,5 +1,9 @@
 # DreamCommerce Object Audit Bundle
 
+[![License](https://img.shields.io/packagist/l/dreamcommerce/object-audit-bundle.svg)](https://packagist.org/packages/dreamcommerce/object-audit-bundle)
+[![Version](https://img.shields.io/packagist/vpre/dreamcommerce/object-audit-bundle.svg)](https://packagist.org/packages/dreamcommerce/object-audit-bundle)
+[![Build status on Linux](https://img.shields.io/travis/dreamcommerce/object-audit-bundle/master.svg)](http://travis-ci.org/dreamcommerce/object-audit-bundle)
+
 This is a fork of the [SimpleThings EntityAudit](https://github.com/simplethings/EntityAudit) project.
 
 ## Installation (Standalone)
