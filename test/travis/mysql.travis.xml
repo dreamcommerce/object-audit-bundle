@@ -8,6 +8,8 @@
         <var name="db_password" value=""/>
         <var name="db_name" value="object_audit_tests"/>
         <var name="db_port" value="3306"/>
+        <server name="KERNEL_DIR" value="./../app/" />
+        <server name="IS_DOCTRINE_ORM_SUPPORTED" value="true" />
     </php>
 
     <testsuites>
