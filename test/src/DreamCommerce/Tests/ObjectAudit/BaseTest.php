@@ -483,8 +483,13 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
     protected function setUpAuditSchema()
     {
-        $classes = $this->getAuditPersistManager()->getMetadataFactory()->getAllMetadata();
-        $this->getAuditSchemaTool()->createSchema($classes);
+        $auditPersistManager = $this->getAuditPersistManager();
+        $persistManager = $this->getPersistManager();
+
+        if($auditPersistManager != $persistManager) {
+            $classes = $auditPersistManager->getMetadataFactory()->getAllMetadata();
+            $this->getAuditSchemaTool()->createSchema($classes);
+        }
     }
 
     protected function tearDownTestSchema()

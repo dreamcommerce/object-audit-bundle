@@ -44,3 +44,11 @@ cp test/app/config/parameters.yml.dist test/app/config/parameters.yml
 EOT
     );
 }
+
+if (!file_exists(__DIR__ . '/app/db.sql')) {
+    die(<<<'EOT'
+You must create database schema, run the following command:
+test/app/console doctrine:schema:create
+EOT
+    );
+}

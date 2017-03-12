@@ -678,7 +678,9 @@ class ORMAuditManager extends BaseObjectAuditManager
 
             $identifiers = array();
             foreach ($classMetadata->identifier as $idField) {
-                $identifiers[$idField] = $row[$idField];
+                if(isset($row[$idField])) {
+                    $identifiers[$idField] = $row[$idField];
+                }
             }
 
             $objects[] = new ObjectAudit(
