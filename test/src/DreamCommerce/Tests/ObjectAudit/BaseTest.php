@@ -485,7 +485,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $auditPersistManager = $this->getAuditPersistManager();
         $persistManager = $this->getPersistManager();
 
-        if($auditPersistManager != $persistManager) {
+        if($auditPersistManager->getConnection()->getDatabase() != $persistManager->getConnection()->getDatabase()) {
             $classes = $auditPersistManager->getMetadataFactory()->getAllMetadata();
             $this->getAuditSchemaTool()->createSchema($classes);
         }
