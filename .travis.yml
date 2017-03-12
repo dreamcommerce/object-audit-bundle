@@ -30,7 +30,7 @@ before_install:
 
 install: composer update $COMPOSER_FLAGS --prefer-dist
 
-script: ./vendor/bin/phpunit -c test/travis/$DB.travis.xml
+script: ./bin/phpunit -c test/travis/$DB.travis.xml
 
 matrix:
   fast_finish: true
