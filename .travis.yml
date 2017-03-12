@@ -28,6 +28,7 @@ before_install:
   - composer update $COMPOSER_FLAGS --prefer-dist
   - cp test/app/config/parameters.yml.dist test/app/config/parameters.yml
   - php test/app/console doctrine:database:create
+  - php test/app/console doctrine:schema:drop --force
   - php test/app/console doctrine:schema:create
 
 script: ./bin/phpunit -c test/travis/$DB.travis.xml
