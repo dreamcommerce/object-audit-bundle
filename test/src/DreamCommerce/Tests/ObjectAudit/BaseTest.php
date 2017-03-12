@@ -179,7 +179,6 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $config->setProxyNamespace('DreamCommerce\Tests\ObjectAuditBundle\Proxies');
 
         $paths = array($this->fixturesPath);
-        $paths[] = realpath(__DIR__ . '/../../Fixtures/ObjectAudit/Entity/Common');
         $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver($paths, false));
 
         Gedmo\DoctrineExtensions::registerAnnotations();

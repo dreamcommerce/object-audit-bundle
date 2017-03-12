@@ -143,8 +143,8 @@ class CoreTest extends BaseTest
         $this->expectExceptionCode(ObjectAuditNotFoundException::CODE_OBJECT_AUDIT_NOT_EXIST_AT_SPECIFIC_REVISION);
 
         $revision = new RevisionTest();
-        $this->persistManager->persist($revision);
-        $this->persistManager->flush();
+        $this->auditPersistManager->persist($revision);
+        $this->auditPersistManager->flush();
 
         $this->objectAuditManager->find(UserAudit::class, 1, $revision);
     }
@@ -160,8 +160,8 @@ class CoreTest extends BaseTest
         $this->expectExceptionCode(ObjectNotAuditedException::CODE_CLASS_IS_NOT_AUDITED);
 
         $revision = new RevisionTest();
-        $this->persistManager->persist($revision);
-        $this->persistManager->flush();
+        $this->auditPersistManager->persist($revision);
+        $this->auditPersistManager->flush();
 
         $this->objectAuditManager->find("stdClass", 1, $revision);
     }
