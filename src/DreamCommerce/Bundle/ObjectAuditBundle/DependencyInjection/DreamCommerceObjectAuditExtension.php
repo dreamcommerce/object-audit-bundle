@@ -91,8 +91,12 @@ final class DreamCommerceObjectAuditExtension extends AbstractResourceExtension
             $config['managers'][$name]['options'] = $partialOptions;
         }
 
-        $defaultManager = $config['default_manager'];
+        $defaultManager = null;
         if (count($config['managers']) > 0) {
+            if(isset($config['default_manager'])) {
+                $defaultManager = $config['default_manager'];
+            }
+
             if (!empty($defaultManager)) {
                 if (!isset($config['managers'][$defaultManager])) {
                     throw new RuntimeException('Audit manager "' . $defaultManager . '" does not exist');

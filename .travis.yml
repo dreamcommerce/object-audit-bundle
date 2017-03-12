@@ -64,3 +64,6 @@ matrix:
         postgresql: 9.4
   allow_failures:
     - php: nightly
+
+notifications:
+    email: false

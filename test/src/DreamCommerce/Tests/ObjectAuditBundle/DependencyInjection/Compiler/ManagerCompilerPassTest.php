@@ -177,21 +177,25 @@ class ManagerCompilerPassTest extends AbstractCompilerPassTestCase
             'xml' => array(
                 'driver' => ObjectAuditManagerInterface::DRIVER_ORM,
                 'object_manager' => 'xml',
+                'audit_object_manager' => 'xml',
                 'options' => array()
             ),
             'yaml' => array(
                 'driver' => ObjectAuditManagerInterface::DRIVER_ORM,
                 'object_manager' => 'yaml',
+                'audit_object_manager' => 'yaml',
                 'options' => array()
             ),
             'annotation' => array(
                 'driver' => ObjectAuditManagerInterface::DRIVER_ORM,
                 'object_manager' => 'annotation',
+                'audit_object_manager' => 'annotation',
                 'options' => array()
             ),
             'chain' => array(
                 'driver' => ObjectAuditManagerInterface::DRIVER_ORM,
                 'object_manager' => 'chain',
+                'audit_object_manager' => 'chain',
                 'options' => array()
             )
         );

@@ -103,12 +103,15 @@ class LogRevisionsSubscriber implements EventSubscriber
                     );
                 }
 
-                $changedIdentifiers = $uow->getEntityIdentifier($objectAudit->getObject());
-                if ($changedIdentifiers !== null) {
-                    $revisionData = array_merge(
-                        $revisionData,
-                        $changedIdentifiers
-                    );
+                $object = $objectAudit->getObject();
+                if($uow->isInIdentityMap($object)) {
+                    $changedIdentifiers = $uow->getEntityIdentifier($object);
+                    if ($changedIdentifiers !== null) {
+                        $revisionData = array_merge(
+                            $revisionData,
+                            $changedIdentifiers
+                        );
+                    }
                 }
 
                 $objectAudit->setData($revisionData);
