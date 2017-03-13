@@ -346,8 +346,6 @@ class ORMAuditManager extends BaseObjectAuditManager
             $groupBy[] = $indexBy;
         }
 
-        $queryBuilder->groupBy($groupBy);
-
         foreach ($identifierColumnNames as $identifierColumnName) {
             $queryBuilder->addOrderBy($identifierColumnName, 'ASC');
         }
@@ -356,8 +354,12 @@ class ORMAuditManager extends BaseObjectAuditManager
         if (!$classMetadata->isInheritanceTypeNone()) {
             $discriminatorColumn = $classMetadata->discriminatorColumn['name'];
             $queryBuilder->addSelect($discriminatorColumn);
+            if(!in_array($discriminatorColumn, $groupBy)) {
+                $groupBy[] = $discriminatorColumn;
+            }
         }
 
+        $queryBuilder->groupBy($groupBy);
         $result = $queryBuilder->execute()->fetchAll();
 
         $proxyFactory = new LazyLoadingValueHolderFactory();
