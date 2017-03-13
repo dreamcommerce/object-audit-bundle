@@ -225,14 +225,14 @@ class CoreTest extends BaseTest
         $this->assertEquals(RevisionInterface::ACTION_INSERT, $objects[0]->getType());
         $this->assertEquals(ArticleAudit::class, $objects[0]->getClassName());
         $this->assertInstanceOf(ArticleAudit::class, $objects[0]->getObject());
-        $this->assertEquals(1, $objects[0]->getObject()->getId());
+        $this->assertEquals($article->getId(), $objects[0]->getObject()->getId());
         $this->assertEquals($this->persistManager, $objects[0]->getPersistManager());
 
         $this->assertEquals($revision, $objects[1]->getRevision());
         $this->assertEquals(RevisionInterface::ACTION_INSERT, $objects[1]->getType());
         $this->assertEquals(Cat::class, $objects[1]->getClassName());
         $this->assertInstanceOf(Cat::class, $objects[1]->getObject());
-        $this->assertEquals(1, $objects[1]->getObject()->getId());
+        $this->assertEquals($cat->getId(), $objects[1]->getObject()->getId());
         $this->assertEquals($this->persistManager, $objects[1]->getPersistManager());
     }
 
