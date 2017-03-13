@@ -17,7 +17,5 @@ sleep 4
 sudo mysql -e "use mysql; update user set authentication_string=PASSWORD('') where User='root'; update user set plugin='mysql_native_password';FLUSH PRIVILEGES;"
 sudo killall mysqld
 sleep 4
-sudo kill -9 `sudo cat /var/run/mysqld/mysqld.pid`
-sleep 1
 sudo service mysql restart
 sleep 4
