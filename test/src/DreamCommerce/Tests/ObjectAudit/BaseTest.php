@@ -33,6 +33,7 @@ namespace DreamCommerce\Tests\ObjectAudit;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Configuration;
@@ -140,6 +141,9 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->getObjectAuditManager();
+
+        $this->tearDownTestSchema();
+        $this->tearDownAuditSchema();
 
         $this->setUpTestSchema();
         $this->setUpAuditSchema();
@@ -485,7 +489,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $auditPersistManager = $this->getAuditPersistManager();
         $persistManager = $this->getPersistManager();
 
-        if($auditPersistManager->getConnection()->getDatabase() != $persistManager->getConnection()->getDatabase()) {
+        if($auditPersistManager != $persistManager) {
             $classes = $auditPersistManager->getMetadataFactory()->getAllMetadata();
             $this->getAuditSchemaTool()->createSchema($classes);
         }
@@ -502,6 +506,19 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $sm = $this->auditPersistManager->getConnection()->getSchemaManager();
         foreach ($sm->listTableNames() as $auditTable) {
             $sm->dropTable($auditTable);
+        }
+        $auditSequences = null;
+        try {
+            $auditSequences = $sm->listSequences();
+        } catch(DBALException $e) {
+            // ignore
+        }
+
+        if($auditSequences !== null) {
+            foreach ($auditSequences as $auditSequence) {
+                $sm->dropSequence($auditSequence);
+
+            }
         }
     }
 
