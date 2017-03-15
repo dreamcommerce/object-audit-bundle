@@ -45,98 +45,92 @@ use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditRegistry;
 use RuntimeException;
 
-class CreateSchemaSubscriber implements EventSubscriber
+class BuilderSubscriber implements EventSubscriber
 {
     /**
      * @var ObjectAuditRegistry
      */
-    private $objectAuditRegistry;
-
-    /**
-     * @var string
-     */
-    private $objectManagerName;
+    protected $objectAuditRegistry;
 
     /**
      * @param ObjectAuditRegistry $objectAuditRegistry
-     * @param string              $objectManagerName
      */
-    public function __construct(ObjectAuditRegistry $objectAuditRegistry, string $objectManagerName)
+    public function __construct(ObjectAuditRegistry $objectAuditRegistry)
     {
         $this->objectAuditRegistry = $objectAuditRegistry;
-        $this->objectManagerName = $objectManagerName;
     }
 
     public function getSubscribedEvents()
     {
         return array(
-            ToolEvents::postGenerateSchemaTable,
+            ToolEvents::postGenerateSchemaTable
         );
     }
 
     public function postGenerateSchemaTable(GenerateSchemaTableEventArgs $eventArgs)
     {
-        /** @var EntityManagerInterface $objectAuditManager */
-        $objectAuditManager = $this->objectAuditRegistry->getByName($this->objectManagerName);
-        if (!($objectAuditManager instanceof ORMAuditManager)) {
-            throw new RuntimeException('Unable generate audit tables for unsupported type of object audit manager "' . get_class($objectAuditManager) . '"');
+        $objectAuditManagers = $this->getObjectAuditRegistry()->getAll();
+        foreach ($objectAuditManagers as $objectAuditManager) {
+            if (!($objectAuditManager instanceof ORMAuditManager)) {
+                continue;
+            }
+
+            /** @var ORMAuditConfiguration $configuration */
+            $configuration = $objectAuditManager->getConfiguration();
+            /** @var EntityManagerInterface $auditPersistManager */
+            $auditPersistManager = $objectAuditManager->getAuditPersistManager();
+
+            $classMetadata = $eventArgs->getClassMetadata();
+            if (!$this->isAudited($objectAuditManager->getMetadataFactory(), $classMetadata)) {
+                continue;
+            }
+
+            if (!in_array($classMetadata->inheritanceType, array(ClassMetadataInfo::INHERITANCE_TYPE_NONE, ClassMetadataInfo::INHERITANCE_TYPE_JOINED, ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_TABLE))) {
+                throw new RuntimeException(sprintf('Inheritance type "%s" is not yet supported', $classMetadata->inheritanceType));
+            }
+
+            $auditTableName = $objectAuditManager->getAuditTableNameForClass($classMetadata->name);
+            $revisionClassMetadata = $objectAuditManager->getRevisionManager()->getMetadata();
+
+            $schemaManager = $auditPersistManager->getConnection()->getSchemaManager();
+            if ($schemaManager->tablesExist($auditTableName)) {
+                continue;
+            }
+
+            $entityTable = $eventArgs->getClassTable();
+
+            $auditTable = new Table($auditTableName);
+            $revisionAction = $configuration->getRevisionActionFieldType();
+            $auditTable->addColumn($configuration->getRevisionActionFieldName(), $revisionAction);
+
+            foreach ($entityTable->getColumns() as $column) {
+                /* @var Column $column */
+                $auditTable->addColumn($column->getName(), $column->getType()->getName(), array_merge(
+                    $column->toArray(),
+                    array(
+                        'notnull' => false,
+                        'autoincrement' => false,
+                    )
+                ));
+            }
+
+            $pkColumns = $entityTable->getPrimaryKey()->getColumns();
+            $revPkColumns = array();
+
+            foreach ($revisionClassMetadata->identifier as $revisionIdentifier) {
+                $columnName = $revisionClassMetadata->fieldMappings[$revisionIdentifier]['columnName'];
+                $columnName = $configuration->getRevisionIdFieldPrefix() . $columnName . $configuration->getRevisionIdFieldSuffix();
+                $type = $revisionClassMetadata->fieldMappings[$revisionIdentifier]['type'];
+                $auditTable->addColumn($columnName, $type);
+                $revPkColumns[] = $columnName;
+            }
+
+            $pkColumns = array_merge($pkColumns, $revPkColumns);
+            $auditTable->setPrimaryKey($pkColumns);
+            $auditTable->addIndex($revPkColumns);
+
+            $schemaManager->createTable($auditTable);
         }
-
-        /** @var ORMAuditConfiguration $configuration */
-        $configuration = $objectAuditManager->getConfiguration();
-        /** @var EntityManagerInterface $auditPersistManager */
-        $auditPersistManager = $objectAuditManager->getAuditPersistManager();
-
-        $classMetadata = $eventArgs->getClassMetadata();
-        if (!$this->isAudited($objectAuditManager->getMetadataFactory(), $classMetadata)) {
-            return;
-        }
-
-        if (!in_array($classMetadata->inheritanceType, array(ClassMetadataInfo::INHERITANCE_TYPE_NONE, ClassMetadataInfo::INHERITANCE_TYPE_JOINED, ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_TABLE))) {
-            throw new RuntimeException(sprintf('Inheritance type "%s" is not yet supported', $classMetadata->inheritanceType));
-        }
-
-        $auditTableName = $objectAuditManager->getAuditTableNameForClass($classMetadata->name);
-        $revisionClassMetadata = $objectAuditManager->getRevisionManager()->getMetadata();
-
-        $schemaManager = $auditPersistManager->getConnection()->getSchemaManager();
-        if ($schemaManager->tablesExist($auditTableName)) {
-            return;
-        }
-
-        $entityTable = $eventArgs->getClassTable();
-
-        $auditTable = new Table($auditTableName);
-        $revisionAction = $configuration->getRevisionActionFieldType();
-        $auditTable->addColumn($configuration->getRevisionActionFieldName(), $revisionAction);
-
-        foreach ($entityTable->getColumns() as $column) {
-            /* @var Column $column */
-            $auditTable->addColumn($column->getName(), $column->getType()->getName(), array_merge(
-                $column->toArray(),
-                array(
-                    'notnull' => false,
-                    'autoincrement' => false,
-                )
-            ));
-        }
-
-        $pkColumns = $entityTable->getPrimaryKey()->getColumns();
-        $revPkColumns = array();
-
-        foreach ($revisionClassMetadata->identifier as $revisionIdentifier) {
-            $columnName = $revisionClassMetadata->fieldMappings[$revisionIdentifier]['columnName'];
-            $columnName = $configuration->getRevisionIdFieldPrefix().$columnName.$configuration->getRevisionIdFieldSuffix();
-            $type = $revisionClassMetadata->fieldMappings[$revisionIdentifier]['type'];
-            $auditTable->addColumn($columnName, $type);
-            $revPkColumns[] = $columnName;
-        }
-
-        $pkColumns = array_merge($pkColumns, $revPkColumns);
-        $auditTable->setPrimaryKey($pkColumns);
-        $auditTable->addIndex($revPkColumns);
-
-        $schemaManager->createTable($auditTable);
     }
 
     /**
@@ -172,5 +166,10 @@ class CreateSchemaSubscriber implements EventSubscriber
         }
 
         return true;
+    }
+
+    protected function getObjectAuditRegistry(): ObjectAuditRegistry
+    {
+        return $this->objectAuditRegistry;
     }
 }

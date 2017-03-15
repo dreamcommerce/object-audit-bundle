@@ -71,7 +71,7 @@ final class ManagerCompilerPass implements CompilerPassInterface
                 case ObjectAuditManagerInterface::DRIVER_ORM:
                     $configurationClass = $container->getParameter(DreamCommerceObjectAuditExtension::ALIAS . '.orm.configuration.class');
                     $managerClass = $container->getParameter(DreamCommerceObjectAuditExtension::ALIAS . '.orm.manager.class');
-                    $auditFactory = $container->getDefinition(DreamCommerceObjectAuditExtension::ALIAS . '.orm.factory');
+                    $auditFactory = new Reference(DreamCommerceObjectAuditExtension::ALIAS . '.orm.factory');
                     $objectManagerId = 'doctrine.orm.' . $managerConfig['object_manager'] . '_entity_manager';
                     $auditObjectManagerId = 'doctrine.orm.' . $managerConfig['audit_object_manager'] . '_entity_manager';
 
@@ -101,7 +101,7 @@ final class ManagerCompilerPass implements CompilerPassInterface
             $manager->setArguments(array(
                 $configuration,
                 new Reference($objectManagerId),
-                $container->getDefinition(DreamCommerceObjectAuditExtension::ALIAS . '.revision_manager'),
+                new Reference(DreamCommerceObjectAuditExtension::ALIAS . '.revision_manager'),
                 $auditFactory,
                 $metadataFactory,
                 new Reference($auditObjectManagerId),
@@ -114,6 +114,29 @@ final class ManagerCompilerPass implements CompilerPassInterface
                 array(
                     $name,
                     new Reference($managerId),
+                )
+            );
+        }
+
+        $taggedServices = $container->findTaggedServiceIds(
+            DreamCommerceObjectAuditExtension::ALIAS.'.manager'
+        );
+
+        foreach ($taggedServices as $id => $attributes) {
+            foreach (array('name', 'object_manager') as $key) {
+                if (!isset($attributes[$key])) {
+                    throw new RuntimeException('Attribute "' . $key . '" is required');
+                }
+            }
+
+            $name = $attributes['name'];
+            $managerId = $attributes['object_manager'];
+
+            $definition->addMethodCall(
+                'registerObjectAuditManager',
+                array(
+                    $name,
+                    new Reference($managerId)
                 )
             );
         }

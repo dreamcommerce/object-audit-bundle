@@ -40,16 +40,17 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Persisters\Entity\BasicEntityPersister;
 use Doctrine\ORM\Persisters\Entity\EntityPersister;
 use Doctrine\ORM\UnitOfWork;
+use DreamCommerce\Component\ObjectAudit\Exception\NotDefinedException;
 use DreamCommerce\Component\ObjectAudit\Model\ObjectAudit;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditRegistry;
 
-class LogRevisionsSubscriber implements EventSubscriber
+class ObserverSubscriber implements EventSubscriber
 {
     /**
      * @var ObjectAuditRegistry
      */
-    private $objectAuditRegistry;
+    protected $objectAuditRegistry;
 
     /**
      * @var ObjectAudit[]
@@ -82,7 +83,11 @@ class LogRevisionsSubscriber implements EventSubscriber
     {
         if (count($this->objects) > 0) {
             $entityManager = $eventArgs->getEntityManager();
-            $objectAuditManager = $this->objectAuditRegistry->getByPersistManager($entityManager);
+            try {
+                $objectAuditManager = $this->getObjectAuditRegistry()->getByPersistManager($entityManager);
+            } catch (NotDefinedException $exc) {
+                return;
+            }
 
             foreach ($this->objects as $objectAudit) {
                 $uow = $entityManager->getUnitOfWork();
@@ -104,7 +109,7 @@ class LogRevisionsSubscriber implements EventSubscriber
                 }
 
                 $object = $objectAudit->getObject();
-                if($uow->isInIdentityMap($object)) {
+                if ($uow->isInIdentityMap($object)) {
                     $changedIdentifiers = $uow->getEntityIdentifier($object);
                     if ($changedIdentifiers !== null) {
                         $revisionData = array_merge(
@@ -116,6 +121,11 @@ class LogRevisionsSubscriber implements EventSubscriber
 
                 $objectAudit->setData($revisionData);
                 $objectAuditManager->saveAudit($objectAudit);
+            }
+
+            if (count($this->objects) > 0) {
+                $revisionManager = $objectAuditManager->getRevisionManager();
+                $revisionManager->resetRevision();
             }
 
             $this->objects = array();
@@ -130,7 +140,11 @@ class LogRevisionsSubscriber implements EventSubscriber
     public function onFlush(OnFlushEventArgs $eventArgs)
     {
         $entityManager = $eventArgs->getEntityManager();
-        $objectAuditManager = $this->objectAuditRegistry->getByPersistManager($entityManager);
+        try {
+            $objectAuditManager = $this->getObjectAuditRegistry()->getByPersistManager($entityManager);
+        } catch (NotDefinedException $e) {
+            return;
+        }
         $objectMetadataFactory = $objectAuditManager->getMetadataFactory();
         $uow = $entityManager->getUnitOfWork();
         $configuration = $objectAuditManager->getConfiguration();
@@ -226,7 +240,7 @@ class LogRevisionsSubscriber implements EventSubscriber
         }
 
         if (count($this->objects) > 0) {
-            $revisionManager->save();
+            $revisionManager->save($entityManager);
         }
     }
 
@@ -362,5 +376,10 @@ class LogRevisionsSubscriber implements EventSubscriber
         }
 
         return $result[$className];
+    }
+
+    protected function getObjectAuditRegistry(): ObjectAuditRegistry
+    {
+        return $this->objectAuditRegistry;
     }
 }

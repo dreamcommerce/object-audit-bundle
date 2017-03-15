@@ -33,8 +33,10 @@ namespace DreamCommerce\Tests\ObjectAuditBundle;
 use DateTime;
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\DreamCommerceObjectAuditExtension;
 use DreamCommerce\Component\Common\Factory\DateTimeFactory;
+use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Manager\RevisionManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Model\Revision;
+use DreamCommerce\Fixtures\ObjectAuditBundle\Entity\AuditEntity;
 use JMS\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -46,6 +48,7 @@ class DreamCommerceObjectAuditBundleTest extends WebTestCase
         /** @var ContainerInterface $container */
         $container = self::createClient()->getContainer();
         $services = array(
+            DreamCommerceObjectAuditExtension::ALIAS . '.orm.observer',
             DreamCommerceObjectAuditExtension::ALIAS . '.orm.factory',
             DreamCommerceObjectAuditExtension::ALIAS . '.registry',
             DreamCommerceObjectAuditExtension::ALIAS . '.resource_manager',
@@ -103,5 +106,49 @@ class DreamCommerceObjectAuditBundleTest extends WebTestCase
         );
 
         $this->assertEquals($expected, $actual);
+    }
+
+    public function testSimpleAudit()
+    {
+        /** @var ContainerInterface $container */
+        $container = self::createClient()->getContainer();
+
+        $dateTime = new DateTime('2011-01-02 12:13:14');
+        $dateTime2 = new DateTime('2012-01-02 12:13:14');
+        $dateTime3 = new DateTime('2013-01-02 12:13:14');
+
+        $dateTimeFactory = $this->createMock(DateTimeFactory::class);
+        $dateTimeFactory->method('createNew')
+            ->will($this->onConsecutiveCalls($dateTime, $dateTime2, $dateTime3));
+
+        $container->set('dream_commerce.datetime_factory', $dateTimeFactory);
+
+        /** @var ObjectAuditManagerInterface $objectAuditManager */
+        $objectAuditManager = $container->get(DreamCommerceObjectAuditExtension::ALIAS . '.manager');
+        $persistManager = $objectAuditManager->getPersistManager();
+        /** @var RevisionManagerInterface $revisionManager */
+        $revisionManager = $container->get(DreamCommerceObjectAuditExtension::ALIAS . '.revision_manager');
+        $revision = $revisionManager->getRevision();
+
+        $entity = new AuditEntity();
+        $entity->setTest('test 1');
+        $persistManager->persist($entity);
+        $persistManager->flush();
+
+        $revision2 = $revisionManager->getRevision();
+        $this->assertNotEquals($revision, $revision2);
+        $this->assertEquals($revision->getCreatedAt(), $dateTime);
+
+        $entity->setTest('test 2');
+        $persistManager->flush();
+
+        $revision3 = $revisionManager->getRevision();
+        $this->assertNotEquals($revision3, $revision2);
+        $this->assertEquals($revision2->getCreatedAt(), $dateTime2);
+
+        /** @var AuditEntity $auditEntity */
+        $auditEntity = $objectAuditManager->find(AuditEntity::class, $entity->getId(), $revision);
+        $this->assertInstanceOf(AuditEntity::class, $auditEntity);
+        $this->assertEquals('test 1', $auditEntity->getTest());
     }
 }

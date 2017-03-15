@@ -10,10 +10,6 @@ services:
             - /tmp:/tmp
             - ./build/php.ini:/usr/local/etc/php/php.ini:ro
             - ./build/entry.sh:/docker/entry.sh:ro
-        depends_on:
-            - mysql
-        links:
-            - mysql
         mem_limit: 2000000000
 #        ports:
 #            - 19060:9000
@@ -30,20 +26,8 @@ services:
             - /tmp:/tmp
             - ./build/php.ini:/usr/local/etc/php/php.ini:ro
             - ./build/entry.sh:/docker/entry.sh:ro
-        depends_on:
-            - mysql
-        links:
-            - mysql
         mem_limit: 2000000000
 #        ports:
 #            - 19061:9000
 #        environment:
 #            XDEBUG_CONFIG: idekey=DC_OBJECT_AUDIT remote_host=xx.yy.zz.vv
-
-    mysql:
-        image: mariadb
-        environment:
-            MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: docker
-            MYSQL_USER: docker
-            MYSQL_PASSWORD: docker

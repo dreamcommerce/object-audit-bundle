@@ -28,50 +28,33 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Fixtures\ObjectAuditBundle\Entity;
+namespace DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORM\Subscriber;
 
-use Doctrine\ORM\Mapping as ORM;
-use DreamCommerce\Component\ObjectAudit\Mapping\Annotation as Audit;
+use DreamCommerce\Component\ObjectAudit\Doctrine\ORM\Subscriber\ObserverSubscriber;
+use DreamCommerce\Component\ObjectAudit\ObjectAuditRegistry;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
-/**
- * @Audit\Auditable
- * @ORM\Entity
- */
-class AuditEntity
+class BundleObserverSubscriber extends ObserverSubscriber
 {
     /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue
+     * @var ContainerInterface
      */
-    private $id;
+    private $container;
 
     /**
-     * @ORM\Column(type="string", nullable=true)
+     * @param ContainerInterface $container
      */
-    private $test;
-
-    /**
-     * @return int
-     */
-    public function getId()
+    public function __construct(ContainerInterface $container)
     {
-        return $this->id;
+        $this->container = $container;
     }
 
-    /**
-     * @return string
-     */
-    public function getTest()
+    public function getObjectAuditRegistry(): ObjectAuditRegistry
     {
-        return $this->test;
-    }
+        if ($this->objectAuditRegistry === null) {
+            $this->objectAuditRegistry = $this->container->get('dream_commerce_object_audit.registry');
+        }
 
-    /**
-     * @param string $test
-     */
-    public function setTest(string $test)
-    {
-        $this->test = $test;
+        return $this->objectAuditRegistry;
     }
 }

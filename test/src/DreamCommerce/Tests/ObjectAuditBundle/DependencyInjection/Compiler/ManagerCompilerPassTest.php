@@ -52,8 +52,10 @@ use DreamCommerce\Component\ObjectAudit\Metadata\Driver\YamlDriver as YamlAuditD
 use DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadataFactory;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditRegistry;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractCompilerPassTestCase;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Reference;
 
 class ManagerCompilerPassTest extends AbstractCompilerPassTestCase
@@ -61,6 +63,11 @@ class ManagerCompilerPassTest extends AbstractCompilerPassTestCase
     public function setUp()
     {
         parent::setUp();
+
+        $definition = new Definition(EntityManager::class);
+        $definition->setAbstract(true);
+
+        $this->container->setDefinition('doctrine.orm.entity_manager.abstract', $definition);
 
         $this->registerService(DreamCommerceObjectAuditExtension::ALIAS . '.registry', ObjectAuditRegistry::class);
         $this->registerService(DreamCommerceObjectAuditExtension::ALIAS . '.orm.factory', ORMObjectAuditFactory::class);
@@ -121,8 +128,8 @@ class ManagerCompilerPassTest extends AbstractCompilerPassTestCase
         $objectManager = new Reference('doctrine.orm.foo_entity_manager');
         $auditObjectManager = new Reference('doctrine.orm.foo_audit_entity_manager');
         $metadataFactory = $this->container->getDefinition(DreamCommerceObjectAuditExtension::ALIAS . '.baz_metadata_factory');
-        $revisionManager = $this->container->getDefinition(DreamCommerceObjectAuditExtension::ALIAS . '.revision_manager');
-        $auditFactory = $this->container->getDefinition(DreamCommerceObjectAuditExtension::ALIAS . '.orm.factory');
+        $revisionManager = new Reference(DreamCommerceObjectAuditExtension::ALIAS . '.revision_manager');
+        $auditFactory = new Reference(DreamCommerceObjectAuditExtension::ALIAS . '.orm.factory');
 
         $this->assertContainerBuilderHasServiceDefinitionWithArgument(DreamCommerceObjectAuditExtension::ALIAS . '.baz_manager', 0, $configuration);
         $this->assertContainerBuilderHasServiceDefinitionWithArgument(DreamCommerceObjectAuditExtension::ALIAS . '.baz_manager', 1, $objectManager);
@@ -230,7 +237,7 @@ class ManagerCompilerPassTest extends AbstractCompilerPassTestCase
 
     protected function registerCompilerPass(ContainerBuilder $container)
     {
-        $container->addCompilerPass(new ManagerCompilerPass());
+        $container->addCompilerPass(new ManagerCompilerPass(), PassConfig::TYPE_REMOVE);
     }
 
     protected function registerEntityMockManager(string $name, string $driverClass = null)

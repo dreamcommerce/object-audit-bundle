@@ -354,7 +354,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         if (!$classMetadata->isInheritanceTypeNone()) {
             $discriminatorColumn = $classMetadata->discriminatorColumn['name'];
             $queryBuilder->addSelect($discriminatorColumn);
-            if(!in_array($discriminatorColumn, $groupBy)) {
+            if (!in_array($discriminatorColumn, $groupBy)) {
                 $groupBy[] = $discriminatorColumn;
             }
         }
@@ -680,7 +680,7 @@ class ORMAuditManager extends BaseObjectAuditManager
 
             $identifiers = array();
             foreach ($classMetadata->identifier as $idField) {
-                if(isset($row[$idField])) {
+                if (isset($row[$idField])) {
                     $identifiers[$idField] = $row[$idField];
                 }
             }

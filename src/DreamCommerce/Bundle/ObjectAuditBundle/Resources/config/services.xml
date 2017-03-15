@@ -9,15 +9,28 @@
         <parameter key="dream_commerce_object_audit.resource_metadata_factory.class">DreamCommerce\Bundle\ObjectAuditBundle\Metadata\ResourceAuditMetadataFactory</parameter>
         <parameter key="dream_commerce_object_audit.registry.class">DreamCommerce\Component\ObjectAudit\ObjectAuditRegistry</parameter>
         <parameter key="dream_commerce_object_audit.metadata_factory.class">DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadataFactory</parameter>
+        <parameter key="dream_commerce_object_audit.revision_factory.class">DreamCommerce\Component\ObjectAudit\Factory\RevisionFactory</parameter>
 
         <parameter key="dream_commerce_object_audit.orm.configuration.class">DreamCommerce\Component\ObjectAudit\Configuration\ORMAuditConfiguration</parameter>
         <parameter key="dream_commerce_object_audit.orm.factory.class">DreamCommerce\Component\ObjectAudit\Factory\ORMObjectAuditFactory</parameter>
         <parameter key="dream_commerce_object_audit.orm.manager.class">DreamCommerce\Component\ObjectAudit\Manager\ORMAuditManager</parameter>
+        <parameter key="dream_commerce_object_audit.orm.observer.class">DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORM\Subscriber\BundleObserverSubscriber</parameter>
+        <parameter key="dream_commerce_object_audit.orm.builder.class">DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORM\Subscriber\BundleBuilderSubscriber</parameter>
     </parameters>
 
     <services>
         <service id="dream_commerce_object_audit.orm.factory" class="%dream_commerce_object_audit.orm.factory.class%">
             <argument type="service" id="dream_commerce_object_audit.revision_manager" />
+        </service>
+
+        <service id="dream_commerce_object_audit.orm.observer" class="%dream_commerce_object_audit.orm.observer.class%" public="false">
+            <argument type="service" id="service_container" />
+            <tag name="doctrine.event_subscriber" />
+        </service>
+
+        <service id="dream_commerce_object_audit.orm.builder" class="%dream_commerce_object_audit.orm.builder.class%" public="false">
+            <argument type="service" id="service_container" />
+            <tag name="doctrine.event_subscriber" />
         </service>
 
         <service id="dream_commerce_object_audit.revision_manager" class="%dream_commerce_object_audit.revision_manager.class%">
@@ -41,5 +54,10 @@
         </service>
 
         <service id="dream_commerce_object_audit.registry" class="%dream_commerce_object_audit.registry.class%" />
+
+        <service id="dream_commerce_object_audit.revision_factory" class="%dream_commerce_object_audit.revision_factory.class%" public="false" decorates="dream_commerce.factory.revision">
+            <argument>%dream_commerce.model.revision.class%</argument>
+            <argument type="service" id="dream_commerce.datetime_factory" />
+        </service>
     </services>
 </container>

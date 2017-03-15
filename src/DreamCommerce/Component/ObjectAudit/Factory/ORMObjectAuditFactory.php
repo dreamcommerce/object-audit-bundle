@@ -322,7 +322,7 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
                     throw new RuntimeException('Multiple valued association identifiers not supported');
                 }
             }
-            if(isset($data[$name])) {
+            if (isset($data[$name])) {
                 $keyParts[$name] = $data[$name];
             }
         }

@@ -28,7 +28,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Tests\ObjectAuditBundle;
+namespace DreamCommerce\Tests\ObjectAuditBundle\Manager;
 
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\DreamCommerceObjectAuditExtension;

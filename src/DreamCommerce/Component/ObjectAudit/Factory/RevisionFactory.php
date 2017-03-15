@@ -28,50 +28,37 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-namespace DreamCommerce\Fixtures\ObjectAuditBundle\Entity;
+namespace DreamCommerce\Component\ObjectAudit\Factory;
 
-use Doctrine\ORM\Mapping as ORM;
-use DreamCommerce\Component\ObjectAudit\Mapping\Annotation as Audit;
+use DreamCommerce\Component\Common\Factory\DateTimeFactory;
+use Sylius\Component\Resource\Factory\FactoryInterface;
 
-/**
- * @Audit\Auditable
- * @ORM\Entity
- */
-class AuditEntity
+class RevisionFactory implements FactoryInterface
 {
     /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue
+     * @var string
      */
-    private $id;
+    private $className;
 
     /**
-     * @ORM\Column(type="string", nullable=true)
+     * @var DateTimeFactory
      */
-    private $test;
+    private $dateTimeFactory;
 
     /**
-     * @return int
+     * @param string $className
      */
-    public function getId()
+    public function __construct(string $className, DateTimeFactory $dateTimeFactory)
     {
-        return $this->id;
+        $this->className = $className;
+        $this->dateTimeFactory = $dateTimeFactory;
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
-    public function getTest()
+    public function createNew()
     {
-        return $this->test;
-    }
-
-    /**
-     * @param string $test
-     */
-    public function setTest(string $test)
-    {
-        $this->test = $test;
+        return new $this->className($this->dateTimeFactory);
     }
 }

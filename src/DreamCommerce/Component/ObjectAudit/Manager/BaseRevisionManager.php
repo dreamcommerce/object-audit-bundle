@@ -123,4 +123,12 @@ abstract class BaseRevisionManager implements RevisionManagerInterface
     {
         return $this->persistManager;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function resetRevision()
+    {
+        $this->revision = null;
+    }
 }

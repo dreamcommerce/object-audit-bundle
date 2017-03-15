@@ -88,10 +88,19 @@ final class ObjectAuditRegistry
      */
     public function getByPersistManager(ObjectManager $persistManager): ObjectAuditManagerInterface
     {
-        if (!isset($this->persistManagers[$persistManager])) {
+        $hash = spl_object_hash($persistManager);
+        if (!$this->persistManagers->contains($persistManager)) {
             throw NotDefinedException::forPersistManager($persistManager);
         }
 
         return $this->persistManagers[$persistManager];
+    }
+
+    /**
+     * @return array
+     */
+    public function getAll(): array
+    {
+        return $this->objectAuditManagers;
     }
 }

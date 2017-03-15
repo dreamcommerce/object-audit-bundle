@@ -67,7 +67,7 @@ final class DreamCommerceObjectAuditExtension extends AbstractResourceExtension
         }
 
         foreach ($config['managers'] as $name => $managerConfig) {
-            if(empty($managerConfig['audit_object_manager'])) {
+            if (empty($managerConfig['audit_object_manager'])) {
                 $config['managers'][$name]['audit_object_manager'] = $managerConfig['object_manager'];
             }
 
@@ -93,7 +93,7 @@ final class DreamCommerceObjectAuditExtension extends AbstractResourceExtension
 
         $defaultManager = null;
         if (count($config['managers']) > 0) {
-            if(isset($config['default_manager'])) {
+            if (isset($config['default_manager'])) {
                 $defaultManager = $config['default_manager'];
             }
 

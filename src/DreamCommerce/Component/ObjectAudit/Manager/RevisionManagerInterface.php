@@ -63,7 +63,12 @@ interface RevisionManagerInterface
     public function getRevision(): RevisionInterface;
 
     /**
-     * Save & clear old revision pointer.
+     * Clear current revision
      */
-    public function save();
+    public function resetRevision();
+
+    /**
+     * @param ObjectManager $persistManager
+     */
+    public function save(ObjectManager $persistManager);
 }

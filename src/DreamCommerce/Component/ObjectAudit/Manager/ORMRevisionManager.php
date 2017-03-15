@@ -30,6 +30,7 @@
 
 namespace DreamCommerce\Component\ObjectAudit\Manager;
 
+use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
@@ -38,7 +39,7 @@ class ORMRevisionManager extends BaseRevisionManager
     /**
      * {@inheritdoc}
      */
-    public function save()
+    public function save(ObjectManager $persistManager)
     {
         if ($this->revision !== null) {
             /** @var EntityManagerInterface $auditPersistManager */
@@ -49,9 +50,10 @@ class ORMRevisionManager extends BaseRevisionManager
 
             $uow->persist($this->revision);
             $uow->computeChangeSet($revisionMetadata, $this->revision);
-            $auditPersistManager->flush();
 
-            $this->revision = null;
+            if ($auditPersistManager != $persistManager) {
+                $auditPersistManager->flush();
+            }
         }
     }
 }

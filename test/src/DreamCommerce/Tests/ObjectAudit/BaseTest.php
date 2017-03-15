@@ -47,8 +47,8 @@ use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionEnumType;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionIntegerType;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionSmallIntType;
 use DreamCommerce\Component\ObjectAudit\Doctrine\DBAL\Types\RevisionTinyIntType;
-use DreamCommerce\Component\ObjectAudit\Doctrine\ORM\Subscriber\CreateSchemaSubscriber;
-use DreamCommerce\Component\ObjectAudit\Doctrine\ORM\Subscriber\LogRevisionsSubscriber;
+use DreamCommerce\Component\ObjectAudit\Doctrine\ORM\Subscriber\BuilderSubscriber;
+use DreamCommerce\Component\ObjectAudit\Doctrine\ORM\Subscriber\ObserverSubscriber;
 use DreamCommerce\Component\ObjectAudit\Factory\ORMObjectAuditFactory;
 use DreamCommerce\Component\ObjectAudit\Manager\ORMAuditManager;
 use DreamCommerce\Component\ObjectAudit\Manager\ORMRevisionManager;
@@ -440,8 +440,8 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $rtel->addResolveTargetEntity(RevisionInterface::class, RevisionTest::class, array());
 
         $eventManager->addEventListener(Events::loadClassMetadata, $rtel);
-        $eventManager->addEventSubscriber(new LogRevisionsSubscriber($objectAuditRegistry, 'default'));
-        $eventManager->addEventSubscriber(new CreateSchemaSubscriber($objectAuditRegistry, 'default'));
+        $eventManager->addEventSubscriber(new ObserverSubscriber($objectAuditRegistry));
+        $eventManager->addEventSubscriber(new BuilderSubscriber($objectAuditRegistry, 'default'));
 
         $types = array(
             RevisionEnumType::TYPE_NAME => RevisionEnumType::class,
@@ -489,7 +489,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $auditPersistManager = $this->getAuditPersistManager();
         $persistManager = $this->getPersistManager();
 
-        if($auditPersistManager != $persistManager) {
+        if ($auditPersistManager != $persistManager) {
             $classes = $auditPersistManager->getMetadataFactory()->getAllMetadata();
             $this->getAuditSchemaTool()->createSchema($classes);
         }
@@ -510,14 +510,13 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $auditSequences = null;
         try {
             $auditSequences = $sm->listSequences();
-        } catch(DBALException $e) {
+        } catch (DBALException $e) {
             // ignore
         }
 
-        if($auditSequences !== null) {
+        if ($auditSequences !== null) {
             foreach ($auditSequences as $auditSequence) {
                 $sm->dropSequence($auditSequence);
-
             }
         }
     }

@@ -223,7 +223,7 @@ class DreamCommerceObjectAuditExtensionTest extends AbstractExtensionTestCase
             if (!isset($managers[$k]['driver'])) {
                 $managers[$k]['driver'] = ObjectAuditManagerInterface::DRIVER_ORM;
             }
-            if(!isset($managers[$k]['options'])) {
+            if (!isset($managers[$k]['options'])) {
                 $managers[$k]['options'] = array();
             }
 
