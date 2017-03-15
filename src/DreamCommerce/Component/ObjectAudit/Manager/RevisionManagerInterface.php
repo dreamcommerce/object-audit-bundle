@@ -68,7 +68,7 @@ interface RevisionManagerInterface
     public function resetRevision();
 
     /**
-     * @param ObjectManager $persistManager
+     * Save current revision
      */
-    public function save(ObjectManager $persistManager);
+    public function save();
 }

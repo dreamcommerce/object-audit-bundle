@@ -240,7 +240,13 @@ class ObserverSubscriber implements EventSubscriber
         }
 
         if (count($this->objects) > 0) {
-            $revisionManager->save($entityManager);
+            $revisionManager->save();
+            $auditPersistManager = $revisionManager->getPersistManager();
+
+            if ($auditPersistManager != $entityManager) {
+                $auditPersistManager->flush();
+            }
+
         }
     }
 

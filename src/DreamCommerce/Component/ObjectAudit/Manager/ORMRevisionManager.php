@@ -39,7 +39,7 @@ class ORMRevisionManager extends BaseRevisionManager
     /**
      * {@inheritdoc}
      */
-    public function save(ObjectManager $persistManager)
+    public function save()
     {
         if ($this->revision !== null) {
             /** @var EntityManagerInterface $auditPersistManager */
@@ -50,10 +50,6 @@ class ORMRevisionManager extends BaseRevisionManager
 
             $uow->persist($this->revision);
             $uow->computeChangeSet($revisionMetadata, $this->revision);
-
-            if ($auditPersistManager != $persistManager) {
-                $auditPersistManager->flush();
-            }
         }
     }
 }
