@@ -131,7 +131,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     public function findAllChangesAtRevision(RevisionInterface $revision, array $options = array()): array
     {
         $result = array();
-        foreach ($this->resourceAuditMetadataFactory->getAllResourceNames() as $resourceName) {
+        foreach ($this->resourceAuditMetadataFactory->getAllNames() as $resourceName) {
             $result = array_merge(
                 $result,
                 $this->findChangesAtRevision($resourceName, $revision, $options)

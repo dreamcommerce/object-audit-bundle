@@ -60,7 +60,7 @@ class ResourceListCommand extends BaseCommand
 
         /** @var RegistryInterface $resourceRegistry */
         $resourceRegistry = $this->getContainer()->get('sylius.resource_registry');
-        $resources = $resourceMetadataFactory->getAllResourceNames();
+        $resources = $resourceMetadataFactory->getAllNames();
         ksort($resources);
 
         $table = new Table($output);

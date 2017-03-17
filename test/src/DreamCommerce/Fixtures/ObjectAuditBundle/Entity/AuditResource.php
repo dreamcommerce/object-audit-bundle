@@ -48,10 +48,34 @@ class AuditResource implements ResourceInterface
     private $id;
 
     /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $test;
+
+    /**
      * @return int
      */
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTest()
+    {
+        return $this->test;
+    }
+
+    /**
+     * @param string $test
+     * @return $this
+     */
+    public function setTest(string $test)
+    {
+        $this->test = $test;
+
+        return $this;
     }
 }
