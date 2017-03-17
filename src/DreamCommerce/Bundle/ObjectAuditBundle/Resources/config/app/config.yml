@@ -1,6 +1,6 @@
 jms_serializer:
     metadata:
         directories:
-            dreamcommerce-objectaudit-revision:
-                namespace_prefix: "DreamCommerce\\Component\\ObjectAudit\\Revision"
+            dreamcommerce-objectaudit:
+                namespace_prefix: "DreamCommerce\\Component\\ObjectAudit"
                 path: "@DreamCommerceObjectAuditBundle/Resources/config/serializer"
