@@ -64,12 +64,17 @@ class YamlDriver extends FileDriver
     /**
      * {@inheritdoc}
      */
-    public function isTransient(string $className): bool
+    public function isTransient(string $className, DriverInterface $parentDriver = null): bool
     {
         $reflection = new ReflectionClass($className);
         $parentClassName = $reflection->getParentClass();
-        if ($parentClassName && $this->isTransient($parentClassName->name)) {
-            return true;
+        if ($parentClassName) {
+            if($parentDriver === null) {
+                $parentDriver = $this;
+            }
+            if($parentDriver->isTransient($parentClassName->name)) {
+                return true;
+            }
         }
 
         $mapping = $this->_getMapping($className);

@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="dream_commerce_object_audit.resource_manager.class">DreamCommerce\Bundle\ObjectAuditBundle\Manager\ResourceAuditManager</parameter>
+        <parameter key="dream_commerce_object_audit.resource_metadata_factory.class">DreamCommerce\Bundle\ObjectAuditBundle\Metadata\ResourceAuditMetadataFactory</parameter>
+    </parameters>
+
+    <services>
+        <service id="dream_commerce_object_audit.resource_metadata_factory" class="%dream_commerce_object_audit.resource_metadata_factory.class%">
+            <argument type="service" id="dream_commerce_object_audit.registry" />
+            <argument type="service" id="sylius.resource_registry" />
+            <argument type="service" id="service_container" />
+        </service>
+
+        <service id="dream_commerce_object_audit.resource_manager" class="%dream_commerce_object_audit.resource_manager.class%">
+            <argument type="service" id="dream_commerce_object_audit.registry" />
+            <argument type="service" id="sylius.resource_registry" />
+            <argument type="service" id="dream_commerce_object_audit.resource_metadata_factory" />
+            <argument type="service" id="service_container" />
+        </service>
+    </services>
+</container>

@@ -45,8 +45,9 @@ interface DriverInterface
 
     /**
      * @param string $className
+     * @param DriverInterface $parentDriver
      *
      * @return bool
      */
-    public function isTransient(string $className): bool;
+    public function isTransient(string $className, DriverInterface $parentDriver = null): bool;
 }

@@ -5,8 +5,6 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="dream_commerce_object_audit.resource_manager.class">DreamCommerce\Bundle\ObjectAuditBundle\Manager\ResourceAuditManager</parameter>
-        <parameter key="dream_commerce_object_audit.resource_metadata_factory.class">DreamCommerce\Bundle\ObjectAuditBundle\Metadata\ResourceAuditMetadataFactory</parameter>
         <parameter key="dream_commerce_object_audit.registry.class">DreamCommerce\Component\ObjectAudit\ObjectAuditRegistry</parameter>
         <parameter key="dream_commerce_object_audit.metadata_factory.class">DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadataFactory</parameter>
         <parameter key="dream_commerce_object_audit.revision_factory.class">DreamCommerce\Component\ObjectAudit\Factory\RevisionFactory</parameter>
@@ -38,19 +36,6 @@
             <argument type="service" id="dream_commerce.manager.revision" />
             <argument type="service" id="dream_commerce.factory.revision" />
             <argument type="service" id="dream_commerce.repository.revision" />
-        </service>
-
-        <service id="dream_commerce_object_audit.resource_metadata_factory" class="%dream_commerce_object_audit.resource_metadata_factory.class%">
-            <argument type="service" id="dream_commerce_object_audit.registry" />
-            <argument type="service" id="sylius.resource_registry" />
-            <argument type="service" id="service_container" />
-        </service>
-
-        <service id="dream_commerce_object_audit.resource_manager" class="%dream_commerce_object_audit.resource_manager.class%">
-            <argument type="service" id="dream_commerce_object_audit.registry" />
-            <argument type="service" id="sylius.resource_registry" />
-            <argument type="service" id="dream_commerce_object_audit.resource_metadata_factory" />
-            <argument type="service" id="service_container" />
         </service>
 
         <service id="dream_commerce_object_audit.registry" class="%dream_commerce_object_audit.registry.class%" />

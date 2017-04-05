@@ -32,7 +32,6 @@ namespace DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Compiler;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Persistence\Mapping\Driver\AnnotationDriver;
-use Doctrine\Common\Persistence\Mapping\Driver\DefaultFileLocator;
 use Doctrine\Common\Persistence\Mapping\Driver\FileDriver;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
@@ -45,9 +44,11 @@ use DreamCommerce\Component\ObjectAudit\Metadata\Driver\AnnotationDriver as Audi
 use DreamCommerce\Component\ObjectAudit\Metadata\Driver\MappingDriverChain as AuditMappingDriverChain;
 use DreamCommerce\Component\ObjectAudit\Metadata\Driver\XmlDriver as AuditXmlDriver;
 use DreamCommerce\Component\ObjectAudit\Metadata\Driver\YamlDriver as AuditYamlDriver;
+use ReflectionClass;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -154,7 +155,13 @@ final class ManagerCompilerPass implements CompilerPassInterface
         $auditDriver = null;
         if ($driver instanceof MappingDriverChain) {
             $auditDriver = new Definition(AuditMappingDriverChain::class);
-            foreach ($driver->getDrivers() as $namespace => $partDriver) {
+            $drivers = $driver->getDrivers();
+            $syliusResourceNs = 'Sylius\Component\Resource\Model';
+            if(class_exists('\Sylius\Component\Resource\Model\AbstractTranslation') && !isset($drivers[$syliusResourceNs])) {
+                $drivers[$syliusResourceNs] = $this->getSyliusResourceDriver();
+            }
+
+            foreach ($drivers as $namespace => $partDriver) {
                 $auditPartDriver = $this->getAuditDriver($partDriver);
                 $auditDriver->addMethodCall(
                     'addDriver',
@@ -196,5 +203,20 @@ final class ManagerCompilerPass implements CompilerPassInterface
         }
 
         return $auditDriver;
+    }
+
+    private function getSyliusResourceDriver(): XmlDriver
+    {
+        $reflection = new ReflectionClass('\Sylius\Bundle\ResourceBundle\SyliusResourceBundle');
+        $dir = dirname($reflection->getFileName()) . '/Resources/config/doctrine/model';
+
+        $locator = new SymfonyFileLocator(
+            array(
+                $dir => 'Sylius\\Component\\Resource\\Model'
+            ),
+            '.orm.xml'
+        );
+
+        return new XmlDriver($locator);
     }
 }

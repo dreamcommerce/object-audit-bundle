@@ -77,16 +77,19 @@ class AnnotationDriver implements DriverInterface
     }
 
     /**
-     * @param string $className
-     *
-     * @return bool
+     * {@inheritdoc}
      */
-    public function isTransient(string $className): bool
+    public function isTransient(string $className, DriverInterface $parentDriver = null): bool
     {
         $reflection = new ReflectionClass($className);
         $parentClassName = $reflection->getParentClass();
-        if ($parentClassName && $this->isTransient($parentClassName->name)) {
-            return true;
+        if ($parentClassName) {
+            if($parentDriver === null) {
+                $parentDriver = $this;
+            }
+            if($parentDriver->isTransient($parentClassName->name)) {
+                return true;
+            }
         }
 
         return (bool) $this->reader->getClassAnnotation($reflection, Auditable::class);

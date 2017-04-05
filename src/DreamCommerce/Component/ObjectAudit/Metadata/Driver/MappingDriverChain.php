@@ -116,12 +116,12 @@ class MappingDriverChain implements DriverInterface
     /**
      * {@inheritDoc}
      */
-    public function isTransient(string $className): bool
+    public function isTransient(string $className, DriverInterface $parentDriver = null): bool
     {
         /* @var $driver DriverInterface */
         foreach ($this->drivers as $namespace => $driver) {
             if (strpos($className, $namespace) === 0) {
-                return $driver->isTransient($className);
+                return $driver->isTransient($className, $this);
             }
         }
 
