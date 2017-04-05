@@ -61,7 +61,7 @@ final class DreamCommerceObjectAuditExtension extends AbstractResourceExtension
         $this->mapFormValidationGroupsParameters($config, $container);
         $loader->load('services.xml');
 
-        if(class_exists('\Sylius\Bundle\ResourceBundle\SyliusResourceBundle')) {
+        if (class_exists('\Sylius\Bundle\ResourceBundle\SyliusResourceBundle')) {
             $loader->load('services/integrations/sylius/services.xml');
         }
 

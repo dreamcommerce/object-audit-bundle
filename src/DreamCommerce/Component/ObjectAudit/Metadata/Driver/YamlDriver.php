@@ -69,10 +69,10 @@ class YamlDriver extends FileDriver
         $reflection = new ReflectionClass($className);
         $parentClassName = $reflection->getParentClass();
         if ($parentClassName) {
-            if($parentDriver === null) {
+            if ($parentDriver === null) {
                 $parentDriver = $this;
             }
-            if($parentDriver->isTransient($parentClassName->name)) {
+            if ($parentDriver->isTransient($parentClassName->name)) {
                 return true;
             }
         }

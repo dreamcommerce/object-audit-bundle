@@ -157,7 +157,7 @@ final class ManagerCompilerPass implements CompilerPassInterface
             $auditDriver = new Definition(AuditMappingDriverChain::class);
             $drivers = $driver->getDrivers();
             $syliusResourceNs = 'Sylius\Component\Resource\Model';
-            if(class_exists('\Sylius\Component\Resource\Model\AbstractTranslation') && !isset($drivers[$syliusResourceNs])) {
+            if (class_exists('\Sylius\Component\Resource\Model\AbstractTranslation') && !isset($drivers[$syliusResourceNs])) {
                 $drivers[$syliusResourceNs] = $this->getSyliusResourceDriver();
             }
 

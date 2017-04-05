@@ -246,7 +246,6 @@ class ObserverSubscriber implements EventSubscriber
             if ($auditPersistManager != $entityManager) {
                 $auditPersistManager->flush();
             }
-
         }
     }
 
