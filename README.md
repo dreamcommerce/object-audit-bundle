@@ -142,11 +142,11 @@ Or if you prefer XML:
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
     <entity name="Page">
-        <dreamcommerce:auditable />
-        
         <field name="ignoreMe" type="string">
             <dreamcommerce:ignore/>
         </field>
+        
+        <dreamcommerce:auditable />
     </entity>
 </doctrine-mapping>
 ```
