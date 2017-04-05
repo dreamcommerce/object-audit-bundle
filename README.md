@@ -8,7 +8,7 @@ This is a fork of the [SimpleThings EntityAudit](https://github.com/simplethings
 
 ## Installation (Standalone)
 
-###Installing the lib/bundle
+### Installing the lib/bundle
 
 Simply run assuming you have installed composer.phar or composer binary:
 
@@ -18,7 +18,7 @@ $ composer require dreamcommerce/object-audit-bundle
 
 ## Installation (In Symfony 3 Application)
 
-###Enable the bundle
+### Enable the bundle
 
 Enable the bundle in the kernel:
 
@@ -37,11 +37,11 @@ public function registerBundles()
 }
 ```
 
-###Configuration
+### Configuration
 
 You can configure the audited tables. 
 
-#####app/config/config.yml
+##### app/config/config.yml
 ```yml
 dream_commerce_object_audit:
     resources:
@@ -91,7 +91,7 @@ dream_commerce_object_audit:
             object_manager: baz      
 ```
 
-###Creating new tables
+### Creating new tables
 
 Call the command below to see the new tables in the update schema queue.
 
