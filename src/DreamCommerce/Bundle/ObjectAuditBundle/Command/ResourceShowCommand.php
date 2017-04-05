@@ -78,7 +78,7 @@ class ResourceShowCommand extends BaseCommand
         /** @var ResourceAuditManagerInterface $resourceAuditManager */
         $resourceAuditManager = $this->getContainer()->get('dream_commerce_object_audit.resource_manager');
         /** @var RevisionRepositoryInterface $revisionRepository */
-        $revisionRepository = $this->getContainer()->get('dream_commerce.repository.revision');
+        $revisionRepository = $this->getContainer()->get('dream_commerce_object_audit.repository.revision');
 
         if (empty($revisionId)) {
             $revision = $resourceAuditManager->getRevision($resourceName, $resourceId);

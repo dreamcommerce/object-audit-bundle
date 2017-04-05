@@ -55,10 +55,10 @@ class DreamCommerceObjectAuditExtensionTest extends AbstractExtensionTestCase
         $this->assertContainerBuilderHasParameter(DreamCommerceObjectAuditExtension::ALIAS . '.managers', array());
         $this->assertContainerBuilderHasParameter(DreamCommerceObjectAuditExtension::ALIAS . '.default_manager');
 
-        $this->assertContainerBuilderHasService('dream_commerce.factory.revision');
-        $this->assertContainerBuilderHasService('dream_commerce.repository.revision');
-        $this->assertContainerBuilderHasService('dream_commerce.manager.revision');
-        $this->assertContainerBuilderHasParameter('dream_commerce.model.revision.class', Revision::class);
+        $this->assertContainerBuilderHasService('dream_commerce_object_audit.factory.revision');
+        $this->assertContainerBuilderHasService('dream_commerce_object_audit.repository.revision');
+        $this->assertContainerBuilderHasService('dream_commerce_object_audit.manager.revision');
+        $this->assertContainerBuilderHasParameter('dream_commerce_object_audit.model.revision.class', Revision::class);
     }
 
     public function testSingleObjectAuditManager()

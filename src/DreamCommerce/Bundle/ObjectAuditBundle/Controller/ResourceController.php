@@ -91,6 +91,7 @@ final class ResourceController
         RevisionManagerInterface $revisionManager,
         RegistryInterface $resourceRegistry
     ) {
+        $this->container = $container;
         $this->templatingEngine = $templatingEngine;
         $this->resourceAuditManager = $resourceAuditManager;
         $this->resourceRegistry = $resourceRegistry;
@@ -110,7 +111,7 @@ final class ResourceController
         $paginator = $this->revisionManager->getRepository()->createPaginator();
         $paginator->setCurrentPage($page);
 
-        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:index.html.twig', array(
+        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Resource:index.html.twig', array(
             'revisions' => $paginator,
         ));
     }
@@ -126,9 +127,9 @@ final class ResourceController
     {
         $revision = $this->getRevision($revisionId);
 
-        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:view_revision.html.twig', array(
+        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Resource:view_revision.html.twig', array(
             'revision' => $revision,
-            'changedResources' => $this->resourceAuditManager->findAllChangesAtRevision($revision),
+            'changedResources' => $this->resourceAuditManager->findAllChangesAtRevision($revision)
         ));
     }
 
@@ -142,12 +143,11 @@ final class ResourceController
      */
     public function viewResourceAction($resourceName, $resourceId)
     {
-        $resource = $this->getResource($resourceName, $resourceId);
+        $this->getResourceMetadata($resourceName);
 
-        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:view_resource.html.twig', array(
+        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Resource:view_resource.html.twig', array(
             'resourceId' => $resourceId,
             'resourceName' => $resourceName,
-            'resource' => $resource,
             'revisions' => $this->resourceAuditManager->getRevisions($resourceName, $resourceId),
         ));
     }
@@ -170,7 +170,7 @@ final class ResourceController
         $data = $this->resourceAuditManager->getValues($resource);
         krsort($data);
 
-        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:view_detail.html.twig', array(
+        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Resource:view_detail.html.twig', array(
             'resourceId' => $resourceId,
             'revision' => $revision,
             'resourceName' => $resourceName,
@@ -236,35 +236,13 @@ final class ResourceController
 
         $diff = $this->resourceAuditManager->diffRevisions($resourceName, $resourceId, $oldRevision, $newRevision);
 
-        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Audit:compare.html.twig', array(
+        return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Resource:compare.html.twig', array(
             'resourceName' => $resourceName,
             'resourceId' => $resourceId,
             'oldRevision' => $oldRevision,
             'newRevision' => $newRevision,
             'diff' => $diff,
         ));
-    }
-
-    /**
-     * @param string $resourceName
-     * @param int    $resourceId
-     *
-     * @return ResourceInterface
-     *
-     * @throws NotFoundHttpException
-     */
-    private function getResource($resourceName, $resourceId)
-    {
-        $metadata = $this->getResourceMetadata($resourceName);
-        /** @var RepositoryInterface $resourceRepository */
-        $resourceRepository = $this->container->get($metadata->getServiceId('repository'));
-        /** @var ResourceInterface $resource */
-        $resource = $resourceRepository->find($resourceId);
-        if ($resource === null) {
-            throw new NotFoundHttpException('Resource identified by name '.$resourceName.' and ID #'.$resourceId.' does not exist');
-        }
-
-        return $resource;
     }
 
     /**

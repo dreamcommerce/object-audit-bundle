@@ -64,22 +64,22 @@ class ResourceAuditManagerTest extends WebTestCase
 
     public function testGetAllNames()
     {
-        $this->assertEquals(array('dream_commerce.test_audit'), $this->resourceMetadataFactory->getAllNames());
+        $this->assertEquals(array('dream_commerce_object_audit.test_audit'), $this->resourceMetadataFactory->getAllNames());
     }
 
     public function testIsAudited()
     {
-        $this->assertTrue($this->resourceMetadataFactory->isAudited('dream_commerce.test_audit'));
-        $this->assertFalse($this->resourceMetadataFactory->isAudited('dream_commerce.test_not_audit'));
+        $this->assertTrue($this->resourceMetadataFactory->isAudited('dream_commerce_object_audit.test_audit'));
+        $this->assertFalse($this->resourceMetadataFactory->isAudited('dream_commerce_object_audit.test_not_audit'));
     }
 
     public function testMetadataFor()
     {
-        $this->assertNull($this->resourceMetadataFactory->getMetadataFor('dream_commerce.test_not_audit'));
-        $resourceMetadata = $this->resourceMetadataFactory->getMetadataFor('dream_commerce.test_audit');
+        $this->assertNull($this->resourceMetadataFactory->getMetadataFor('dream_commerce_object_audit.test_not_audit'));
+        $resourceMetadata = $this->resourceMetadataFactory->getMetadataFor('dream_commerce_object_audit.test_audit');
 
         $this->assertInstanceOf(ResourceAuditMetadata::class, $resourceMetadata);
-        $this->assertEquals('dream_commerce.test_audit', $resourceMetadata->resourceName);
+        $this->assertEquals('dream_commerce_object_audit.test_audit', $resourceMetadata->resourceName);
         $this->assertInstanceOf(ObjectAuditMetadata::class, $resourceMetadata->objectAuditMetadata);
         $objectAuditMetadata = $resourceMetadata->objectAuditMetadata;
         $this->assertInstanceOf(ClassMetadata::class, $objectAuditMetadata->classMetadata);

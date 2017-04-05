@@ -1,8 +1,8 @@
 sylius_resource:
     resources:
-        dream_commerce.test_audit:
+        dream_commerce_object_audit.test_audit:
             classes:
                 model: DreamCommerce\Fixtures\ObjectAuditBundle\Entity\AuditResource
-        dream_commerce.test_not_audit:
+        dream_commerce_object_audit.test_not_audit:
             classes:
                 model: DreamCommerce\Fixtures\ObjectAuditBundle\Entity\NotAuditResource

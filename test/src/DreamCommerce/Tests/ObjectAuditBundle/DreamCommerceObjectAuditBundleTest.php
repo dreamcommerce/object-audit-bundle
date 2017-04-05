@@ -176,9 +176,9 @@ class DreamCommerceObjectAuditBundleTest extends WebTestCase
         $revision = $revisionManager->getRevision();
 
         /** @var FactoryInterface $resourceFactory */
-        $resourceFactory = $container->get('dream_commerce.factory.test_audit');
+        $resourceFactory = $container->get('dream_commerce_object_audit.factory.test_audit');
         /** @var ObjectManager $resourceManager */
-        $resourceManager = $container->get('dream_commerce.manager.test_audit');
+        $resourceManager = $container->get('dream_commerce_object_audit.manager.test_audit');
 
         /** @var AuditResource $resource */
         $resource = $resourceFactory->createNew();
@@ -200,7 +200,7 @@ class DreamCommerceObjectAuditBundleTest extends WebTestCase
         /** @var ResourceAuditManagerInterface $resourceAuditManager */
         $resourceAuditManager = $container->get(DreamCommerceObjectAuditExtension::ALIAS . '.resource_manager');
         /** @var AuditResource $auditResource */
-        $auditResource = $resourceAuditManager->find('dream_commerce.test_audit', $resource->getId(), $revision);
+        $auditResource = $resourceAuditManager->find('dream_commerce_object_audit.test_audit', $resource->getId(), $revision);
         $this->assertInstanceOf(AuditResource::class, $auditResource);
         $this->assertEquals('test 1', $auditResource->getTest());
     }

@@ -57,7 +57,7 @@ final class DreamCommerceObjectAuditExtension extends AbstractResourceExtension
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load(sprintf('services/integrations/%s.xml', $config['driver']));
 
-        $this->registerResources('dream_commerce', $config['driver'], $config['resources'], $container);
+        $this->registerResources('dream_commerce_object_audit', $config['driver'], $config['resources'], $container);
         $this->mapFormValidationGroupsParameters($config, $container);
         $loader->load('services.xml');
 

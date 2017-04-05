@@ -1,37 +1,37 @@
 dream_commerce_object_audit_home:
     path: /{page}
     defaults:
-        _controller: DreamCommerceObjectAuditBundle:Resource:index
+        _controller: dream_commerce_object_audit.resource_controller:indexAction
         page: 1
     requirements:
         page: \d+
 
-dream_commerce_object_audit_viewrevision:
+dream_commerce_object_audit_view_revision:
     path: /viewrev/{revisionId}
     defaults:
-        _controller: DreamCommerceObjectAuditBundle:Resource:viewRevision
+        _controller: dream_commerce_object_audit.resource_controller:viewRevisionAction
     requirements:
         revisionId: \d+
 
-dream_commerce_object_audit_viewentity_detail:
-    path: /viewent/{resourceName}/{resourceId}/{revisionId}
+dream_commerce_object_audit_view_resource_detail:
+    path: /viewres/{resourceName}/{resourceId}/{revisionId}
     defaults:
-        _controller: DreamCommerceObjectAuditBundle:Resource:viewDetail
+        _controller: dream_commerce_object_audit.resource_controller:viewDetailAction
     requirements:
         resourceId: \d+
         revisionId: \d+
 
-dream_commerce_object_audit_viewentity:
-    path: /viewent/{resourceName}/{resourceId}
+dream_commerce_object_audit_view_resource:
+    path: /viewres/{resourceName}/{resourceId}
     defaults:
-        _controller: DreamCommerceObjectAuditBundle:Resource:viewEntity
+        _controller: dream_commerce_object_audit.resource_controller:viewResourceAction
     requirements:
         resourceId: \d+
 
 dream_commerce_object_audit_compare:
     path: /compare/{resourceName}/{resourceId}/{oldRevisionId}/{newRevisionId}
     defaults:
-        _controller: DreamCommerceObjectAuditBundle:Resource:compare
+        _controller: dream_commerce_object_audit.resource_controller:compareAction
         oldRevisionId: ~
         newRevisionId: ~
     requirements:

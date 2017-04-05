@@ -32,16 +32,16 @@
         </service>
 
         <service id="dream_commerce_object_audit.revision_manager" class="%dream_commerce_object_audit.revision_manager.class%">
-            <argument>%dream_commerce.model.revision.class%</argument>
-            <argument type="service" id="dream_commerce.manager.revision" />
-            <argument type="service" id="dream_commerce.factory.revision" />
-            <argument type="service" id="dream_commerce.repository.revision" />
+            <argument>%dream_commerce_object_audit.model.revision.class%</argument>
+            <argument type="service" id="dream_commerce_object_audit.manager.revision" />
+            <argument type="service" id="dream_commerce_object_audit.factory.revision" />
+            <argument type="service" id="dream_commerce_object_audit.repository.revision" />
         </service>
 
         <service id="dream_commerce_object_audit.registry" class="%dream_commerce_object_audit.registry.class%" />
 
-        <service id="dream_commerce_object_audit.revision_factory" class="%dream_commerce_object_audit.revision_factory.class%" public="false" decorates="dream_commerce.factory.revision">
-            <argument>%dream_commerce.model.revision.class%</argument>
+        <service id="dream_commerce_object_audit.revision_factory" class="%dream_commerce_object_audit.revision_factory.class%" public="false" decorates="dream_commerce_object_audit.factory.revision">
+            <argument>%dream_commerce_object_audit.model.revision.class%</argument>
             <argument type="service" id="dream_commerce.datetime_factory" />
         </service>
     </services>

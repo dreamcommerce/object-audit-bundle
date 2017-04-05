@@ -1,14 +1,14 @@
 {% extends "DreamCommerceObjectAuditBundle::layout.html.twig" %}
 
 {% block dream_commerce_object_audit_content %}
-    <h1>{{ 'Resources changed in revision %revision%'|trans('%revision%': revision.id) }}</h1>
+    <h1>{{ 'Resources changed in revision %revision%'|trans({'%revision%': revision.id}) }}</h1>
 
     <p><a href="{{ path('dream_commerce_object_audit_home') }}">{{ 'Home'|trans }}</a></p>
 
     <table>
         <thead>
             <tr>
-                <th>{{ 'Class Name'|trans }}</th>
+                <th>{{ 'Resource Name'|trans }}</th>
                 <th>{{ 'Identifiers'|trans }}</th>
                 <th>{{ 'Revision Type'|trans }}</th>
             </tr>
@@ -16,9 +16,9 @@
         <tbody>
             {% for changedResource in changedResources %}
                 <tr>
-                    <td><a href="{{ path('dream_commerce_object_audit_viewentity_detail', { 'revision': revision.id, 'resourceName': changedResource.resourceName, 'resourceId': changedResource.resource.id }) }}">{{ changedResource.resourceName }}</a></td>
-                    <td>{{ changedResource.resource.id }}</td>
-                    <td>{{ changedResource.revisionType }}</td>
+                    <td><a href="{{ path('dream_commerce_object_audit_view_resource', { 'revisionId': revision.id, 'resourceName': changedResource.resourceName, 'resourceId': changedResource.object.id }) }}">{{ changedResource.resourceName }}</a></td>
+                    <td>{{ changedResource.object.id }}</td>
+                    <td>{{ changedResource.type }}</td>
                 </tr>
             {% endfor %}
         </tbody>

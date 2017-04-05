@@ -33,7 +33,6 @@ if (!($loader = @include __DIR__ . '/../vendor/autoload.php')) {
 You must set up the project dependencies, run the following commands:
 wget http://getcomposer.org/composer.phar
 php composer.phar install
-
 EOT
     );
 }
@@ -42,7 +41,6 @@ if (!file_exists(__DIR__ . '/app/config/parameters.yml')) {
     die(<<<'EOT'
 You must create parameters.yml, run the following command:
 cp test/app/config/parameters.yml.dist test/app/config/parameters.yml
-
 EOT
     );
 }
@@ -51,7 +49,6 @@ if (!file_exists(__DIR__ . '/app/db.sql')) {
     die(<<<'EOT'
 You must create database schema, run the following command:
 test/app/console doctrine:schema:create
-
 EOT
     );
 }

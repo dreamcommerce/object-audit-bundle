@@ -7,6 +7,7 @@
     <parameters>
         <parameter key="dream_commerce_object_audit.resource_manager.class">DreamCommerce\Bundle\ObjectAuditBundle\Manager\ResourceAuditManager</parameter>
         <parameter key="dream_commerce_object_audit.resource_metadata_factory.class">DreamCommerce\Bundle\ObjectAuditBundle\Metadata\ResourceAuditMetadataFactory</parameter>
+        <parameter key="dream_commerce_object_audit.resource_controller.class">DreamCommerce\Bundle\ObjectAuditBundle\Controller\ResourceController</parameter>
     </parameters>
 
     <services>
@@ -22,5 +23,14 @@
             <argument type="service" id="dream_commerce_object_audit.resource_metadata_factory" />
             <argument type="service" id="service_container" />
         </service>
+
+        <service id="dream_commerce_object_audit.resource_controller" class="%dream_commerce_object_audit.resource_controller.class%">
+            <argument type="service" id="service_container" />
+            <argument type="service" id="templating" />
+            <argument type="service" id="dream_commerce_object_audit.resource_manager" />
+            <argument type="service" id="dream_commerce_object_audit.revision_manager" />
+            <argument type="service" id="sylius.resource_registry" />
+        </service>
+
     </services>
 </container>

@@ -1,11 +1,11 @@
 {% extends "DreamCommerceObjectAuditBundle::layout.html.twig" %}
 
-{% block dream_commerce_ObjectAudit_content %}
+{% block dream_commerce_object_audit_content %}
 <h1>{{ 'Revisions'|trans }}</h1>
 
 <ul>
 {% for revision in revisions %}
-    <li><a href="{{ path('dream_commerce_object_audit_viewrevision', { 'id': revision.id }) }}">{{ revision.createdAt|date('r') }}</a></li>
+    <li><a href="{{ path('dream_commerce_object_audit_view_revision', { 'revisionId': revision.id }) }}">{{ revision.createdAt|date('r') }}</a></li>
 {% endfor %}
 </ul>
 {% endblock dream_commerce_object_audit_content %}

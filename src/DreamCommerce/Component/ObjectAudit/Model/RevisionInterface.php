@@ -35,9 +35,9 @@ use Sylius\Component\Resource\Model\ResourceInterface;
 
 interface RevisionInterface extends ResourceInterface
 {
-    const ACTION_INSERT = 'INS';
-    const ACTION_UPDATE = 'UPD';
-    const ACTION_DELETE = 'DEL';
+    const ACTION_INSERT = 'INSERT';
+    const ACTION_UPDATE = 'UPDATE';
+    const ACTION_DELETE = 'DELETE';
 
     /**
      * @return int

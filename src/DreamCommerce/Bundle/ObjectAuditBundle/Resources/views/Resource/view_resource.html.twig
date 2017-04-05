@@ -1,7 +1,7 @@
 {% extends "DreamCommerceObjectAuditBundle::layout.html.twig" %}
 
 {% block dream_commerce_object_audit_content %}
-    <h1>Change history for {{ className }} with identifiers of {{ id }}</h1>
+    <h1>{{ 'Change history for %resourceName% with identifiers of %resourceId%'|trans({'%resourceName%': resourceName, '%resourceId%': resourceId}) }}</h1>
 
     <p><a href="{{ path('dream_commerce_object_audit_home') }}">{{ 'Home'|trans }}</a></p>
 
@@ -22,8 +22,8 @@
             <tbody>
                 {% for revision in revisions %}
                     <tr>
-                        <td><a href="{{ path('dream_commerce_object_audit_viewentity_detail', { 'revision': revision.id, 'resourceName': resourceName, 'resourceId': resourceId })}}">{{ revision.id }}</a></td>
-                        <td>{{ revision.date | date('r') }}</td>
+                        <td><a href="{{ path('dream_commerce_object_audit_view_resource_detail', { 'revisionId': revision.id, 'resourceName': resourceName, 'resourceId': resourceId })}}">{{ revision.id }}</a></td>
+                        <td>{{ revision.createdAt | date('r') }}</td>
                         <td><input type="radio" name="oldRev" value="{{ revision.id }}"{% if loop.index == 2 %} checked{% endif %} /></td>
                         <td><input type="radio" name="newRev" value="{{ revision.id }}"{% if loop.index == 1 %} checked{% endif %} /></td>
                     </tr>

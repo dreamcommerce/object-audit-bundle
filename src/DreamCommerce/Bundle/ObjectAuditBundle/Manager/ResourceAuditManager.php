@@ -301,7 +301,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     public function getValues(ResourceInterface $resource): array
     {
         $className = get_class($resource);
-        $resourceName = $this->resourceRegistry->getByClass($className)->getName();
+        $resourceName = $this->resourceRegistry->getByClass($className)->getAlias();
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
 
         return $objectAuditManager->getValues($resource);
