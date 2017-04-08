@@ -110,6 +110,7 @@ class BuilderSubscriber implements EventSubscriber
                     array(
                         'notnull' => false,
                         'autoincrement' => false,
+                        'nullable' => null,
                     )
                 ));
             }
