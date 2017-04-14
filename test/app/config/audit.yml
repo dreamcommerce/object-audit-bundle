@@ -1,4 +1,4 @@
 dream_commerce_object_audit:
     managers:
-        foo:
-            object_manager: foo
+        default:
+            object_manager: default

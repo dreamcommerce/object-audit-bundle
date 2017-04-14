@@ -38,13 +38,12 @@ doctrine:
                 path: "%audit_database_path%"
                 charset: UTF8
     orm:
-        default_entity_manager: foo
         entity_managers:
-            foo:
+            default:
                 connection: default
                 mappings:
                     DreamCommerceFixturesObjectAuditBundle: ~
-            foo_audit:
+            default_audit:
                 connection: audit
 
             bar:

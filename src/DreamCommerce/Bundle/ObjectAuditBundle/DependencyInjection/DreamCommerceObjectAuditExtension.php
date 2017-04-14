@@ -58,7 +58,6 @@ final class DreamCommerceObjectAuditExtension extends AbstractResourceExtension
         $loader->load(sprintf('services/integrations/%s.xml', $config['driver']));
 
         $this->registerResources('dream_commerce_object_audit', $config['driver'], $config['resources'], $container);
-        $this->mapFormValidationGroupsParameters($config, $container);
         $loader->load('services.xml');
 
         if (class_exists('\Sylius\Bundle\ResourceBundle\SyliusResourceBundle')) {

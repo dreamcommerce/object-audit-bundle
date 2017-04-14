@@ -34,6 +34,7 @@ use Doctrine\Common\Persistence\ObjectManager;
 use DreamCommerce\Component\ObjectAudit\Exception\DefinedException;
 use DreamCommerce\Component\ObjectAudit\Exception\NotDefinedException;
 use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
+use ProxyManager\Proxy\LazyLoadingInterface;
 use SplObjectStorage;
 
 final class ObjectAuditRegistry
@@ -59,6 +60,17 @@ final class ObjectAuditRegistry
             $this->persistManagers = new SplObjectStorage();
         }
         $persistManager = $objectAuditManager->getPersistManager();
+        if($persistManager instanceof LazyLoadingInterface) {
+            $persistManager->setProxyInitializer(
+                function (& $wrappedObject, $proxy, $method, array $parameters, & $initializer) use($objectAuditManager) {
+                    $this->persistManagers[$wrappedObject] = $objectAuditManager;
+                    $initializer = null;
+
+                    return true;
+                }
+            );
+        }
+
         if (isset($this->objectAuditManagers[$name])) {
             throw DefinedException::forObjectAuditManager($name);
         }
