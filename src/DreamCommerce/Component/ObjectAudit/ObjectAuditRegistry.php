@@ -35,6 +35,7 @@ use DreamCommerce\Component\ObjectAudit\Exception\DefinedException;
 use DreamCommerce\Component\ObjectAudit\Exception\NotDefinedException;
 use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 use ProxyManager\Proxy\LazyLoadingInterface;
+use ProxyManager\Proxy\VirtualProxyInterface;
 use SplObjectStorage;
 
 final class ObjectAuditRegistry
@@ -59,17 +60,7 @@ final class ObjectAuditRegistry
         if ($this->persistManagers === null) {
             $this->persistManagers = new SplObjectStorage();
         }
-        $persistManager = $objectAuditManager->getPersistManager();
-        if($persistManager instanceof LazyLoadingInterface) {
-            $persistManager->setProxyInitializer(
-                function (& $wrappedObject, $proxy, $method, array $parameters, & $initializer) use($objectAuditManager) {
-                    $this->persistManagers[$wrappedObject] = $objectAuditManager;
-                    $initializer = null;
-
-                    return true;
-                }
-            );
-        }
+        $persistManager = $this->getPersistManager($objectAuditManager);
 
         if (isset($this->objectAuditManagers[$name])) {
             throw DefinedException::forObjectAuditManager($name);
@@ -100,7 +91,6 @@ final class ObjectAuditRegistry
      */
     public function getByPersistManager(ObjectManager $persistManager): ObjectAuditManagerInterface
     {
-        $hash = spl_object_hash($persistManager);
         if (!$this->persistManagers->contains($persistManager)) {
             throw NotDefinedException::forPersistManager($persistManager);
         }
@@ -114,5 +104,26 @@ final class ObjectAuditRegistry
     public function getAll(): array
     {
         return $this->objectAuditManagers;
+    }
+
+    private function getPersistManager(ObjectAuditManagerInterface $objectAuditManager)
+    {
+        $persistManager = $objectAuditManager->getPersistManager();
+        if($persistManager instanceof VirtualProxyInterface) {
+            if($persistManager->isProxyInitialized()) {
+                $persistManager = $persistManager->getWrappedValueHolderValue();
+            } else {
+                $persistManager->setProxyInitializer(
+                    function (& $wrappedObject, $proxy, $method, array $parameters, & $initializer) use ($objectAuditManager) {
+                        $this->persistManagers[$wrappedObject] = $objectAuditManager;
+                        $initializer = null;
+
+                        return true;
+                    }
+                );
+            }
+        }
+
+        return $persistManager;
     }
 }

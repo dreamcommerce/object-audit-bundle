@@ -41,9 +41,11 @@ use Doctrine\ORM\Persisters\Entity\BasicEntityPersister;
 use Doctrine\ORM\Persisters\Entity\EntityPersister;
 use Doctrine\ORM\UnitOfWork;
 use DreamCommerce\Component\ObjectAudit\Exception\NotDefinedException;
+use DreamCommerce\Component\ObjectAudit\Manager\RevisionManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Model\ObjectAudit;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\ObjectAuditRegistry;
+use ProxyManager\Proxy\VirtualProxyInterface;
 
 class ObserverSubscriber implements EventSubscriber
 {
@@ -241,12 +243,26 @@ class ObserverSubscriber implements EventSubscriber
 
         if (count($this->objects) > 0) {
             $revisionManager->save();
-            $auditPersistManager = $revisionManager->getPersistManager();
+            $auditPersistManager = $this->getAuditPersistManager($revisionManager);
 
             if ($auditPersistManager != $entityManager) {
                 $auditPersistManager->flush();
             }
         }
+    }
+
+    private function getAuditPersistManager(RevisionManagerInterface $revisionManager)
+    {
+        $auditPersistManager = $revisionManager->getPersistManager();
+        if($auditPersistManager instanceof VirtualProxyInterface) {
+            if($auditPersistManager->isProxyInitialized()) {
+                $auditPersistManager = $auditPersistManager->getWrappedValueHolderValue();
+            } else {
+                $auditPersistManager = $auditPersistManager->initializeProxy();
+            }
+        }
+
+        return $auditPersistManager;
     }
 
     /**
