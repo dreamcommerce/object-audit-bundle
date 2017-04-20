@@ -60,7 +60,8 @@ final class ObjectAuditRegistry
         if ($this->persistManagers === null) {
             $this->persistManagers = new SplObjectStorage();
         }
-        $persistManager = $this->getPersistManager($objectAuditManager);
+        $persistManager = $objectAuditManager->getPersistManager();
+        $persistManager = $this->unwrapPersistManager($persistManager);
 
         if (isset($this->objectAuditManagers[$name])) {
             throw DefinedException::forObjectAuditManager($name);
@@ -91,6 +92,8 @@ final class ObjectAuditRegistry
      */
     public function getByPersistManager(ObjectManager $persistManager): ObjectAuditManagerInterface
     {
+        $persistManager = $this->unwrapPersistManager($persistManager);
+
         if (!$this->persistManagers->contains($persistManager)) {
             throw NotDefinedException::forPersistManager($persistManager);
         }
@@ -106,21 +109,13 @@ final class ObjectAuditRegistry
         return $this->objectAuditManagers;
     }
 
-    private function getPersistManager(ObjectAuditManagerInterface $objectAuditManager)
+    private function unwrapPersistManager(ObjectManager $persistManager)
     {
-        $persistManager = $objectAuditManager->getPersistManager();
         if($persistManager instanceof VirtualProxyInterface) {
             if($persistManager->isProxyInitialized()) {
                 $persistManager = $persistManager->getWrappedValueHolderValue();
             } else {
-                $persistManager->setProxyInitializer(
-                    function (& $wrappedObject, $proxy, $method, array $parameters, & $initializer) use ($objectAuditManager) {
-                        $this->persistManagers[$wrappedObject] = $objectAuditManager;
-                        $initializer = null;
-
-                        return true;
-                    }
-                );
+                $persistManager = $persistManager->initializeProxy();
             }
         }
 
