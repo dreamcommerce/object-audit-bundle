@@ -229,6 +229,21 @@ class ObserverSubscriber implements EventSubscriber
             }
 
             $classMetadata = $entityManager->getClassMetadata($className);
+            $modifiedData = $this->getOriginalEntityData($entity, $entityManager);
+
+            foreach($modifiedData as $k => $v) {
+                if(is_object($v)) {
+                    continue;
+                }
+                if(!isset($changeset[$k])) {
+                    unset($modifiedData[$k]);
+                }
+            }
+
+            if (count($modifiedData) == 0) {
+                unset($this->objects[spl_object_hash($entity)]);
+                continue;
+            }
 
             $this->objects[spl_object_hash($entity)] = new ObjectAudit(
                 $entity,
@@ -236,7 +251,7 @@ class ObserverSubscriber implements EventSubscriber
                 $classMetadata->getIdentifierValues($entity),
                 $currentRevision,
                 $entityManager,
-                $this->getOriginalEntityData($entity, $entityManager),
+                $modifiedData,
                 RevisionInterface::ACTION_UPDATE
             );
         }
