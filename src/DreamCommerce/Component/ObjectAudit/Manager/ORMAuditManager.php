@@ -260,7 +260,7 @@ class ORMAuditManager extends BaseObjectAuditManager
             throw ObjectAuditNotFoundException::forObjectAtSpecificRevision($classMetadata->name, $ids, $revision);
         }
 
-        $data = [];
+        $data = array_shift($rows);
         foreach($rows as $row) {
             $row = array_filter($row);
             $data = array_merge($data, $row);
