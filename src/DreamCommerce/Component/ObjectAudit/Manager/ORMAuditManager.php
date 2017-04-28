@@ -132,6 +132,7 @@ class ORMAuditManager extends BaseObjectAuditManager
 
         $queryBuilder = $this->auditConnection->createQueryBuilder();
         $queryBuilder->from($tableName, 'e');
+        $queryBuilder->setMaxResults(1);
 
         if (!is_array($ids)) {
             if (count($classMetadata->identifier) > 1) {
@@ -161,7 +162,7 @@ class ORMAuditManager extends BaseObjectAuditManager
         foreach ($revisionColumns as $revisionColumn) {
             $queryBuilder->andWhere('e.'.$revisionColumn.' <= :'.$revisionColumn);
             $queryBuilder->addSelect('e.'.$revisionColumn);
-            $queryBuilder->orderBy('e.'.$revisionColumn);
+            $queryBuilder->orderBy('e.'.$revisionColumn, 'DESC');
         }
 
         foreach ($classMetadata->identifier as $idField) {
@@ -254,28 +255,22 @@ class ORMAuditManager extends BaseObjectAuditManager
         }
 
         $queryBuilder->setParameters(array_merge($revisionIds, $ids));
-        $rows = $queryBuilder->execute()->fetchAll(\PDO::FETCH_ASSOC);
+        $row = $queryBuilder->execute()->fetch(\PDO::FETCH_ASSOC);
 
-        if (count($rows) === 0) {
+        if (!$row) {
             throw ObjectAuditNotFoundException::forObjectAtSpecificRevision($classMetadata->name, $ids, $revision);
         }
 
-        $data = array_shift($rows);
-        foreach($rows as $row) {
-            $row = array_filter($row);
-            $data = array_merge($data, $row);
-        }
-
         $revisionType = Type::getType($configuration->getRevisionActionFieldType());
-        $revisionTypeValue = $revisionType->convertToPHPValue($data[$fieldRevisionTypeName], $this->auditPlatform);
+        $revisionTypeValue = $revisionType->convertToPHPValue($row[$fieldRevisionTypeName], $this->auditPlatform);
 
         if ($options['threatDeletionsAsExceptions'] && $revisionTypeValue == RevisionInterface::ACTION_DELETE) {
             throw ObjectAuditDeletedException::forObjectAtSpecificRevision($classMetadata->name, $ids, $revision);
         }
 
-        unset($data[$fieldRevisionTypeName]);
+        unset($row[$fieldRevisionTypeName]);
 
-        return $this->objectAuditFactory->createNewAudit($classMetadata->name, $columnMap, $data, $revision, $this);
+        return $this->objectAuditFactory->createNewAudit($classMetadata->name, $columnMap, $row, $revision, $this);
     }
 
     /**
