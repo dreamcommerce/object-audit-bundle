@@ -1,20 +1,6 @@
 {% extends "DreamCommerceObjectAuditBundle::layout.html.twig" %}
 
-{% macro showValue(value) %}
-    {% if value.date is defined %}
-        {{ value|date('r') }}
-    {% elseif value is iterable %}
-        <ul>
-        {% for element in value %}
-            <li>{{ element }}</li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        {{ value }}
-    {% endif %}
-{% endmacro %}
-
-{% import _self as helper %}
+{% import "DreamCommerceObjectAuditBundle::macros.html.twig" as helper %}
 
 {% block dream_commerce_object_audit_content %}
     <h1>{{ 'Comparing %resourceName% with identifier of %resourceId% between revisions %oldRevision% and %newRevision%'|trans({'%resourceName%': resourceName, '%resourceId%': resourceId, '%oldRevision%': oldRevision.id, '%newRevision%': newRevision.id}) }}</h1>
@@ -43,7 +29,7 @@
                     <td>
                         {{ helper.showValue(value.new) }}
                     </td>
-            </tr>
+                </tr>
             {% endfor %}
         </tbody>
     </table>

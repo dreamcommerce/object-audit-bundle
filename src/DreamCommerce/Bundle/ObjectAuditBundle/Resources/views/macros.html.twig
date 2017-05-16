@@ -1,0 +1,25 @@
+{% macro showValue(value) %}
+    {% if value is instanceof('Sylius\\Component\\Resource\\Model\\ResourceInterface') %}
+        {{ class(value) }} (ID: #{{ value.id }})
+    {% elseif value is instanceof('DateTime') %}
+        {{ value|date('r') }}
+    {% elseif value is object %}
+        {{ class(value) }}
+    {% elseif value is iterable %}
+        <ul>
+            {% for element in value %}
+                <li>{{ element }}</li>
+            {% endfor %}
+        </ul>
+    {% elseif value is bool %}
+        {% if value %}
+            {{ 'true'|trans }}
+        {% else %}
+            {{ 'false'|trans }}
+        {% endif %}
+    {% elseif value is null %}
+        <i>{{ 'null'|trans }}</i>
+    {% else %}
+        {{ value }}
+    {% endif %}
+{% endmacro %}
