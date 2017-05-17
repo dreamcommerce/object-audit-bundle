@@ -31,6 +31,7 @@
 namespace DreamCommerce\Component\ObjectAudit\Factory;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -107,8 +108,6 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
     public function createNewAudit(string $className, array $columnMap, array $data, RevisionInterface $revision,
                                    ObjectAuditManagerInterface $objectAuditManager)
     {
-        $configuration = $objectAuditManager->getConfiguration();
-        $objectMetadataFactory = $objectAuditManager->getMetadataFactory();
         /** @var ClassMetadata $revisionMetadata */
         $revisionMetadata = $this->revisionManager->getMetadata();
 
@@ -116,11 +115,12 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
         /** @var EntityManagerInterface $persistManager */
         $classMetadata = $persistManager->getClassMetadata($className);
         $cacheKey = $this->createEntityCacheKey($classMetadata, $revisionMetadata, $data, $revision);
-        $proxyFactory = new LazyLoadingValueHolderFactory();
 
         if (isset($this->entityCache[$cacheKey])) {
             return $this->entityCache[$cacheKey];
         }
+
+        $proxyFactory = new LazyLoadingValueHolderFactory();
 
         if (!$classMetadata->isInheritanceTypeNone()) {
             if (!isset($data[$classMetadata->discriminatorColumn['name']])) {
@@ -166,136 +166,236 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
             }
         }
 
-        $uow = $persistManager->getUnitOfWork();
-        $options = array('threatDeletionsAsExceptions' => true);
-
         foreach ($classMetadata->associationMappings as $field => $assoc) {
             // Check if the association is not among the fetch-joined associations already.
             if (isset($hints['fetched'][$className][$field])) {
                 continue;
             }
 
-            /** @var ClassMetadata $targetClass */
-            $targetClass = $persistManager->getClassMetadata($assoc['targetEntity']);
-            $isAudited = $objectMetadataFactory->isAudited($assoc['targetEntity']);
+            $persistManager = $objectAuditManager->getPersistManager();
+            /** @var ClassMetadata $targetClassMetadata */
+            $targetClassMetadata = $persistManager->getClassMetadata($assoc['targetEntity']);
 
-            if ($assoc['type'] & ClassMetadata::TO_ONE) {
-                $value = null;
+            // Primary Key. Used for audit tables queries.
+//            $identifiers = array();
+//            foreach ($assoc['targetToSourceKeyColumns'] as $foreign => $local) {
+//                $identifiers[$foreign] = $data[$columnMap[$local]];
+//            }
+//            $identifiers = array_filter($identifiers);
+            $proxyObject = null;
 
-                if ($isAudited && $configuration->isLoadAuditedObjects()) {
-                    if ($assoc['isOwningSide']) {
-                        // Primary Key. Used for audit tables queries.
-                        $identifiers = array();
-                        foreach ($assoc['targetToSourceKeyColumns'] as $foreign => $local) {
-                            $identifiers[$foreign] = $data[$columnMap[$local]];
-                        }
-                        $identifiers = array_filter($identifiers);
+//            if(count($identifiers) > 0) {
+                $proxyClass = null;
 
-                        if (!empty($identifiers)) {
-                            try {
-                                $value = $objectAuditManager->find(
-                                    $targetClass->name,
-                                    $identifiers,
-                                    $revision,
-                                    $options
-                                );
-                            } catch (ObjectAuditDeletedException $e) {
-                                $value = null;
-                            } catch (ObjectAuditNotFoundException $e) {
-                                // The entity does not have any revision yet. So let's get the actual state of it.
-                                $value = $persistManager->getRepository($targetClass->name)->findOneBy($identifiers);
-                            }
-                        }
-                    } else {
-                        // Primary Field. Used when fallback to Doctrine finder.
-                        $pf = array();
-
-                        /** @var ClassMetadata $otherEntityMeta */
-                        $otherEntityAssoc = $persistManager->getClassMetadata($assoc['targetEntity'])->associationMappings[$assoc['mappedBy']];
-
-                        $fields = array();
-                        foreach ($otherEntityAssoc['targetToSourceKeyColumns'] as $local => $foreign) {
-                            $fields[$foreign] = $pf[$otherEntityAssoc['fieldName']] = $data[$classMetadata->getFieldName($local)];
-                        }
-
-                        $objects = $objectAuditManager->findByFieldsAndRevision(
-                            $targetClass->name,
-                            $fields,
-                            null,
-                            $revision,
-                            $options
-                        );
-
-                        if (count($objects) == 0) {
-                            // The entity does not have any revision yet. So let's get the actual state of it.
-                            $value = $persistManager->getRepository($targetClass->name)->findOneBy($pf);
-                        } elseif (count($objects) == 1) {
-                            try {
-                                $value = $objects[0];
-                            } catch (ObjectAuditDeletedException $e) {
-                                $value = null;
-                            }
-                        } else {
-                            throw new RuntimeException('The method returned unexpectedly too much rows');
-                        }
-                    }
-                } elseif (!$isAudited && $configuration->isLoadNativeObjects()) {
-                    if ($assoc['isOwningSide']) {
-                        $associatedId = array();
-                        foreach ($assoc['targetToSourceKeyColumns'] as $targetColumn => $srcColumn) {
-                            $joinColumnValue = isset($data[$columnMap[$srcColumn]]) ? $data[$columnMap[$srcColumn]] : null;
-                            if ($joinColumnValue !== null) {
-                                $associatedId[$targetClass->fieldNames[$targetColumn]] = $joinColumnValue;
-                            }
-                        }
-                        if (!empty($associatedId)) {
-                            $value = $persistManager->getReference($targetClass->name, $associatedId);
-                        }
-                    } else {
-                        // Inverse side of x-to-one can never be lazy
-                        $value = $uow->getEntityPersister($assoc['targetEntity'])
-                            ->loadOneToOneEntity($assoc, $entity);
-                    }
+                if ($assoc['type'] & ClassMetadata::ONE_TO_MANY || $assoc['type'] & ClassMetadata::MANY_TO_MANY) {
+                    $proxyClass = Collection::class;
+                } elseif ($targetClassMetadata->isInheritanceTypeNone()) {
+                    $proxyClass = $targetClassMetadata->name;
                 }
 
-                $classMetadata->reflFields[$field]->setValue($entity, $value);
-            } elseif ($assoc['type'] & ClassMetadata::ONE_TO_MANY) {
-                $collection = new ArrayCollection();
-
-                if ($isAudited && $configuration->isLoadAuditedCollections()) {
-                    $foreignKeys = array();
-                    foreach ($targetClass->associationMappings[$assoc['mappedBy']]['sourceToTargetKeyColumns'] as $local => $foreign) {
-                        $field = $classMetadata->getFieldForColumn($foreign);
-                        $foreignKeys[$local] = $classMetadata->reflFields[$field]->getValue($entity);
-                    }
-
-                    $indexBy = null;
-                    if (isset($assoc['indexBy'])) {
-                        $indexBy = $assoc['indexBy'];
-                    }
-
-                    $collection = new AuditCollection(
-                        $targetClass->name,
-                        $foreignKeys,
-                        $indexBy,
-                        $revision,
-                        $objectAuditManager
+                if ($proxyClass === null) {
+                    $proxyObject = $this->getAssocObject($entity, $columnMap, $data, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata);
+                } else {
+                    $proxyObject = $proxyFactory->createProxy(
+                        $proxyClass,
+                        function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use ($entity, $columnMap, $data, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata) {
+                            $wrappedObject = $this->getAssocObject($entity, $columnMap, $data, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata);
+                            $initializer = null;
+                        }
                     );
-                } elseif (!$isAudited && $configuration->isLoadNativeCollections()) {
-                    $collection = new PersistentCollection($persistManager, $targetClass, new ArrayCollection());
-
-                    $uow->getEntityPersister($assoc['targetEntity'])
-                        ->loadOneToManyCollection($assoc, $entity, $collection);
                 }
+//            }
 
-                $classMetadata->reflFields[$assoc['fieldName']]->setValue($entity, $collection);
+            if ($assoc['type'] & ClassMetadata::ONE_TO_MANY) {
+                $classMetadata->reflFields[$assoc['fieldName']]->setValue($entity, $proxyObject);
             } else {
-                // Inject collection
-                $classMetadata->reflFields[$field]->setValue($entity, new ArrayCollection());
+                $classMetadata->reflFields[$field]->setValue($entity, $proxyObject);
             }
         }
 
         return $entity;
+    }
+
+    private function getAssocObject($entity, array $columnMap, array $data, RevisionInterface $revision,
+                                    ObjectAuditManagerInterface $objectAuditManager, array $assoc,
+                                    ClassMetadata $classMetadata, ClassMetadata $targetClassMetadata)
+    {
+        $objectMetadataFactory = $objectAuditManager->getMetadataFactory();
+        $isAudited = $objectMetadataFactory->isAudited($assoc['targetEntity']);
+
+        if ($assoc['type'] & ClassMetadata::TO_ONE) {
+            return $this->getAssocOneToOne($entity, $columnMap, $data, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata, $isAudited);
+        } elseif ($assoc['type'] & ClassMetadata::ONE_TO_MANY) {
+            return $this->getAssocOneToMany($entity, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata, $isAudited);
+        }
+
+        return new ArrayCollection();
+    }
+
+    private function getAssocOneToOne($entity, array $columnMap, array $data, RevisionInterface $revision,
+                                      ObjectAuditManagerInterface $objectAuditManager, array $assoc,
+                                      ClassMetadata $classMetadata, ClassMetadata $targetClassMetadata, bool $isAudited)
+    {
+        $configuration = $objectAuditManager->getConfiguration();
+
+        if ($isAudited && $configuration->isLoadAuditedObjects()) {
+            return $this->getAssocAuditObject($columnMap, $data, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata);
+        } elseif (!$isAudited && $configuration->isLoadNativeObjects()) {
+            return $this->getAssocNativeObject($entity, $columnMap, $data, $objectAuditManager, $assoc, $targetClassMetadata);
+        }
+
+        return null;
+    }
+
+    private function getAssocAuditObject(array $columnMap, array $data, RevisionInterface $revision,
+                                         ObjectAuditManagerInterface $objectAuditManager, array $assoc,
+                                         ClassMetadata $classMetadata, ClassMetadata $targetClassMetadata)
+    {
+        $value = null;
+        $options = array('threatDeletionsAsExceptions' => true);
+        $persistManager = $objectAuditManager->getPersistManager();
+
+        if ($assoc['isOwningSide']) {
+            // Primary Key. Used for audit tables queries.
+            $identifiers = array();
+            foreach ($assoc['targetToSourceKeyColumns'] as $foreign => $local) {
+                $identifiers[$foreign] = $data[$columnMap[$local]];
+            }
+            $identifiers = array_filter($identifiers);
+
+            if (!empty($identifiers)) {
+                try {
+                    $value = $objectAuditManager->find(
+                        $targetClassMetadata->name,
+                        $identifiers,
+                        $revision,
+                        $options
+                    );
+                } catch (ObjectAuditDeletedException $e) {
+                    $value = null;
+                } catch (ObjectAuditNotFoundException $e) {
+                    // The entity does not have any revision yet. So let's get the actual state of it.
+                    $value = $persistManager->getRepository($targetClassMetadata->name)->findOneBy($identifiers);
+                }
+            }
+        } else {
+            // Primary Field. Used when fallback to Doctrine finder.
+            $pf = array();
+
+            /** @var ClassMetadata $otherEntityMeta */
+            $otherEntityAssoc = $persistManager->getClassMetadata($assoc['targetEntity'])->associationMappings[$assoc['mappedBy']];
+
+            $fields = array();
+            foreach ($otherEntityAssoc['targetToSourceKeyColumns'] as $local => $foreign) {
+                $fields[$foreign] = $pf[$otherEntityAssoc['fieldName']] = $data[$classMetadata->getFieldName($local)];
+            }
+
+            $objects = $objectAuditManager->findByFieldsAndRevision(
+                $targetClassMetadata->name,
+                $fields,
+                null,
+                $revision,
+                $options
+            );
+
+            if (count($objects) == 0) {
+                // The entity does not have any revision yet. So let's get the actual state of it.
+                $value = $persistManager->getRepository($targetClassMetadata->name)->findOneBy($pf);
+            } elseif (count($objects) == 1) {
+                try {
+                    $value = $objects[0];
+                } catch (ObjectAuditDeletedException $e) {
+                    $value = null;
+                }
+            } else {
+                throw new RuntimeException('The method returned unexpectedly too much rows');
+            }
+        }
+
+        return $value;
+    }
+
+    private function getAssocNativeObject($entity, array $columnMap, array $data,
+                                          ObjectAuditManagerInterface $objectAuditManager, array $assoc,
+                                          ClassMetadata $targetClassMetadata)
+    {
+        $persistManager = $objectAuditManager->getPersistManager();
+        $uow = $persistManager->getUnitOfWork();
+
+        $value = null;
+
+        if ($assoc['isOwningSide']) {
+            $associatedId = array();
+            foreach ($assoc['targetToSourceKeyColumns'] as $targetColumn => $srcColumn) {
+                $joinColumnValue = isset($data[$columnMap[$srcColumn]]) ? $data[$columnMap[$srcColumn]] : null;
+                if ($joinColumnValue !== null) {
+                    $associatedId[$targetClassMetadata->fieldNames[$targetColumn]] = $joinColumnValue;
+                }
+            }
+            if (!empty($associatedId)) {
+                $value = $persistManager->getReference($targetClassMetadata->name, $associatedId);
+            }
+        } else {
+            // Inverse side of x-to-one can never be lazy
+            $value = $uow->getEntityPersister($assoc['targetEntity'])
+                ->loadOneToOneEntity($assoc, $entity);
+        }
+
+        return $value;
+    }
+
+    private function getAssocOneToMany($entity, RevisionInterface $revision,
+                                       ObjectAuditManagerInterface $objectAuditManager, array $assoc,
+                                       ClassMetadata $classMetadata, ClassMetadata $targetClassMetadata,
+                                       bool $isAudited): Collection
+    {
+        $configuration = $objectAuditManager->getConfiguration();
+
+        if ($isAudited && $configuration->isLoadAuditedCollections()) {
+            return $this->getAssocAuditCollection($entity, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata);
+        } elseif (!$isAudited && $configuration->isLoadNativeCollections()) {
+            return $this->getAssocNativeCollection($entity, $objectAuditManager, $assoc, $targetClassMetadata);
+        }
+
+        return new ArrayCollection();
+    }
+
+    private function getAssocNativeCollection($entity, ObjectAuditManagerInterface $objectAuditManager, array $assoc,
+                                              ClassMetadata $targetClassMetadata)
+    {
+        /** @var EntityManagerInterface $persistManager */
+        $persistManager = $objectAuditManager->getPersistManager();
+        $collection = new PersistentCollection($persistManager, $targetClassMetadata, new ArrayCollection());
+
+        $uow = $persistManager->getUnitOfWork();
+        $uow->getEntityPersister($assoc['targetEntity'])
+            ->loadOneToManyCollection($assoc, $entity, $collection);
+
+        return $collection;
+    }
+
+    private function getAssocAuditCollection($entity, RevisionInterface $revision,
+                                             ObjectAuditManagerInterface $objectAuditManager, array $assoc,
+                                             ClassMetadata $classMetadata, ClassMetadata $targetClassMetadata): AuditCollection
+    {
+        $foreignKeys = array();
+        foreach ($targetClassMetadata->associationMappings[$assoc['mappedBy']]['sourceToTargetKeyColumns'] as $local => $foreign) {
+            $field = $classMetadata->getFieldForColumn($foreign);
+            $foreignKeys[$local] = $classMetadata->reflFields[$field]->getValue($entity);
+        }
+
+        $indexBy = null;
+        if (isset($assoc['indexBy'])) {
+            $indexBy = $assoc['indexBy'];
+        }
+
+        return new AuditCollection(
+            $targetClassMetadata->name,
+            $foreignKeys,
+            $indexBy,
+            $revision,
+            $objectAuditManager
+        );
     }
 
     /**
@@ -328,6 +428,6 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
         }
         ksort($keyParts);
 
-        return $classMetadata->name.'_'.implode('_', array_values($keyParts)).'_'.implode('_', array_values($revisionIds));
+        return $classMetadata->name.':'.implode('_', array_values($keyParts)).':'.implode('_', array_values($revisionIds));
     }
 }

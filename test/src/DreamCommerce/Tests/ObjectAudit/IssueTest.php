@@ -228,9 +228,16 @@ class IssueTest extends BaseTest
 
         $revision = $this->getRevision(2);
         $auditAddress = $this->objectAuditManager->find(get_class($address), $address->getUser()->getId(), $revision);
-        $this->assertEquals($auditAddress->getUser(), $auditUser);
+        $proxyAuditUser = $auditAddress->getUser(); // proxy
+        $proxyAuditUser->initializeProxy();
+
+        $this->assertEquals($proxyAuditUser->getWrappedValueHolderValue(), $auditUser);
         $this->assertEquals($address->getUser(), $auditUser);
-        $this->assertEquals($auditAddress->getUser(), $user);
+
+        $proxyAuditUser = $auditAddress->getUser();
+        $proxyAuditUser->initializeProxy();
+
+        $this->assertEquals($proxyAuditUser->getWrappedValueHolderValue(), $user);
     }
     
     public function testIssue196()
