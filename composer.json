@@ -13,7 +13,7 @@
         "doctrine/dbal": "~2.5",
         "doctrine/orm": "~2.4",
         "ocramius/proxy-manager": "^2.0",
-        "dreamcommerce/common-bundle": "dev-master",
+        "dreamcommerce/common-bundle": "^1.0",
         "sylius/resource-bundle": "^1.0"
     },
     "require-dev": {
@@ -61,8 +61,8 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "1.1-dev",
-            "dev-develop": "1.2-dev"
+            "dev-master": "1.2-dev",
+            "dev-develop": "1.3-dev"
         }
     }
 }

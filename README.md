@@ -14,8 +14,6 @@ Simply run assuming you have installed composer.phar or composer binary:
 
 ``` bash
 $ composer require dreamcommerce/object-audit-bundle
-$ composer config minimum-stability dev
-$ composer config prefer-stable true
 ```
 
 ## Installation (In Symfony 3 Application)
