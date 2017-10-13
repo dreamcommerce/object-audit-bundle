@@ -47,6 +47,7 @@ class RevisionFactory implements FactoryInterface
 
     /**
      * @param string $className
+     * @param DateTimeFactory $dateTimeFactory
      */
     public function __construct(string $className, DateTimeFactory $dateTimeFactory)
     {

@@ -55,7 +55,7 @@ class ObjectException extends AuditException
     /**
      * @return string|null
      */
-    public function getClassName()
+    public function getClassName(): ?string
     {
         return $this->className;
     }
@@ -71,7 +71,7 @@ class ObjectException extends AuditException
     /**
      * @return RevisionInterface|null
      */
-    public function getRevision()
+    public function getRevision(): ?RevisionInterface
     {
         return $this->revision;
     }

@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Manager;
 
 use Doctrine\Common\Collections\Collection;
@@ -55,7 +57,7 @@ interface ResourceAuditManagerInterface
      *
      * @return ResourceInterface
      */
-    public function find(string $resourceName, int $resourceId, RevisionInterface $revision, array $options = array());
+    public function find(string $resourceName, int $resourceId, RevisionInterface $revision, array $options = array()): ResourceInterface;
 
     /**
      * @param string            $resourceName
@@ -63,7 +65,7 @@ interface ResourceAuditManagerInterface
      * @param RevisionInterface $revision
      * @param array             $options
      *
-     * @return array
+     * @return ResourceInterface[]
      */
     public function findByFieldsAndRevision(string $resourceName, array $fields, RevisionInterface $revision, array $options = array()): array;
 
@@ -121,7 +123,7 @@ interface ResourceAuditManagerInterface
      *
      * @return RevisionInterface|null
      */
-    public function getInitRevision(string $resourceName, int $resourceId);
+    public function getInitRevision(string $resourceName, int $resourceId): ?RevisionInterface;
 
     /**
      * Gets the current revision of the resource with given ID.
@@ -134,16 +136,14 @@ interface ResourceAuditManagerInterface
      *
      * @return RevisionInterface|null
      */
-    public function getRevision(string $resourceName, int $resourceId);
+    public function getRevision(string $resourceName, int $resourceId): ?RevisionInterface;
 
     /**
      * @param ResourceAudit $resourceAudit
      *
      * @throws ResourceNotAuditedException
-     *
-     * @return $this
      */
-    public function saveAudit(ResourceAudit $resourceAudit);
+    public function saveAudit(ResourceAudit $resourceAudit): void;
 
     /**
      * Get an array with the differences of between two specific revisions of

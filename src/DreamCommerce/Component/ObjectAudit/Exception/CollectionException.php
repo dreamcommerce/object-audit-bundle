@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Exception;
 
 class CollectionException extends AuditException
@@ -46,11 +48,19 @@ class CollectionException extends AuditException
     private $offset;
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getClassName(): string
+    public function getClassName(): ?string
     {
         return $this->className;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getOffset(): ?int
+    {
+        return $this->offset;
     }
 
     /**

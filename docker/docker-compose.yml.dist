@@ -1,21 +1,5 @@
 version: '2'
 services:
-    php-7.0:
-        build: build/php-7.0
-        working_dir: /docker/app
-        volumes:
-            - ../:/docker/app
-            - ~/.ssh/id_rsa:/docker/.ssh/id_rsa:ro
-            - ~/.composer:/docker/.composer
-            - /tmp:/tmp
-            - ./build/php.ini:/usr/local/etc/php/php.ini:ro
-            - ./build/entry.sh:/docker/entry.sh:ro
-        mem_limit: 2000000000
-#        ports:
-#            - 19060:9000
-#        environment:
-#            XDEBUG_CONFIG: idekey=DC_OBJECT_AUDIT remote_host=xx.yy.zz.vv
-
     php-7.1:
         build: build/php-7.1
         working_dir: /docker/app

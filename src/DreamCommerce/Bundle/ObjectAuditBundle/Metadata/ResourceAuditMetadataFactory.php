@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Metadata;
 
 use Doctrine\Common\Persistence\ObjectManager;
@@ -125,7 +127,7 @@ final class ResourceAuditMetadataFactory implements AuditMetadataFactoryInterfac
         return array_keys($this->auditResources);
     }
 
-    private function load()
+    private function load(): void
     {
         if ($this->loaded) {
             return;

@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Exception;
 
 use \DreamCommerce\Component\Common\Exception\NotDefinedException as BaseNotDefinedException;
@@ -47,6 +49,22 @@ class NotDefinedException extends BaseNotDefinedException
      * @var ObjectManager
      */
     private $persistManager;
+
+    /**
+     * @return string|null
+     */
+    public function getObjectAuditManagerName(): ?string
+    {
+        return $this->objectAuditManagerName;
+    }
+
+    /**
+     * @return ObjectManager|null
+     */
+    public function getPersistManager(): ?ObjectManager
+    {
+        return $this->persistManager;
+    }
 
     /**
      * @param string $objectAuditManagerName

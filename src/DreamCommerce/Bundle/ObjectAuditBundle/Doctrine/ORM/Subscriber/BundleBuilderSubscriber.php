@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORM\Subscriber;
 
 use DreamCommerce\Component\ObjectAudit\Doctrine\ORM\Subscriber\BuilderSubscriber;

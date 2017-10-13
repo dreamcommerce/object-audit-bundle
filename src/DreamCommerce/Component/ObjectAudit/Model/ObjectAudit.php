@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Model;
 
 use Doctrine\Common\Persistence\ObjectManager;
@@ -152,9 +154,9 @@ class ObjectAudit
     /**
      * @param array $data
      *
-     * @return $this
+     * @return self
      */
-    public function setData(array $data)
+    public function setData(array $data): self
     {
         $this->data = $data;
 

@@ -11,7 +11,6 @@ cache:
     - $HOME/.composer/cache
 
 php:
-  - 7.0
   - 7.1
   - nightly
 
@@ -36,8 +35,6 @@ script: ./bin/phpunit -c test/travis/$DB.travis.xml
 matrix:
   fast_finish: true
   include:
-#    - php: 7.0
-#      env: COMPOSER_FLAGS="--prefer-lowest" DB=sqlite
     - php: 7.1
       env: NAME="MySQL 5.6" DB=mysql
       dist: trusty

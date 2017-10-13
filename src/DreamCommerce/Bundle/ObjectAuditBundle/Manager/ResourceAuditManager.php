@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Manager;
 
 use Doctrine\Common\Collections\Collection;
@@ -91,7 +93,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function find(string $resourceName, int $resourceId, RevisionInterface $revision, array $options = array())
+    public function find(string $resourceName, int $resourceId, RevisionInterface $revision, array $options = array()): ResourceInterface
     {
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
@@ -101,6 +103,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
         }
 
         try {
+            /** @var ResourceInterface $object */
             $object = $objectAuditManager->find($className, $resourceId, $revision, $options);
         } catch (ObjectAuditDeletedException $exception) {
             throw ResourceDeletedException::forObjectDeletedException($exception, $resourceName);
@@ -227,7 +230,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function getInitRevision(string $resourceName, int $resourceId)
+    public function getInitRevision(string $resourceName, int $resourceId): ?RevisionInterface
     {
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
@@ -250,7 +253,7 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function getRevision(string $resourceName, int $resourceId)
+    public function getRevision(string $resourceName, int $resourceId): ?RevisionInterface
     {
         $className = $this->getResourceModelClass($resourceName);
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceName);
@@ -273,11 +276,10 @@ class ResourceAuditManager implements ResourceAuditManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function saveAudit(ResourceAudit $resourceAudit)
+    public function saveAudit(ResourceAudit $resourceAudit): void
     {
         $objectAuditManager = $this->getResourceObjectAuditManager($resourceAudit->getResourceName());
-
-        return $objectAuditManager->saveAudit($resourceAudit);
+        $objectAuditManager->saveAudit($resourceAudit);
     }
 
     /**

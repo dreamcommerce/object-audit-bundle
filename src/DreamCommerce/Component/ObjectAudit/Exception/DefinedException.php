@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Exception;
 
 use DreamCommerce\Component\Common\Exception\DefinedException as BaseDefinedException;
@@ -40,6 +42,14 @@ class DefinedException extends BaseDefinedException
      * @var string
      */
     private $objectAuditManagerName;
+
+    /**
+     * @return string|null
+     */
+    public function getObjectAuditManagerName(): ?string
+    {
+        return $this->objectAuditManagerName;
+    }
 
     /**
      * @param string $objectAuditManagerName

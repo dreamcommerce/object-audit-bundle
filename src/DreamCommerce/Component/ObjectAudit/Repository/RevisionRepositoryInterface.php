@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Repository;
 
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
@@ -38,5 +40,5 @@ interface RevisionRepositoryInterface extends RepositoryInterface
     /**
      * @return RevisionInterface|null
      */
-    public function findCurrent();
+    public function findCurrent() : ?RevisionInterface;
 }

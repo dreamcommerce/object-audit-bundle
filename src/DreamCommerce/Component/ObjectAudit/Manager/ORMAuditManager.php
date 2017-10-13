@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Manager;
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -702,7 +704,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     /**
      * {@inheritdoc}
      */
-    public function getInitRevision(string $className, $ids)
+    public function getInitRevision(string $className, $ids): ?RevisionInterface
     {
         return $this->getObjectRevision($className, $ids);
     }
@@ -710,7 +712,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     /**
      * {@inheritdoc}
      */
-    public function getRevision(string $className, $ids)
+    public function getRevision(string $className, $ids): ?RevisionInterface
     {
         return $this->getObjectRevision($className, $ids, 'DESC');
     }
@@ -718,7 +720,7 @@ class ORMAuditManager extends BaseObjectAuditManager
     /**
      * {@inheritdoc}
      */
-    public function saveAudit(ObjectAudit $objectAudit)
+    public function saveAudit(ObjectAudit $objectAudit): void
     {
         $object = $objectAudit->getObject();
         $className = $objectAudit->getClassName();
@@ -820,7 +822,7 @@ class ORMAuditManager extends BaseObjectAuditManager
      *
      * @return string
      */
-    public function getAuditTableNameForClass(string $className)
+    public function getAuditTableNameForClass(string $className): string
     {
         $className = ClassUtils::getRealClass($className);
 
@@ -868,9 +870,9 @@ class ORMAuditManager extends BaseObjectAuditManager
      * @throws ObjectNotAuditedException
      * @throws ObjectAuditNotFoundException
      *
-     * @return null|object
+     * @return null|RevisionInterface
      */
-    protected function getObjectRevision(string $className, $ids, $sort = 'ASC')
+    protected function getObjectRevision(string $className, $ids, $sort = 'ASC'): ?RevisionInterface
     {
         $className = ClassUtils::getRealClass($className);
 
@@ -1042,7 +1044,7 @@ class ORMAuditManager extends BaseObjectAuditManager
      *
      * @throws \Doctrine\DBAL\DBALException
      */
-    protected function getInsertRevisionSQL(ClassMetadata $classMetadata)
+    protected function getInsertRevisionSQL(ClassMetadata $classMetadata): string
     {
         if (!isset($this->insertRevisionSQL[$classMetadata->name])) {
             $placeholders = array('?', '?');

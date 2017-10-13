@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Manager;
 
 use Doctrine\Common\Collections\Collection;
@@ -69,7 +71,7 @@ interface ObjectAuditManagerInterface
      *
      * @throws ObjectNotAuditedException
      *
-     * @return array
+     * @return object[]
      */
     public function findByFieldsAndRevision(string $className, array $fields, string $indexBy = null, RevisionInterface $revision, array $options = array()): array;
 
@@ -126,7 +128,7 @@ interface ObjectAuditManagerInterface
      *
      * @return RevisionInterface|null
      */
-    public function getInitRevision(string $className, $objectIds);
+    public function getInitRevision(string $className, $objectIds): ?RevisionInterface;
 
     /**
      * Gets the current revision of the object with given ID.
@@ -139,16 +141,14 @@ interface ObjectAuditManagerInterface
      *
      * @return RevisionInterface|null
      */
-    public function getRevision(string $className, $objectIds);
+    public function getRevision(string $className, $objectIds): ?RevisionInterface;
 
     /**
      * @param ObjectAudit $objectAudit
      *
      * @throws ObjectNotAuditedException
-     *
-     * @return $this
      */
-    public function saveAudit(ObjectAudit $objectAudit);
+    public function saveAudit(ObjectAudit $objectAudit): void;
 
     /**
      * Get an array with the differences of between two specific revisions of

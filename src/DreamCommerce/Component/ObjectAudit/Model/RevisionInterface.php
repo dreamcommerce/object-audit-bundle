@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Model;
 
 use DateTime;
@@ -40,12 +42,7 @@ interface RevisionInterface extends ResourceInterface
     const ACTION_DELETE = 'DELETE';
 
     /**
-     * @return int
-     */
-    public function getId();
-
-    /**
      * @return DateTime
      */
-    public function getCreatedAt();
+    public function getCreatedAt(): ?DateTime;
 }

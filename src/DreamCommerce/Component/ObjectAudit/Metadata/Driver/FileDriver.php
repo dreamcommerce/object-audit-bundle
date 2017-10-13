@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Metadata\Driver;
 
 use Doctrine\Common\Persistence\Mapping\Driver\FileLocator;
@@ -47,7 +49,7 @@ abstract class FileDriver implements DriverInterface
     /**
      * @param FileLocator $locator
      */
-    public function setLocator(FileLocator $locator)
+    public function setLocator(FileLocator $locator): void
     {
         $this->locator = $locator;
     }

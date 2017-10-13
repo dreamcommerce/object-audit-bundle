@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Configuration;
 
 class ORMAuditConfiguration extends BaseAuditConfiguration
@@ -73,9 +75,9 @@ class ORMAuditConfiguration extends BaseAuditConfiguration
     /**
      * @param string $prefix
      *
-     * @return $this
+     * @return self
      */
-    public function setTablePrefix(string $prefix)
+    public function setTablePrefix(string $prefix): self
     {
         $this->tablePrefix = $prefix;
 
@@ -93,9 +95,9 @@ class ORMAuditConfiguration extends BaseAuditConfiguration
     /**
      * @param string $suffix
      *
-     * @return $this
+     * @return self
      */
-    public function setTableSuffix(string $suffix)
+    public function setTableSuffix(string $suffix): self
     {
         $this->tableSuffix = $suffix;
 
@@ -113,9 +115,9 @@ class ORMAuditConfiguration extends BaseAuditConfiguration
     /**
      * @param string $revisionIdFieldPrefix
      *
-     * @return $this
+     * @return self
      */
-    public function setRevisionIdFieldPrefix(string $revisionIdFieldPrefix)
+    public function setRevisionIdFieldPrefix(string $revisionIdFieldPrefix): self
     {
         $this->revisionIdFieldPrefix = $revisionIdFieldPrefix;
 
@@ -133,9 +135,9 @@ class ORMAuditConfiguration extends BaseAuditConfiguration
     /**
      * @param string $revisionIdFieldSuffix
      *
-     * @return $this
+     * @return self
      */
-    public function setRevisionIdFieldSuffix(string $revisionIdFieldSuffix)
+    public function setRevisionIdFieldSuffix(string $revisionIdFieldSuffix): self
     {
         $this->revisionIdFieldSuffix = $revisionIdFieldSuffix;
 
@@ -153,9 +155,9 @@ class ORMAuditConfiguration extends BaseAuditConfiguration
     /**
      * @param string $revisionActionFieldName
      *
-     * @return $this
+     * @return self
      */
-    public function setRevisionActionFieldName(string $revisionActionFieldName)
+    public function setRevisionActionFieldName(string $revisionActionFieldName): self
     {
         $this->revisionActionFieldName = $revisionActionFieldName;
 
@@ -173,9 +175,9 @@ class ORMAuditConfiguration extends BaseAuditConfiguration
     /**
      * @param string $revisionActionFieldType
      *
-     * @return $this
+     * @return self
      */
-    public function setRevisionActionFieldType(string $revisionActionFieldType)
+    public function setRevisionActionFieldType(string $revisionActionFieldType): self
     {
         $this->revisionActionFieldType = $revisionActionFieldType;
 

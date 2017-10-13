@@ -28,8 +28,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Repository;
 
+use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository;
 
 class ORMRevisionRepository extends EntityRepository implements RevisionRepositoryInterface
@@ -37,7 +40,7 @@ class ORMRevisionRepository extends EntityRepository implements RevisionReposito
     /**
      * {@inheritdoc}
      */
-    public function findCurrent()
+    public function findCurrent(): ?RevisionInterface
     {
         $classMetadata = $this->getClassMetadata();
         $qb = $this->createQueryBuilder('r');

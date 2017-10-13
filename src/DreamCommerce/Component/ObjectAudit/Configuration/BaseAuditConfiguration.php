@@ -89,9 +89,9 @@ class BaseAuditConfiguration implements ArrayableInterface
     /**
      * @param array $properties
      *
-     * @return $this
+     * @return self
      */
-    public function setIgnoreProperties(array $properties)
+    public function setIgnoreProperties(array $properties): self
     {
         $this->ignoreProperties = $properties;
 
@@ -109,9 +109,9 @@ class BaseAuditConfiguration implements ArrayableInterface
     /**
      * @param bool $loadAuditedCollections
      *
-     * @return $this
+     * @return self
      */
-    public function setLoadAuditedCollections(bool $loadAuditedCollections)
+    public function setLoadAuditedCollections(bool $loadAuditedCollections): self
     {
         $this->loadAuditedCollections = $loadAuditedCollections;
 
@@ -129,9 +129,9 @@ class BaseAuditConfiguration implements ArrayableInterface
     /**
      * @param bool $loadAuditedObjects
      *
-     * @return $this
+     * @return self
      */
-    public function setLoadAuditedObjects(bool $loadAuditedObjects)
+    public function setLoadAuditedObjects(bool $loadAuditedObjects): self
     {
         $this->loadAuditedObjects = $loadAuditedObjects;
 
@@ -149,9 +149,9 @@ class BaseAuditConfiguration implements ArrayableInterface
     /**
      * @param bool $loadNativeCollections
      *
-     * @return $this
+     * @return self
      */
-    public function setLoadNativeCollections(bool $loadNativeCollections)
+    public function setLoadNativeCollections(bool $loadNativeCollections): self
     {
         $this->loadNativeCollections = $loadNativeCollections;
 
@@ -169,9 +169,9 @@ class BaseAuditConfiguration implements ArrayableInterface
     /**
      * @param bool $loadNativeObjects
      *
-     * @return $this
+     * @return self
      */
-    public function setLoadNativeObjects(bool $loadNativeObjects)
+    public function setLoadNativeObjects(bool $loadNativeObjects): self
     {
         $this->loadNativeObjects = $loadNativeObjects;
 

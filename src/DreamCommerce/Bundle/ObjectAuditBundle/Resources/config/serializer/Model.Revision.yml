@@ -8,4 +8,4 @@ DreamCommerce\Component\ObjectAudit\Model\Revision:
             xml_attribute: true
         createdAt:
             expose: true
-            type: DateTime
+            type: DateTime<'Y-m-d\TH:i:sO'>

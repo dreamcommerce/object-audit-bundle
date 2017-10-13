@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Metadata\Driver;
 
 use DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadata;
@@ -42,7 +44,7 @@ class XmlDriver extends FileDriver
     /**
      * {@inheritdoc}
      */
-    public function loadMetadataForClass(string $className, ObjectAuditMetadata $objectAuditMetadata)
+    public function loadMetadataForClass(string $className, ObjectAuditMetadata $objectAuditMetadata): void
     {
         $reflection = new ReflectionClass($className);
         $parentClassName = $reflection->getParentClass();

@@ -28,13 +28,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit;
 
 use Doctrine\Common\Persistence\ObjectManager;
 use DreamCommerce\Component\ObjectAudit\Exception\DefinedException;
 use DreamCommerce\Component\ObjectAudit\Exception\NotDefinedException;
 use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
-use ProxyManager\Proxy\LazyLoadingInterface;
 use ProxyManager\Proxy\VirtualProxyInterface;
 use SplObjectStorage;
 
@@ -55,7 +56,7 @@ final class ObjectAuditRegistry
      * @param ObjectAuditManagerInterface $objectAuditManager
      * @throws DefinedException
      */
-    public function registerObjectAuditManager(string $name, ObjectAuditManagerInterface $objectAuditManager)
+    public function registerObjectAuditManager(string $name, ObjectAuditManagerInterface $objectAuditManager): void
     {
         if ($this->persistManagers === null) {
             $this->persistManagers = new SplObjectStorage();

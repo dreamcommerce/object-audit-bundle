@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Bundle\ObjectAuditBundle;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
@@ -85,17 +87,17 @@ class DreamCommerceObjectAuditBundle extends AbstractResourceBundle
     /**
      * {@inheritdoc}
      */
-    public function build(ContainerBuilder $container)
+    public function build(ContainerBuilder $container): void
     {
         parent::build($container);
 
-        $container->addCompilerPass(new ManagerCompilerPass(), PassConfig::TYPE_REMOVE);
+        $container->addCompilerPass(new ManagerCompilerPass(), PassConfig::TYPE_OPTIMIZE, -100);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getSupportedDrivers()
+    public function getSupportedDrivers(): array
     {
         return array(
             SyliusResourceBundle::DRIVER_DOCTRINE_ORM,
@@ -105,7 +107,7 @@ class DreamCommerceObjectAuditBundle extends AbstractResourceBundle
     /**
      * {@inheritdoc}
      */
-    protected function getModelNamespace()
+    protected function getModelNamespace(): ?string
     {
         return 'DreamCommerce\Component\ObjectAudit\Model';
     }

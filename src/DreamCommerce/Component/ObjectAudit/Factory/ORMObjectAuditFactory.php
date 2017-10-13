@@ -28,19 +28,17 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Factory;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Persistence\Mapping\MappingException;
-use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\PersistentCollection;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectAuditDeletedException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectAuditNotFoundException;
-use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
 use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Manager\RevisionManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Model\AuditCollection;
@@ -81,29 +79,13 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
     /**
      * {@inheritdoc}
      */
-    public function clearAuditCache()
+    public function clearAuditCache(): void
     {
         $this->entityCache = array();
     }
 
     /**
-     * Simplified and stolen code from UnitOfWork::createEntity.
-     *
-     * @param string                      $className
-     * @param array                       $columnMap
-     * @param array                       $data
-     * @param RevisionInterface           $revision
-     * @param ObjectAuditManagerInterface $objectAuditManager
-     *
-     * @throws ObjectAuditDeletedException
-     * @throws ObjectAuditNotFoundException
-     * @throws ObjectNotAuditedException
-     * @throws DBALException
-     * @throws MappingException
-     * @throws ORMException
-     * @throws \Exception
-     *
-     * @return object
+     * {@inheritdoc}
      */
     public function createNewAudit(string $className, array $columnMap, array $data, RevisionInterface $revision,
                                    ObjectAuditManagerInterface $objectAuditManager)
@@ -196,13 +178,15 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
                 if ($proxyClass === null) {
                     $proxyObject = $this->getAssocObject($entity, $columnMap, $data, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata);
                 } else {
-                    $proxyObject = $proxyFactory->createProxy(
-                        $proxyClass,
-                        function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use ($entity, $columnMap, $data, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata) {
-                            $wrappedObject = $this->getAssocObject($entity, $columnMap, $data, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata);
-                            $initializer = null;
-                        }
-                    );
+//                    $proxyObject = $proxyFactory->createProxy(
+//                        $proxyClass,
+//                        function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use ($entity, $columnMap, $data, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata) {
+//                            $wrappedObject = $this->getAssocObject($entity, $columnMap, $data, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata);
+//                            $initializer = null;
+//                        }
+//                    );
+
+                    $proxyObject = $this->getAssocObject($entity, $columnMap, $data, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata);
                 }
 //            }
 

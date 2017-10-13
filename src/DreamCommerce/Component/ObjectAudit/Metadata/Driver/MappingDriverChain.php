@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Metadata\Driver;
 
 use Doctrine\Common\Persistence\Mapping\MappingException;
@@ -52,7 +54,7 @@ class MappingDriverChain implements DriverInterface
      *
      * @return DriverInterface|null
      */
-    public function getDefaultDriver()
+    public function getDefaultDriver(): ?DriverInterface
     {
         return $this->defaultDriver;
     }
@@ -60,11 +62,9 @@ class MappingDriverChain implements DriverInterface
     /**
      * Set the default driver.
      *
-     * @param DriverInterface $driver
-     *
-     * @return void
+     * @param DriverInterface|null $driver
      */
-    public function setDefaultDriver(DriverInterface $driver)
+    public function setDefaultDriver(DriverInterface $driver = null): void
     {
         $this->defaultDriver = $driver;
     }
@@ -77,7 +77,7 @@ class MappingDriverChain implements DriverInterface
      *
      * @return void
      */
-    public function addDriver(DriverInterface $nestedDriver, $namespace)
+    public function addDriver(DriverInterface $nestedDriver, string $namespace)
     {
         $this->drivers[$namespace] = $nestedDriver;
     }
@@ -87,7 +87,7 @@ class MappingDriverChain implements DriverInterface
      *
      * @return array $drivers
      */
-    public function getDrivers()
+    public function getDrivers(): array
     {
         return $this->drivers;
     }
@@ -95,7 +95,7 @@ class MappingDriverChain implements DriverInterface
     /**
      * {@inheritDoc}
      */
-    public function loadMetadataForClass(string $className, ObjectAuditMetadata $objectAuditMetadata)
+    public function loadMetadataForClass(string $className, ObjectAuditMetadata $objectAuditMetadata): void
     {
         /* @var $driver DriverInterface */
         foreach ($this->drivers as $namespace => $driver) {

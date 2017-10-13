@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Manager;
 
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
@@ -127,7 +129,7 @@ abstract class BaseRevisionManager implements RevisionManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function resetRevision()
+    public function resetRevision(): void
     {
         $this->revision = null;
     }

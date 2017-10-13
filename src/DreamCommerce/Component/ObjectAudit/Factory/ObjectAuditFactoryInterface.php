@@ -28,6 +28,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+declare(strict_types=1);
+
 namespace DreamCommerce\Component\ObjectAudit\Factory;
 
 use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
@@ -44,13 +46,10 @@ interface ObjectAuditFactoryInterface extends FactoryInterface
      * @param RevisionInterface           $revision
      * @param ObjectAuditManagerInterface $objectAuditManager
      *
-     * @return stdClass
+     * @return object
      */
     public function createNewAudit(string $className, array $columnMap, array $data, RevisionInterface $revision,
                                    ObjectAuditManagerInterface $objectAuditManager);
 
-    /**
-     * @return $this
-     */
-    public function clearAuditCache();
+    public function clearAuditCache(): void;
 }
