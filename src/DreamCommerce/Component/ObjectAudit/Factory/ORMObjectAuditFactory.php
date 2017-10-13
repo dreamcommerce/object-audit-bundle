@@ -158,42 +158,12 @@ final class ORMObjectAuditFactory implements ObjectAuditFactoryInterface
             /** @var ClassMetadata $targetClassMetadata */
             $targetClassMetadata = $persistManager->getClassMetadata($assoc['targetEntity']);
 
-            // Primary Key. Used for audit tables queries.
-//            $identifiers = array();
-//            foreach ($assoc['targetToSourceKeyColumns'] as $foreign => $local) {
-//                $identifiers[$foreign] = $data[$columnMap[$local]];
-//            }
-//            $identifiers = array_filter($identifiers);
-            $proxyObject = null;
-
-//            if(count($identifiers) > 0) {
-                $proxyClass = null;
-
-                if ($assoc['type'] & ClassMetadata::ONE_TO_MANY || $assoc['type'] & ClassMetadata::MANY_TO_MANY) {
-                    $proxyClass = Collection::class;
-                } elseif ($targetClassMetadata->isInheritanceTypeNone()) {
-                    $proxyClass = $targetClassMetadata->name;
-                }
-
-                if ($proxyClass === null) {
-                    $proxyObject = $this->getAssocObject($entity, $columnMap, $data, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata);
-                } else {
-//                    $proxyObject = $proxyFactory->createProxy(
-//                        $proxyClass,
-//                        function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use ($entity, $columnMap, $data, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata) {
-//                            $wrappedObject = $this->getAssocObject($entity, $columnMap, $data, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata);
-//                            $initializer = null;
-//                        }
-//                    );
-
-                    $proxyObject = $this->getAssocObject($entity, $columnMap, $data, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata);
-                }
-//            }
+            $object = $this->getAssocObject($entity, $columnMap, $data, $revision, $objectAuditManager, $assoc, $classMetadata, $targetClassMetadata);
 
             if ($assoc['type'] & ClassMetadata::ONE_TO_MANY) {
-                $classMetadata->reflFields[$assoc['fieldName']]->setValue($entity, $proxyObject);
+                $classMetadata->reflFields[$assoc['fieldName']]->setValue($entity, $object);
             } else {
-                $classMetadata->reflFields[$field]->setValue($entity, $proxyObject);
+                $classMetadata->reflFields[$field]->setValue($entity, $object);
             }
         }
 

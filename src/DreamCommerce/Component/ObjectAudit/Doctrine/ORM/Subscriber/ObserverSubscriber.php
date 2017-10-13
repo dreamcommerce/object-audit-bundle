@@ -256,8 +256,8 @@ class ObserverSubscriber implements EventSubscriber
     private function getAuditPersistManager(RevisionManagerInterface $revisionManager)
     {
         $auditPersistManager = $revisionManager->getPersistManager();
-        if($auditPersistManager instanceof VirtualProxyInterface) {
-            if($auditPersistManager->isProxyInitialized()) {
+        if ($auditPersistManager instanceof VirtualProxyInterface) {
+            if ($auditPersistManager->isProxyInitialized()) {
                 $auditPersistManager = $auditPersistManager->getWrappedValueHolderValue();
             } else {
                 $auditPersistManager = $auditPersistManager->initializeProxy();

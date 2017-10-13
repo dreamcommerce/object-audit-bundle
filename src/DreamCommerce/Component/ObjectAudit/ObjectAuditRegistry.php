@@ -112,8 +112,8 @@ final class ObjectAuditRegistry
 
     private function unwrapPersistManager(ObjectManager $persistManager)
     {
-        if($persistManager instanceof VirtualProxyInterface) {
-            if($persistManager->isProxyInitialized()) {
+        if ($persistManager instanceof VirtualProxyInterface) {
+            if ($persistManager->isProxyInitialized()) {
                 $persistManager = $persistManager->getWrappedValueHolderValue();
             } else {
                 $persistManager = $persistManager->initializeProxy();
