@@ -101,6 +101,7 @@ final class ManagerCompilerPass implements CompilerPassInterface
             $container->setDefinition($metadataFactoryId, $metadataFactory);
 
             $manager = new Definition($managerClass);
+            $manager->setPublic(true);
             $manager->setArguments(array(
                 $configuration,
                 new Reference($objectManagerId),

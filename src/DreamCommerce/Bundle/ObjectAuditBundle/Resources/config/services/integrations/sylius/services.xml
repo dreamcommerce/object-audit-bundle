@@ -17,7 +17,7 @@
             <argument type="service" id="service_container" />
         </service>
 
-        <service id="dream_commerce_object_audit.resource_manager" class="%dream_commerce_object_audit.resource_manager.class%">
+        <service id="dream_commerce_object_audit.resource_manager" class="%dream_commerce_object_audit.resource_manager.class%" public="true">
             <argument type="service" id="dream_commerce_object_audit.registry" />
             <argument type="service" id="sylius.resource_registry" />
             <argument type="service" id="dream_commerce_object_audit.resource_metadata_factory" />

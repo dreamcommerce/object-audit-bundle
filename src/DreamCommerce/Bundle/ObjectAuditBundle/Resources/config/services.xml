@@ -14,6 +14,14 @@
         <parameter key="dream_commerce_object_audit.orm.manager.class">DreamCommerce\Component\ObjectAudit\Manager\ORMAuditManager</parameter>
         <parameter key="dream_commerce_object_audit.orm.observer.class">DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORM\Subscriber\BundleObserverSubscriber</parameter>
         <parameter key="dream_commerce_object_audit.orm.builder.class">DreamCommerce\Bundle\ObjectAuditBundle\Doctrine\ORM\Subscriber\BundleBuilderSubscriber</parameter>
+
+        <parameter key="dream_commerce_object_audit.command.resource_changes.class">DreamCommerce\Bundle\ObjectAuditBundle\Command\ResourceChangesCommand</parameter>
+        <parameter key="dream_commerce_object_audit.command.resource_diff.class">DreamCommerce\Bundle\ObjectAuditBundle\Command\ResourceDiffCommand</parameter>
+        <parameter key="dream_commerce_object_audit.command.resource_history.class">DreamCommerce\Bundle\ObjectAuditBundle\Command\ResourceHistoryCommand</parameter>
+        <parameter key="dream_commerce_object_audit.command.resource_list.class">DreamCommerce\Bundle\ObjectAuditBundle\Command\ResourceListCommand</parameter>
+        <parameter key="dream_commerce_object_audit.command.resource_revisions.class">DreamCommerce\Bundle\ObjectAuditBundle\Command\ResourceRevisionsCommand</parameter>
+        <parameter key="dream_commerce_object_audit.command.resource_show.class">DreamCommerce\Bundle\ObjectAuditBundle\Command\ResourceShowCommand</parameter>
+        <parameter key="dream_commerce_object_audit.command.revision_show.class">DreamCommerce\Bundle\ObjectAuditBundle\Command\RevisionShowCommand</parameter>
     </parameters>
 
     <services>
@@ -31,18 +39,42 @@
             <tag name="doctrine.event_subscriber" />
         </service>
 
-        <service id="dream_commerce_object_audit.revision_manager" class="%dream_commerce_object_audit.revision_manager.class%">
+        <service id="dream_commerce_object_audit.revision_manager" class="%dream_commerce_object_audit.revision_manager.class%" public="true">
             <argument>%dream_commerce_object_audit.model.revision.class%</argument>
             <argument type="service" id="dream_commerce_object_audit.manager.revision" />
             <argument type="service" id="dream_commerce_object_audit.factory.revision" />
             <argument type="service" id="dream_commerce_object_audit.repository.revision" />
         </service>
 
-        <service id="dream_commerce_object_audit.registry" class="%dream_commerce_object_audit.registry.class%" />
+        <service id="dream_commerce_object_audit.registry" class="%dream_commerce_object_audit.registry.class%" public="true" />
 
         <service id="dream_commerce_object_audit.revision_factory" class="%dream_commerce_object_audit.revision_factory.class%" public="false" decorates="dream_commerce_object_audit.factory.revision">
             <argument>%dream_commerce_object_audit.model.revision.class%</argument>
             <argument type="service" id="dream_commerce.datetime_factory" />
+        </service>
+
+        <!-- Commands -->
+
+        <service id="dream_commerce_object_audit.command.resource_changes" class="%dream_commerce_object_audit.command.resource_changes.class%">
+            <tag name="console.command" />
+        </service>
+        <service id="dream_commerce_object_audit.command.resource_diff" class="%dream_commerce_object_audit.command.resource_diff.class%">
+            <tag name="console.command" />
+        </service>
+        <service id="dream_commerce_object_audit.command.resource_history" class="%dream_commerce_object_audit.command.resource_history.class%">
+            <tag name="console.command" />
+        </service>
+        <service id="dream_commerce_object_audit.command.resource_list" class="%dream_commerce_object_audit.command.resource_list.class%">
+            <tag name="console.command" />
+        </service>
+        <service id="dream_commerce_object_audit.command.resource_revisions" class="%dream_commerce_object_audit.command.resource_revisions.class%">
+            <tag name="console.command" />
+        </service>
+        <service id="dream_commerce_object_audit.command.resource_show" class="%dream_commerce_object_audit.command.resource_show.class%">
+            <tag name="console.command" />
+        </service>
+        <service id="dream_commerce_object_audit.command.revision_show" class="%dream_commerce_object_audit.command.revision_show.class%">
+            <tag name="console.command" />
         </service>
     </services>
 </container>

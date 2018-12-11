@@ -52,11 +52,8 @@ class DreamCommerceObjectAuditBundleTest extends WebTestCase
         /** @var ContainerInterface $container */
         $container = self::createClient()->getContainer();
         $services = array(
-            DreamCommerceObjectAuditExtension::ALIAS . '.orm.observer',
-            DreamCommerceObjectAuditExtension::ALIAS . '.orm.factory',
             DreamCommerceObjectAuditExtension::ALIAS . '.registry',
             DreamCommerceObjectAuditExtension::ALIAS . '.resource_manager',
-            DreamCommerceObjectAuditExtension::ALIAS . '.resource_metadata_factory',
             DreamCommerceObjectAuditExtension::ALIAS . '.revision_manager'
         );
 
@@ -128,7 +125,7 @@ class DreamCommerceObjectAuditBundleTest extends WebTestCase
         $container->set('dream_commerce.datetime_factory', $dateTimeFactory);
 
         /** @var ObjectAuditManagerInterface $objectAuditManager */
-        $objectAuditManager = $container->get(DreamCommerceObjectAuditExtension::ALIAS . '.manager');
+        $objectAuditManager = $container->get(DreamCommerceObjectAuditExtension::ALIAS . '.default_manager');
         $persistManager = $objectAuditManager->getPersistManager();
         /** @var RevisionManagerInterface $revisionManager */
         $revisionManager = $container->get(DreamCommerceObjectAuditExtension::ALIAS . '.revision_manager');

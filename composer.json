@@ -13,14 +13,14 @@
         "doctrine/dbal": "~2.5",
         "doctrine/orm": "~2.4",
         "ocramius/proxy-manager": "^2.0",
-        "dreamcommerce/common-bundle": "^1.0",
+        "dreamcommerce/common-bundle": "dev-master",
         "sylius/resource-bundle": "^1.0"
     },
     "require-dev": {
         "doctrine/doctrine-bundle": "^1.6",
         "gedmo/doctrine-extensions": "^2.3.1",
         "matthiasnoback/symfony-dependency-injection-test": "^1.0",
-        "phpunit/phpunit": "^5.5",
+        "phpunit/phpunit": "^5.6",
         "symfony/framework-bundle": "^3.2",
         "symfony/var-dumper": "^3.2",
         "friendsofphp/php-cs-fixer": "^1.11",
