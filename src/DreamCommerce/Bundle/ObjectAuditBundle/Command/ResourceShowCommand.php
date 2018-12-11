@@ -33,6 +33,7 @@ declare(strict_types=1);
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Command;
 
 use DreamCommerce\Bundle\CommonBundle\Command\BaseCommand;
+use DreamCommerce\Component\Common\Model\ArrayableInterface;
 use DreamCommerce\Component\ObjectAudit\Manager\ResourceAuditManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Repository\RevisionRepositoryInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -103,6 +104,13 @@ class ResourceShowCommand extends BaseCommand
 
             $cloner = new VarCloner();
             $dumper = new CliDumper();
+
+            if($revision instanceof ArrayableInterface) {
+                $revision = $revision->toArray();
+            }
+            if($auditEntity instanceof ArrayableInterface) {
+                $auditEntity = $auditEntity->toArray();
+            }
 
             $dumper->dump($cloner->cloneVar($revision));
             $dumper->dump($cloner->cloneVar($auditEntity));

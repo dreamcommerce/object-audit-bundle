@@ -141,10 +141,18 @@ class ResourceDiffCommand extends BaseCommand
         $rows = array();
         foreach ($diffRows as $fieldName => $diffRow) {
             foreach (array('old', 'same', 'new') as $type) {
-                if ($diffRow[$type] instanceof \DateTime) {
-                    $diffRow[$type] = $diffRow[$type]->format(\DateTime::ISO8601);
+                if(is_object($diffRow[$type])) {
+                    if ($diffRow[$type] instanceof \DateTime) {
+                        $diffRow[$type] = $diffRow[$type]->format(\DateTime::ISO8601);
+                    } else {
+                        $diffRow[$type] = get_class($diffRow[$type]);
+                    }
                 } elseif ($diffRow[$type] === null) {
                     $diffRow[$type] = '--';
+                }
+
+                if(is_array($diffRow[$type])) {
+                    $diffRow[$type] = var_export($diffRow[$type], true);
                 }
             }
 

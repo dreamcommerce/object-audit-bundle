@@ -663,8 +663,9 @@ class ORMAuditManager extends BaseObjectAuditManager
         while ($row = $stmt->fetch(Query::HYDRATE_ARRAY)) {
             $revisionIdentifiers = array();
             foreach ($revisionIdentifierNames as $revisionIdentifierName) {
-                if (isset($row[$revisionIdentifierName])) {
-                    $revisionIdentifiers[$revisionIdentifierName] = $row[$revisionIdentifierName];
+                $revisionIdentifierName2 = $this->getRevisionColumnName($revisionIdentifierName);
+                if (isset($row[$revisionIdentifierName2])) {
+                    $revisionIdentifiers[$revisionIdentifierName] = $row[$revisionIdentifierName2];
                     unset($row[$revisionIdentifierName]);
                 }
             }
