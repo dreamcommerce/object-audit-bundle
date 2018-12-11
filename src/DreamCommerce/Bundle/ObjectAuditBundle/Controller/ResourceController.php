@@ -150,7 +150,7 @@ final class ResourceController
         return $this->templatingEngine->renderResponse('DreamCommerceObjectAuditBundle:Resource:view_resource.html.twig', array(
             'resourceId' => $resourceId,
             'resourceName' => $resourceName,
-            'revisions' => $this->resourceAuditManager->getRevisions($resourceName, $resourceId),
+            'revisions' => $this->resourceAuditManager->getRevisions($resourceName, (int) $resourceId),
         ));
     }
 
@@ -167,7 +167,7 @@ final class ResourceController
     {
         $this->getResourceMetadata($resourceName);
         $revision = $this->getRevision($revisionId);
-        $resource = $this->resourceAuditManager->find($resourceName, $resourceId, $revision);
+        $resource = $this->resourceAuditManager->find($resourceName, (int) $resourceId, $revision);
 
         $data = $this->resourceAuditManager->getValues($resource);
         krsort($data);
@@ -195,12 +195,13 @@ final class ResourceController
     public function compareAction(Request $request, $resourceName, $resourceId, $oldRevisionId = null, $newRevisionId = null)
     {
         if ($oldRevisionId === null) {
-            $oldRevisionId = $request->query->get('oldRev');
+            $oldRevisionId = (int) $request->query->get('oldRev');
         }
         if ($newRevisionId === null) {
-            $newRevisionId = $request->query->get('newRev');
+            $newRevisionId = (int) $request->query->get('newRev');
         }
 
+        $resourceId = (int) $resourceId;
         $this->getResourceMetadata($resourceName);
 
         if (empty($oldRevisionId)) {
@@ -273,7 +274,7 @@ final class ResourceController
     private function getRevision($revisionId)
     {
         /** @var RevisionInterface $revision */
-        $revision = $this->revisionManager->getRepository()->find($revisionId);
+        $revision = $this->revisionManager->getRepository()->find((int) $revisionId);
         if ($revision === null) {
             throw new NotFoundHttpException('Revision identified by ID #'.$revisionId.' does not exist');
         }

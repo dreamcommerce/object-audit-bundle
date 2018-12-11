@@ -62,7 +62,7 @@ class RevisionShowCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $revisionId = $input->getArgument('revision_id');
+        $revisionId = (int) $input->getArgument('revision_id');
 
         /** @var RevisionRepositoryInterface $revisionRepository */
         $revisionRepository = $this->getContainer()->get('dream_commerce_object_audit.repository.revision');

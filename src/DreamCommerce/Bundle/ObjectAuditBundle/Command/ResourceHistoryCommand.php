@@ -69,7 +69,7 @@ class ResourceHistoryCommand extends BaseCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $resourceName = $input->getArgument('resource_name');
-        $resourceId = $input->getArgument('resource_id');
+        $resourceId = (int) $input->getArgument('resource_id');
 
         /** @var ResourceAuditManagerInterface $resourceAuditManager */
         $resourceAuditManager = $this->getContainer()->get('dream_commerce_object_audit.resource_manager');

@@ -65,7 +65,7 @@ class ResourceChangesCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $revisionId = $input->getArgument('revision_id');
+        $revisionId = (int) $input->getArgument('revision_id');
 
         $container = $this->getContainer();
         /** @var RevisionManagerInterface $revisionManager */

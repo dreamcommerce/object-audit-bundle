@@ -81,9 +81,9 @@ class ResourceDiffCommand extends BaseCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $resourceName = $input->getArgument('resource_name');
-        $resourceId = $input->getArgument('resource_id');
-        $oldRevisionId = $input->getArgument('old_revision_id');
-        $newRevisionId = $input->getArgument('new_revision_id');
+        $resourceId = (int) $input->getArgument('resource_id');
+        $oldRevisionId = (int) $input->getArgument('old_revision_id');
+        $newRevisionId = (int) $input->getArgument('new_revision_id');
 
         $container = $this->getContainer();
         /** @var RevisionManagerInterface $revisionManager */
