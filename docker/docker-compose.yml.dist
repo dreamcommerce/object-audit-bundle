@@ -1,7 +1,7 @@
 version: '2'
 services:
-    php-7.1:
-        build: build/php-7.1
+    php-7.2:
+        build: build/php-7.2
         working_dir: /docker/app
         volumes:
             - ../:/docker/app

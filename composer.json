@@ -9,7 +9,7 @@
     ],
     "description": "Audit for Doctrine entities & Sylius resources",
     "require": {
-        "php": "^7.1",
+        "php": "^7.2",
         "doctrine/dbal": "~2.5",
         "doctrine/orm": "~2.4",
         "ocramius/proxy-manager": "^2.0",
@@ -21,7 +21,7 @@
         "gedmo/doctrine-extensions": "^2.3.1",
         "matthiasnoback/symfony-dependency-injection-test": "^1.0",
         "phpunit/phpunit": "^5.6",
-        "symfony/framework-bundle": "^3.2",
+        "symfony/framework-bundle": "^3.4.35",
         "symfony/var-dumper": "^3.2",
         "friendsofphp/php-cs-fixer": "^1.11",
         "polishsymfonycommunity/symfony-mocker-container": "^1.0",

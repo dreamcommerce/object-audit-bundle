@@ -87,8 +87,7 @@ final class ManagerCompilerPass implements CompilerPassInterface
             $container->setDefinition($configurationId, $configuration);
             $configuration->setArguments(array($managerConfig['options']));
 
-            $objectManager = $container->get($objectManagerId);
-            $driver = $objectManager->getConfiguration()->getMetadataDriverImpl();
+            $driver = $container->get('sylius_resource.doctrine.mapping_driver_chain.inner');
             $auditDriver = $this->getAuditDriver($driver);
 
             $metadataFactoryClass = $container->getParameter(DreamCommerceObjectAuditExtension::ALIAS . '.metadata_factory.class');
