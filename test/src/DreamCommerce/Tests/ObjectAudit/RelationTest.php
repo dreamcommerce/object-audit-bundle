@@ -30,7 +30,7 @@
 
 namespace DreamCommerce\Tests\ObjectAudit;
 
-use Doctrine\Common\Collections\Collection;
+use Doctrine\\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use DreamCommerce\Component\ObjectAudit\Model\ObjectAudit;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;

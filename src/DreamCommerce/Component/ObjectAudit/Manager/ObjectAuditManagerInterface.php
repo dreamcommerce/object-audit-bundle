@@ -32,7 +32,7 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Component\ObjectAudit\Manager;
 
-use Doctrine\Common\Collections\Collection;
+use Doctrine\\Collections\Collection;
 use Doctrine\Persistence\ObjectManager;
 use DreamCommerce\Component\ObjectAudit\Configuration\BaseAuditConfiguration;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectAuditDeletedException;

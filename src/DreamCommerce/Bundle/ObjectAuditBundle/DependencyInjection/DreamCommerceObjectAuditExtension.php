@@ -32,7 +32,7 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection;
 
-use Doctrine\Common\Annotations\AnnotationRegistry;
+use Doctrine\Annotations\AnnotationRegistry;
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Configuration\ORMConfiguration;
 use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 use RuntimeException;

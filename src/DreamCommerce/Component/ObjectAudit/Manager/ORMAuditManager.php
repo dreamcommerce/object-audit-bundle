@@ -32,9 +32,9 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Component\ObjectAudit\Manager;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Util\ClassUtils;
+use Doctrine\\Collections\ArrayCollection;
+use Doctrine\\Collections\Collection;
+use Doctrine\\Util\ClassUtils;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Query\QueryBuilder;

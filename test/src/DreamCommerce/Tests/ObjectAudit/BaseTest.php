@@ -30,8 +30,8 @@
 
 namespace DreamCommerce\Tests\ObjectAudit;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Cache\ArrayCache;
+use Doctrine\\Annotations\AnnotationReader;
+use Doctrine\\Cache\ArrayCache;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\DriverManager;

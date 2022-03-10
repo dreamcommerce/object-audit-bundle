@@ -32,7 +32,7 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\Compiler;
 
-use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Annotations\AnnotationReader;
 use Doctrine\Persistence\Mapping\Driver\AnnotationDriver;
 use Doctrine\Persistence\Mapping\Driver\FileDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriver;

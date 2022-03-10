@@ -32,7 +32,7 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Component\ObjectAudit\Mapping\Annotation;
 
-use Doctrine\Common\Annotations\Annotation;
+use Doctrine\\Annotations\Annotation;
 
 /**
  * @Annotation

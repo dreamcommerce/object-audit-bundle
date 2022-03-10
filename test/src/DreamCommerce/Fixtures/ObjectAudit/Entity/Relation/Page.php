@@ -30,7 +30,7 @@
 
 namespace DreamCommerce\Fixtures\ObjectAudit\Entity\Relation;
 
-use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use DreamCommerce\Component\ObjectAudit\Mapping\Annotation\Auditable;
 

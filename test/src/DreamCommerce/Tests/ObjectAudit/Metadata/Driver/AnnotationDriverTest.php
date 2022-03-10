@@ -30,7 +30,7 @@
 
 namespace DreamCommerce\Tests\ObjectAudit\Metadata\Driver;
 
-use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\\Annotations\AnnotationReader;
 use DreamCommerce\Component\ObjectAudit\Metadata\Driver\AnnotationDriver;
 use DreamCommerce\Component\ObjectAudit\Metadata\Driver\DriverInterface;
 

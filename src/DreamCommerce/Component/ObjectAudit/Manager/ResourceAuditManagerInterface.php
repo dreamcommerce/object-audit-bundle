@@ -32,7 +32,7 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Component\ObjectAudit\Manager;
 
-use Doctrine\Common\Collections\Collection;
+use Doctrine\\Collections\Collection;
 use DreamCommerce\Bundle\ObjectAuditBundle\Metadata\ResourceAuditMetadataFactory;
 use DreamCommerce\Component\ObjectAudit\Exception\ResourceAuditNotFoundException;
 use DreamCommerce\Component\ObjectAudit\Exception\ResourceDeletedException;
