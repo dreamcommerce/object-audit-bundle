@@ -34,7 +34,7 @@ namespace DreamCommerce\Component\ObjectAudit\Model;
 
 use ArrayIterator;
 use Closure;
-use Doctrine\\Collections\Collection;
+use Doctrine\Common\Collections\Collection;
 use DreamCommerce\Component\ObjectAudit\Exception\CollectionException;
 use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 
