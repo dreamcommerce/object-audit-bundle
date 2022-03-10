@@ -32,8 +32,8 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Component\ObjectAudit\Metadata\Driver;
 
-use Doctrine\\Annotations\AnnotationReader;
-use Doctrine\\Annotations\AnnotationRegistry;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\AnnotationRegistry;
 use DreamCommerce\Component\ObjectAudit\Mapping\Annotation\Auditable;
 use DreamCommerce\Component\ObjectAudit\Mapping\Annotation\Ignore;
 use DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadata;
