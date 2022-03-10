@@ -32,8 +32,8 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Component\ObjectAudit\Manager;
 
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\Mapping\ClassMetadata;
+use Doctrine\Persistence\ObjectManager;
 use DreamCommerce\Component\ObjectAudit\Model\RevisionInterface;
 use DreamCommerce\Component\ObjectAudit\Repository\RevisionRepositoryInterface;
 

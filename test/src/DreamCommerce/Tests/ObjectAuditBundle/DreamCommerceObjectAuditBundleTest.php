@@ -31,7 +31,7 @@
 namespace DreamCommerce\Tests\ObjectAuditBundle;
 
 use DateTime;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\DreamCommerceObjectAuditExtension;
 use DreamCommerce\Component\Common\Factory\DateTimeFactory;
 use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;

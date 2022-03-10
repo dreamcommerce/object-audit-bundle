@@ -30,7 +30,7 @@
 
 namespace DreamCommerce\Tests\ObjectAudit\Metadata\Driver;
 
-use Doctrine\Common\Persistence\Mapping\Driver\FileLocator;
+use Doctrine\Persistence\Mapping\Driver\FileLocator;
 use DreamCommerce\Component\ObjectAudit\Metadata\Driver\DriverInterface;
 use DreamCommerce\Component\ObjectAudit\Metadata\Driver\XmlDriver;
 use DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadata;

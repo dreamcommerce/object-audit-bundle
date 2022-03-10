@@ -32,7 +32,7 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Component\ObjectAudit\Metadata\Driver;
 
-use Doctrine\Common\Persistence\Mapping\MappingException;
+use Doctrine\Persistence\Mapping\MappingException;
 use DreamCommerce\Component\ObjectAudit\Metadata\ObjectAuditMetadata;
 
 class MappingDriverChain implements DriverInterface

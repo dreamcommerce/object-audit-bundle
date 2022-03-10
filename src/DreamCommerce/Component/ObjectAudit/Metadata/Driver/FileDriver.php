@@ -32,7 +32,7 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Component\ObjectAudit\Metadata\Driver;
 
-use Doctrine\Common\Persistence\Mapping\Driver\FileLocator;
+use Doctrine\Persistence\Mapping\Driver\FileLocator;
 
 abstract class FileDriver implements DriverInterface
 {

@@ -30,10 +30,10 @@
 
 namespace DreamCommerce\Tests\ObjectAuditBundle\DependencyInjection\Compiler;
 
-use Doctrine\Common\Persistence\Mapping\Driver\AnnotationDriver;
-use Doctrine\Common\Persistence\Mapping\Driver\DefaultFileLocator;
-use Doctrine\Common\Persistence\Mapping\Driver\FileDriver;
-use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
+use Doctrine\Persistence\Mapping\Driver\AnnotationDriver;
+use Doctrine\Persistence\Mapping\Driver\DefaultFileLocator;
+use Doctrine\Persistence\Mapping\Driver\FileDriver;
+use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\Driver\XmlDriver;
