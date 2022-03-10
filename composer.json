@@ -13,7 +13,7 @@
         "doctrine/dbal": "~2.5",
         "doctrine/orm": "~2.4",
         "ocramius/proxy-manager": "^2.0",
-        "dreamcommerce/common-bundle": "^1.0",
+        "dreamcommerce/common-bundle": "dev-bump-version",
         "sylius/resource-bundle": "^1.0"
     },
     "require-dev": {
