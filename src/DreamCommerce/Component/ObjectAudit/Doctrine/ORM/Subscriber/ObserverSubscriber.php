@@ -32,8 +32,8 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Component\ObjectAudit\Doctrine\ORM\Subscriber;
 
-use Doctrine\\EventSubscriber;
-use Doctrine\\Util\ClassUtils;
+use Doctrine\Common\EventSubscriber;
+use Doctrine\Common\Util\ClassUtils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;

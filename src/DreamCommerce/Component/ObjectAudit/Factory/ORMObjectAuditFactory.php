@@ -32,8 +32,8 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Component\ObjectAudit\Factory;
 
-use Doctrine\\Collections\ArrayCollection;
-use Doctrine\\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\PersistentCollection;

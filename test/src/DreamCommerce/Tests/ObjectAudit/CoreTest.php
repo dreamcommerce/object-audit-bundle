@@ -31,7 +31,7 @@
 namespace DreamCommerce\Tests\ObjectAudit;
 
 use DateTime;
-use Doctrine\\Collections\Collection;
+use Doctrine\Common\Collections\Collection;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectAuditNotFoundException;
 use DreamCommerce\Component\ObjectAudit\Exception\ObjectNotAuditedException;
 use DreamCommerce\Component\ObjectAudit\Model\ObjectAudit;
