@@ -32,7 +32,7 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Manager;
 
-use Doctrine\Collections\Collection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Persistence\ObjectManager;
 use DreamCommerce\Bundle\ObjectAuditBundle\Metadata\ResourceAuditMetadataFactory;
 use DreamCommerce\Component\ObjectAudit\Exception\NotDefinedException;
