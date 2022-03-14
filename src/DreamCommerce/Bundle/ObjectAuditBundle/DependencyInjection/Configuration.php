@@ -112,7 +112,7 @@ final class Configuration implements ConfigurationInterface
                 ->arrayNode('managers')
                     ->useAttributeAsKey('name')
                     ->requiresAtLeastOneElement()
-                    ->prototype('array')
+		    ->prototype('array')
                         ->children()
                             ->scalarNode('driver')
                                 ->defaultValue(ObjectAuditManagerInterface::DRIVER_ORM)
@@ -130,8 +130,7 @@ final class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
-            ->end()
-        ;
+            ->end();
     }
 
     /**

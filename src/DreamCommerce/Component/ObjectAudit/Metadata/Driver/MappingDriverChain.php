@@ -110,6 +110,8 @@ class MappingDriverChain implements DriverInterface
             return;
         }
 
+	var_dump($className);
+die('dupa');
         throw MappingException::classNotFoundInNamespaces($className, array_keys($this->drivers));
     }
 

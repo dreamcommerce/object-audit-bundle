@@ -43,8 +43,8 @@ final class ORMConfiguration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('orm');
+        $treeBuilder = new TreeBuilder('orm');
+	    $rootNode = $treeBuilder->getRootNode();
 
         $baseConfiguration = new BaseConfiguration();
         $baseConfiguration->injectPartialNode($rootNode);
