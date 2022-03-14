@@ -32,7 +32,7 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Component\ObjectAudit\Doctrine\ORM\Subscriber;
 
-use Doctrine\EventSubscriber;
+use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\ORM\EntityManagerInterface;
