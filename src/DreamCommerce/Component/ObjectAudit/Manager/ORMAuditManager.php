@@ -825,7 +825,6 @@ class ORMAuditManager extends BaseObjectAuditManager
      */
     public function getAuditTableNameForClass(string $className): string
     {
-	    #die('dupa');
         $className = ClassUtils::getRealClass($className);
 
         /** @var ClassMetadata $classMetadata */

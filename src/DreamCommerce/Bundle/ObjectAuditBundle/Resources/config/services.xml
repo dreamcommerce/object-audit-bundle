@@ -29,14 +29,14 @@
             <argument type="service" id="dream_commerce_object_audit.revision_manager" />
         </service>
 
-        <service id="dream_commerce_object_audit.orm.observer" class="%dream_commerce_object_audit.orm.observer.class%" public="true">
+        <service id="dream_commerce_object_audit.orm.observer" class="%dream_commerce_object_audit.orm.observer.class%" public="false">
             <argument type="service" id="service_container" />
-            <tag name="doctrine.event_subscriber" connection="default"/>
+            <tag name="doctrine.event_subscriber" />
         </service>
 
-        <service id="dream_commerce_object_audit.orm.builder" class="%dream_commerce_object_audit.orm.builder.class%" public="true">
+        <service id="dream_commerce_object_audit.orm.builder" class="%dream_commerce_object_audit.orm.builder.class%" public="false">
             <argument type="service" id="service_container" />
-            <tag name="doctrine.event_subscriber" connection="default"/>
+            <tag name="doctrine.event_subscriber" />
         </service>
 
         <service id="dream_commerce_object_audit.revision_manager" class="%dream_commerce_object_audit.revision_manager.class%" public="true">
