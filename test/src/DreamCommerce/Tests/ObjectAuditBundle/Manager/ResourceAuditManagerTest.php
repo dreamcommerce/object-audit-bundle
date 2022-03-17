@@ -30,7 +30,7 @@
 
 namespace DreamCommerce\Tests\ObjectAuditBundle\Manager;
 
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Doctrine\Persistence\Mapping\ClassMetadata;
 use DreamCommerce\Bundle\ObjectAuditBundle\DependencyInjection\DreamCommerceObjectAuditExtension;
 use DreamCommerce\Bundle\ObjectAuditBundle\Metadata\ResourceAuditMetadataFactory;
 use DreamCommerce\Component\ObjectAudit\Manager\ResourceAuditManagerInterface;

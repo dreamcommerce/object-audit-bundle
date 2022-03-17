@@ -32,7 +32,7 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Component\ObjectAudit\Manager;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 

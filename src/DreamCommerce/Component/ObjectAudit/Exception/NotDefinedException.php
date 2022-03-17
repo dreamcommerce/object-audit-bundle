@@ -33,7 +33,7 @@ declare(strict_types=1);
 namespace DreamCommerce\Component\ObjectAudit\Exception;
 
 use \DreamCommerce\Component\Common\Exception\NotDefinedException as BaseNotDefinedException;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 
 class NotDefinedException extends BaseNotDefinedException
 {

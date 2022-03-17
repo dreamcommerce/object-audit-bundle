@@ -32,7 +32,7 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Bundle\ObjectAuditBundle\Metadata;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
 use DreamCommerce\Component\ObjectAudit\Metadata\AuditMetadataFactoryInterface;
 use DreamCommerce\Component\ObjectAudit\Metadata\ResourceAuditMetadata;

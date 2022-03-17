@@ -32,7 +32,7 @@ declare(strict_types=1);
 
 namespace DreamCommerce\Component\ObjectAudit;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use DreamCommerce\Component\ObjectAudit\Exception\DefinedException;
 use DreamCommerce\Component\ObjectAudit\Exception\NotDefinedException;
 use DreamCommerce\Component\ObjectAudit\Manager\ObjectAuditManagerInterface;
